@@ -1,0 +1,2866 @@
+VionX
+
+Master Architecture & Multi-Agent Execution Specification v1.3
+
+Target: Android-first Child App + Parent Web/PWA + Admin CMS +
+Local-first API/AI platform on Mac mini M4 16GB
+Primary market: Vietnamese students Grade 1-12
+Document purpose: This is an implementation contract for Claude Code /
+engineering teams. Build according to this document unless a later
+approved architecture decision record (ADR) explicitly overrides it.
+
+Brand: VionX
+Tagline: Think. Explore. Grow.
+Brand promise: Help each child think deeply, explore broadly, and grow
+through a personalized development path.
+
+v1.3 architecture update: Mac mini M4 16GB local-first operation, Admin
+Library/Book Import control plane, book-to-knowledge pipeline, local
+content factory, provider-based auth/OTP, privacy/Health Connect
+contracts, and segmented Claude Code execution plan.
+
+0. MASTER INSTRUCTION FOR CLAUDE CODE AND ANTIGRAVITY
+
+You are the principal engineer responsible for implementing VionX. Treat
+this document as the source of truth for architecture and product scope.
+
+  v1.3 context rule: The Master Spec is the complete architectural
+  reference. Coding agents should not re-read it on every task. Normal
+  execution uses VIONX_ENGINEERING_CONTRACT.md plus the current
+  TASK_PACKS/<segment>/TASK.md.
+
+0.1 Operating rules
+
+1.  Do not redesign the product or substitute a different architecture
+    without creating an ADR explaining the reason, impact, migration
+    cost, and rollback plan.
+2.  Build incrementally. Do not attempt all modules in one pass.
+3.  The first objective is a runnable vertical slice: Parent Phone
+    OTP/Google Sign-In -> create Household -> grant required consent ->
+    create Child ID/PIN -> child login -> Today plan -> complete
+    learning/task -> XP -> Coin -> Parent dashboard.
+4.  Prefer a modular monolith for the backend. Do not prematurely create
+    microservices.
+5.  Use REST + OpenAPI for normal application APIs. Use WebSocket only
+    for real-time Arena functionality.
+6.  Use PostgreSQL + pgvector as the primary database. Redis is used for
+    caching, queues, rate limits and ephemeral realtime state. Local
+    development uses local filesystem or MinIO; production may switch to
+    cloud object storage through StorageProvider. Infrastructure
+    dependencies must have local implementations whenever practical.
+7.  All content created by AI that can affect curriculum, answers,
+    scoring, or assessment must carry provenance and a review status. AI
+    must not silently become the curriculum source of truth.
+8.  Child data is private by default. Do not expose precise child
+    location, email, phone, school information, or unrestricted public
+    chat.
+9.  Parent identity supports Phone OTP + Google Sign-In. Google Sign-In
+    may use Firebase Auth. Phone OTP MUST go through an internal
+    OtpProvider adapter: MockOtpProvider locally and a
+    Vietnam-compatible SMS/OTP provider in production. Do not hard-code
+    Firebase Phone Auth as the only phone provider. Child identity uses
+    Child ID + PIN and does not require phone/email.
+10. Consent is versioned, auditable, scoped and revocable. Do not model
+    sensitive consent as one boolean.
+11. Health/activity data is read through approved health connectors
+    (Android Health Connect first). Do not continuously track child GPS.
+    Do not ingest workout routes for child profiles in v1.
+12. Raw front-camera eye-tracking video must remain on-device by
+    default; only derived reading-attention metrics may be uploaded.
+13. Microphone must never run continuously in the background.
+14. Eye tracking is an attention/reading-behavior signal, not proof that
+    a child understood a book. Reading comprehension must be measured
+    separately.
+15. Talent/strength analysis is advisory. Never present it as a
+    psychological diagnosis, fixed aptitude, or deterministic career
+    decision.
+16. Reward rules must be implemented in a configurable rule engine, not
+    scattered hard-coded constants.
+17. Every feature must include permissions, auditability, tests, error
+    states, and migration-safe persistence.
+18. When a requirement is ambiguous, use the defaults in this document
+    rather than asking the product owner unless implementation is
+    genuinely blocked.
+19. At the end of every milestone: run lint, unit tests, integration
+    tests, migration tests, API contract checks and a basic end-to-end
+    flow.
+20. Keep the repository runnable locally with documented commands and
+    seeded demo users.
+
+0.2 Required implementation outputs
+
+Claude must maintain:
+
+-   source code
+-   database migrations
+-   seed data
+-   OpenAPI documentation
+-   automated tests
+-   Docker-based local development environment
+-   .env.example
+-   architecture decision records under docs/adr/
+-   changelog / milestone notes
+-   generated API client contracts where applicable
+-   admin seed account and one demo parent with three child profiles
+-   branded legal/product drafts under docs/legal/ (Privacy Policy,
+    Terms of Use, Parent Consent, Permission Disclosures, Data
+    Retention/Export/Deletion)
+-   VIONX_BRAND.md brand contract
+
+Do not claim a milestone is complete if the primary user journey is not
+runnable.
+
+1. PRODUCT DEFINITION
+
+1.1 Brand identity
+
+-   Product name: VionX
+-   Tagline: Think. Explore. Grow.
+-   Positioning: Personalized Student & Family Development OS for Grade
+    1-12.
+-   Child-facing language: VionX should feel aspirational and
+    age-neutral, not childish.
+-   Naming rule: New modules should use the VionX brand consistently; do
+    not reintroduce the former working name “CDOS” as a public-facing
+    name.
+
+1.2 Product definition
+
+VionX is an AI-powered Student & Family Operating System for children
+from Grade 1 to Grade 12. It combines personalized learning, school
+score tracking, daily planning, reading, English 4 skills, sports,
+talent development, cognitive games, family tasks, rewards and
+educational opportunity discovery.
+
+The system should answer two recurring questions:
+
+-   Student: “What should I do next?”
+-   Parent: “How is my child developing, and where should I invest more
+    time/resources?”
+
+The platform must not collapse a child into one overall score. Academic
+mastery, school grades, English, reading, cognitive games, creative
+activities, sport and habits remain separate dimensions that can be
+viewed together.
+
+2. USER ROLES AND PERMISSIONS
+
+2.1 Parent
+
+The Parent account is the root household identity. A parent can:
+
+-   create and manage child profiles
+-   generate/reset each child’s login ID and PIN
+-   assign tasks, routines and rewards
+-   enter/edit school grades
+-   import books into the family library when permitted
+-   manage schedules and exam dates
+-   configure reward rules within system constraints
+-   view reports, strength analysis and recommendations
+-   approve friend/multiplayer relationships where required
+-   manage privacy, consent, connected health services and
+    competition-area preferences
+-   disable a child login
+
+2.2 Child
+
+A child does not require an email address. Child login is created inside
+a parent’s household.
+
+Child can:
+
+-   sign in using Child ID + PIN or paired device session
+-   view Today plan
+-   complete learning, reading, English, sport and household tasks
+-   use Arena games according to limits
+-   view personal progress, badges, XP, Coin balance and approved
+    rewards
+-   request parent approval for selected actions
+
+Child cannot:
+
+-   edit school grades
+-   change conversion/cash-equivalent reward rules
+-   modify privacy policies
+-   grant/revoke parent-level consent or expose precise location
+-   access parent-only analytics or other siblings’ private reports
+    unless parent explicitly enables a family view
+
+2.3 Admin / Content Editor
+
+Admin manages:
+
+-   curriculum versions
+-   textbook/workbook imports
+-   knowledge graph
+-   question bank
+-   AI-generated content review
+-   books and content moderation
+-   competition/event catalog
+-   safety/moderation queues
+-   product analytics and system configuration
+
+Support fine-grained permissions such as admin, curriculum_editor,
+content_reviewer, competition_editor, support_agent.
+
+3. ARCHITECTURE DECISIONS
+
+3.1 Frontend
+
+Child App
+
+-   Flutter
+-   Android-first
+-   tablet responsive
+-   offline-capable learning packs
+-   camera/microphone access only after parent consent, contextual
+    disclosure and OS permission
+
+Parent App
+
+-   Next.js + TypeScript as responsive web/PWA for v1
+-   architecture must allow later React Native or Flutter mobile shell
+
+Admin CMS
+
+-   Next.js + TypeScript
+-   role-based navigation and data grids
+
+3.2 Backend
+
+-   NestJS + TypeScript
+-   modular monolith
+-   REST + OpenAPI
+-   background jobs using Redis-backed queue
+-   WebSocket gateway only for realtime Arena functionality
+
+3.3 Data
+
+-   PostgreSQL: primary transactional database
+-   pgvector: embeddings and semantic retrieval
+-   Redis: cache, distributed locks, job queue, sessions/rate
+    limits/realtime ephemeral state
+-   S3-compatible object storage: PDFs, EPUB, images, audio,
+    submissions, generated content
+-   PostgreSQL full-text search initially; add a dedicated search engine
+    only after measured need
+
+3.4 AI Provider Strategy
+
+All model calls must go through an internal AI Gateway with provider
+adapters. Do not bind application domain code directly to one vendor.
+
+Local-first default: local inference on the Mac mini is the primary
+development/test path. The default local provider is Ollama or an
+OpenAI-compatible MLX server running natively on macOS. Cloud AI
+providers are optional deployment adapters, not architectural
+dependencies.
+
+Interfaces required:
+
+-   chat/reasoning model
+-   small/low-cost text model
+-   embedding model
+-   speech-to-text
+-   text-to-speech
+-   image/document understanding
+-   moderation/safety classifier where needed
+
+Store model name, prompt version, token/cost metadata and provenance for
+auditable AI operations.
+
+3.5 Local-first deployment invariant
+
+VionX must be able to run an internal alpha primarily on a Mac mini M4
+with 16GB unified memory. The Mac mini is the local application server,
+database server, content-processing workstation and local AI inference
+host for development/internal testing.
+
+Rules:
+
+-   Native macOS processes are preferred for Apple-Silicon-accelerated
+    AI workloads.
+-   Do not run the primary local LLM inside Docker on this 16GB machine.
+    Run Ollama/MLX natively so it can use Apple Silicon/Metal
+    efficiently.
+-   Docker is used for ARM64-compatible infrastructure services such as
+    PostgreSQL/pgvector, Redis, MinIO, Mailpit and optional monitoring.
+-   Every Docker image must support linux/arm64; do not silently depend
+    on x86 emulation.
+-   Limit Docker Desktop memory to about 5-6GB initially, leaving
+    unified memory for macOS, Flutter tooling and local model inference.
+    Adjust only after measuring actual pressure.
+-   Keep only one medium generative model resident at a time. Use small
+    quantized models for routing/classification and a 7B/8B-class
+    quantized model only when necessary. Avoid >8B models as a default
+    on 16GB.
+-   Prefer 4K-8K inference context windows for local operation; RAG
+    should retrieve a small number of high-quality chunks rather than
+    sending whole chapters.
+-   Content generation is queue-based and may be processed
+    serially/off-hours. Interactive student requests have higher
+    priority than offline generation jobs.
+-   Local storage must be configurable to an external SSD/NVMe. If the
+    Mac mini has only 256GB internal storage, use an external 1TB+ SSD
+    for books, OCR artifacts, model files, MinIO data and backups.
+-   The application must remain cloud-migratable by swapping provider
+    adapters and environment configuration, not rewriting domain logic.
+
+Recommended local resource budget
+
+    macOS + system reserve        ~4-5 GB
+    Docker infrastructure         ~4-6 GB
+    Local LLM / embeddings        remaining dynamic memory
+    Flutter / browser / IDE       shared with system reserve
+
+Do not start OCR, speech transcription, a medium LLM and multiple
+content-generation workers simultaneously. The job scheduler must
+enforce concurrency limits appropriate to 16GB unified memory.
+
+4. REPOSITORY STRUCTURE
+
+Use one repository:
+
+    vionx/
+    ├─ apps/
+    │  ├─ child_flutter/
+    │  ├─ parent_web/
+    │  └─ admin_web/
+    ├─ services/
+    │  └─ api/
+    ├─ packages/
+    │  ├─ contracts/          # OpenAPI generated types / shared schemas
+    │  ├─ design_tokens/
+    │  └─ config/
+    ├─ infra/
+    │  ├─ docker/
+    │  ├─ terraform/          # later milestone
+    │  └─ monitoring/
+    ├─ docs/
+    │  ├─ architecture/
+    │  ├─ adr/
+    │  ├─ api/
+    │  └─ product/
+    ├─ scripts/
+    ├─ docker-compose.yml
+    ├─ .env.example
+    ├─ CLAUDE.md
+    └─ README.md
+
+Backend module layout:
+
+    services/api/src/modules/
+    ├─ auth/
+    ├─ households/
+    ├─ students/
+    ├─ curriculum/
+    ├─ content/
+    ├─ knowledge-graph/
+    ├─ questions/
+    ├─ assessments/
+    ├─ mastery/
+    ├─ learning-planner/
+    ├─ gradebook/
+    ├─ calendar/
+    ├─ tasks/
+    ├─ habits/
+    ├─ rewards/
+    ├─ english/
+    ├─ reading/
+    ├─ activity/
+    ├─ health-connectors/
+    ├─ privacy/
+    ├─ talent/
+    ├─ arena/
+    ├─ competitions/
+    ├─ location/
+    ├─ ai/
+    ├─ notifications/
+    ├─ analytics/
+    └─ admin/
+
+5. SYSTEM CONTEXT
+
+                             +------------------+
+                             |   Parent Web/PWA |
+                             +---------+--------+
+                                       |
+    +------------------+               |               +------------------+
+    | Flutter Child App|---------------+---------------|    Admin CMS     |
+    +---------+--------+                               +---------+--------+
+              |                                                  |
+              +------------------ HTTPS / REST ------------------+
+                                       |
+                             +---------v----------+
+                             | NestJS API / BFF   |
+                             | Modular Monolith   |
+                             +----+-----+-----+----+
+                                  |     |     |
+                      +-----------+     |     +-------------+
+                      |                 |                   |
+                +-----v------+    +-----v-----+      +------v-------+
+                | PostgreSQL |    |   Redis   |      | Object Store |
+                | + pgvector |    | Queue/RT  |      | S3-compatible|
+                +-----+------+    +-----------+      +--------------+
+                      |
+                      +--------------------+
+                                           |
+                                  +--------v---------+
+                                  |    AI Gateway    |
+                                  | RAG/STT/TTS/Vision|
+                                  +------------------+
+
+6. CORE DOMAIN MODULES
+
+6.1 Authentication, Household & Consent
+
+Parent authentication
+
+V1 parent authentication is passwordless-first:
+
+-   Firebase Phone Authentication using SMS OTP
+-   Google Sign-In
+-   link multiple Firebase auth providers to one VionX parent identity
+    where possible
+-   verify Firebase ID token on backend and issue/maintain VionX
+    application session according to the selected session strategy
+-   rate-limit abuse-sensitive auth endpoints
+-   do not make email/password the default parent login flow
+
+Child authentication
+
+-   child profile belongs to one household
+-   system generates unique Child ID/username
+-   parent creates or resets 4-8 digit PIN
+-   PIN stored only as an Argon2id (or approved equivalent) secure hash
+-   rate-limit PIN attempts
+-   optional trusted-device pairing token
+-   parent can revoke all child sessions
+-   child has no requirement for phone number, email or Google account
+
+Household relationships
+
+Support multiple parents/guardians with explicit invitation and
+permission levels later. V1 can start with one owner parent plus
+optional second guardian.
+
+Consent architecture
+
+Do not store sensitive permissions as a single parent_consent=true
+field. Persist versioned consent records with at least:
+
+    consent_records
+    - id
+    - household_id
+    - student_id nullable
+    - consent_type
+    - policy_version
+    - status
+    - granted_by_parent_id
+    - child_assent_required
+    - child_assent_status
+    - granted_at
+    - revoked_at
+    - device_id_hash / audit metadata
+
+Initial consent scopes:
+
+-   CORE_SERVICE
+-   EDUCATION_ANALYTICS
+-   AI_PERSONALIZATION
+-   CAMERA_READING
+-   MICROPHONE_SPEAKING
+-   HEALTH_CONNECT_ACTIVITY
+-   HEALTH_CONNECT_HEART_RATE (optional/separate)
+-   COMPETITION_AREA
+
+Consent must be auditable and revocable from Parent Privacy Center.
+
+7. STUDENT DIGITAL TWIN
+
+Each child has separate profiles, not one composite score:
+
+    Student Digital Twin
+    ├─ Academic
+    │  ├─ School grades
+    │  ├─ Curriculum mastery
+    │  ├─ Assessment history
+    │  └─ Mistake patterns
+    ├─ Language
+    │  ├─ Listening
+    │  ├─ Speaking
+    │  ├─ Reading
+    │  └─ Writing
+    ├─ Reading
+    │  ├─ Books
+    │  ├─ Reading consistency
+    │  ├─ Attention signals
+    │  └─ Comprehension
+    ├─ Cognitive
+    │  ├─ Chess
+    │  ├─ Sudoku
+    │  ├─ Logic
+    │  └─ Coding
+    ├─ Creative
+    │  ├─ Music
+    │  └─ Art
+    ├─ Physical
+    │  ├─ Activity sessions
+    │  └─ sport plans
+    ├─ Behavior
+    │  ├─ tasks
+    │  ├─ routines
+    │  └─ habits
+    └─ Opportunity
+       ├─ competitions
+       └─ participation results
+
+Every analytics screen must display data sufficiency/confidence where
+interpretation is involved.
+
+8. CURRICULUM & KNOWLEDGE GRAPH
+
+8.1 Curriculum hierarchy
+
+    Curriculum Version
+    -> Grade
+    -> Subject
+    -> Domain
+    -> Topic
+    -> Lesson
+    -> Learning Objective
+    -> Concept
+    -> Skill
+
+Books are not the hierarchy. Books map to this hierarchy.
+
+8.2 Knowledge graph edge types
+
+Minimum:
+
+-   PREREQUISITE_OF
+-   PART_OF
+-   RELATED_TO
+-   NEXT_RECOMMENDED
+-   EQUIVALENT_OR_OVERLAP
+
+8.3 Curriculum versioning
+
+Store:
+
+-   academic year/version
+-   grade
+-   subject
+-   optional publisher/book series
+-   active/inactive status
+-   source provenance
+
+Never overwrite a curriculum version destructively once student progress
+references it.
+
+9. CONTENT INGESTION: SGK, SBT, BOOKS
+
+9.1 Educational source pipeline
+
+    Drive/File Upload
+    -> Malware/type validation
+    -> Object Storage
+    -> Document parser/OCR when needed
+    -> metadata classifier
+    -> table-of-contents detection
+    -> chapter/lesson segmentation
+    -> text/image chunk extraction
+    -> curriculum mapping proposal
+    -> embedding/indexing
+    -> human review
+    -> published content
+
+Store provenance for every chunk:
+
+-   source file ID
+-   source title
+-   version
+-   page number or EPUB location
+-   chapter/lesson
+-   extraction confidence
+-   review status
+
+9.2 Imported library books
+
+Support:
+
+-   PDF
+-   EPUB
+-   scanned image documents
+
+Book metadata:
+
+-   title
+-   author
+-   language
+-   age recommendation
+-   genres/tags
+-   cover
+-   source ownership/access scope
+
+Do not assume imported copyrighted books can be redistributed. Access
+scope belongs to the household/admin source permissions.
+
+10. MASTERY ENGINE
+
+10.1 Skill state
+
+For each (student, skill) maintain:
+
+-   mastery_score 0-100
+-   confidence_score 0-1
+-   attempt_count
+-   correct_count
+-   recent_accuracy
+-   avg_response_time
+-   current_difficulty
+-   last_attempt_at
+-   last_mastered_at
+-   next_review_at
+-   forgetting_risk
+
+10.2 Display states
+
+-   Not Learned
+-   Introduced
+-   Learning
+-   Proficient
+-   Mastered
+-   Retained
+
+Do not directly equate XP with mastery.
+
+10.3 Initial algorithm
+
+V1 may use a transparent weighted model rather than opaque ML:
+
+    mastery_delta =
+      correctness_weight
+      * difficulty_weight
+      * independence_weight
+      * recency_weight
+
+Hints reduce independence weight. Repeated short-interval answers have
+diminishing impact. Retention review after a delay is required for
+Retained.
+
+The implementation must isolate this formula behind a strategy interface
+so Bayesian/IRT models can replace it later.
+
+11. LEARNING PLANNER: NEXT BEST ACTION
+
+Planner inputs:
+
+-   school timetable
+-   parent-created tasks
+-   homework
+-   upcoming exams
+-   curriculum progress
+-   weak prerequisite skills
+-   forgetting risk / spaced repetition
+-   English plan
+-   daily reading requirement
+-   physical activity target
+-   time available
+-   workload already completed
+
+Output is a prioritized Today plan.
+
+V1 scoring model:
+
+    priority =
+      urgency
+    + prerequisite_gap
+    + forgetting_risk
+    + curriculum_importance
+    + exam_relevance
+    + parent_priority
+    - recent_workload_penalty
+
+Respect age-based session lengths configured by product rules.
+
+12. SCHOOL GRADEBOOK
+
+Parent can manually enter:
+
+-   subject
+-   assessment date
+-   type: oral / short quiz / homework / periodic test / midterm / final
+    / mock / custom
+-   score
+-   max score
+-   semester
+-   topic tags
+-   note
+-   teacher comment
+-   optional image/file attachment
+
+Allow mapping an assessment to multiple curriculum skills.
+
+Reports must keep School Grade separate from App Mastery.
+
+Provide trends by subject, assessment type, semester and mapped skill.
+
+Later: vision extraction from photographed tests may suggest
+question/skill mappings, but parent/admin must be able to correct them.
+
+13. CALENDAR, DAILY TIMETABLE & TASK ENGINE
+
+13.1 Event types
+
+-   school class
+-   tutoring/class
+-   exam
+-   learning block
+-   English
+-   reading
+-   sport
+-   household task
+-   creative activity
+-   family event
+-   custom
+
+13.2 Task fields
+
+-   household_id
+-   assigned_student_id
+-   created_by
+-   type
+-   title
+-   description
+-   date/time window
+-   duration estimate
+-   repeat rule
+-   priority
+-   required/optional
+-   reward policy
+-   verification mode
+-   status
+
+Verification modes:
+
+-   self-check
+-   photo/proof
+-   parent approval
+-   system verified
+
+Parent tasks must support recurring schedules.
+
+14. REWARD ECONOMY
+
+14.1 Currency model
+
+Required default conversion:
+
+    100 XP = 1 Coin
+    1 Coin = nominal reward value 1,000 VND
+
+Coin is a parent-managed reward unit, not a bank balance. Do not
+implement cash withdrawal/payment rails in v1.
+
+Separate:
+
+-   lifetime_xp: progression/levels; can continue increasing
+-   rewardable_xp: XP eligible for Coin conversion
+-   coin_balance: redeemable family reward units
+-   nominal_vnd_value: display calculation only
+
+14.2 Daily conversion caps
+
+Monday-Friday
+
+Maximum converted reward per child per local day:
+
+    20 Coins = 20,000 VND nominal value
+
+Saturday-Sunday
+
+Enhanced milestone mode, absolute maximum:
+
+    50 Coins = 50,000 VND nominal value
+
+Default weekend milestone tiers:
+
+-   Tier 0: up to 20 Coins - normal eligible tasks
+-   Tier 1: up to 30 Coins - all required daily learning tasks completed
+-   Tier 2: up to 40 Coins - Tier 1 + reading goal + physical activity
+    goal
+-   Tier 3: up to 50 Coins - Tier 2 + one approved bonus challenge /
+    family mission / advanced learning milestone
+
+These thresholds must be stored as configurable reward rules. Parent may
+make rules stricter or reduce limits, but cannot raise system safety
+caps unless an administrator-level product setting later permits it.
+
+14.3 Anti-gaming rules
+
+-   one activity cannot award the same reward twice
+-   enforce idempotency key on reward transactions
+-   cap repetitive micro-actions
+-   arena participation alone cannot generate unlimited XP
+-   parent approval can be required for household tasks
+-   excess XP beyond the daily Coin conversion limit may count toward
+    level progression but does not automatically roll into
+    cash-equivalent conversion the next day
+
+All reward ledger entries are immutable. Corrections are reversal
+transactions.
+
+15. ENGLISH ENGINE
+
+English is independent from normal school subject mastery and includes
+four skills:
+
+-   Listening
+-   Speaking
+-   Reading
+-   Writing
+
+Modes:
+
+-   General English
+-   School English
+-   IELTS preparation
+-   TOEIC preparation
+
+IELTS/TOEIC scores shown by the app must be labeled as practice
+estimates, never official exam results.
+
+15.1 Listening
+
+Support:
+
+-   word/sentence/conversation/story/lecture progression
+-   listen-and-choose
+-   dictation
+-   fill blanks
+-   comprehension questions
+-   playback speed settings
+-   accent metadata
+
+15.2 Speaking
+
+Pipeline:
+
+    Microphone
+    -> STT
+    -> pronunciation/fluency feature extraction
+    -> grammar/vocabulary analysis
+    -> feedback
+
+Store derived metrics and transcript; raw audio retention follows
+explicit parent privacy settings.
+
+15.3 Reading
+
+Measure separately:
+
+-   comprehension
+-   vocabulary
+-   main idea
+-   detail
+-   inference
+-   approximate reading speed
+
+15.4 Writing
+
+Evaluate dimensions such as:
+
+-   task completion
+-   organization/coherence
+-   grammar
+-   vocabulary
+-   spelling/mechanics
+
+Feedback-first design: do not immediately replace the child’s entire
+answer with an AI-written answer.
+
+16. SMART READING LIBRARY
+
+16.1 Reading workflow
+
+    Choose Book
+    -> Start Reading Session
+    -> Reader presents page/chapter
+    -> optional attention tracking
+    -> periodic low-friction reading checks
+    -> finish session
+    -> comprehension check
+    -> reading analytics
+    -> XP eligibility
+
+16.2 Eye/attention tracking
+
+This is a privacy-sensitive optional feature.
+
+Principles:
+
+1.  Explicit parent permission and child-facing camera indicator.
+2.  Prefer on-device face/eye landmark processing where practical.
+3.  Do not retain raw front-camera video by default.
+4.  Store derived events/metrics such as face_present,
+    gaze_on_screen_probability, session_focus_ratio, with timestamps and
+    confidence.
+5.  Hardware/device incompatibility must not block reading.
+6.  Eye tracking must not claim comprehension.
+7.  Reading quality combines behavior with comprehension results.
+
+Possible v1 reading-quality formula:
+
+    Reading Quality =
+      0.30 * session_completion
+    + 0.20 * attention_signal
+    + 0.50 * comprehension_score
+
+The formula must be configurable and clearly labeled as an internal
+indicator.
+
+16.3 Daily reading mission
+
+Parent/system can set:
+
+-   duration target
+-   chapter/page target
+-   required comprehension check
+-   optional genre/level
+
+17. SPORTS, ACTIVITY & HEALTH CONNECTORS
+
+VionX does not require continuous GPS tracking for the child. The
+primary source of activity data is a connector abstraction, with Android
+Health Connect as the first implementation.
+
+17.1 Health connector architecture
+
+    Wearable / Health App
+            ↓
+    Android Health Connect
+            ↓
+    HealthConnector adapter
+            ↓
+    On-device normalization
+            ↓
+    VionX Health Gateway
+            ↓
+    Daily/weekly activity summaries
+
+Required provider interface:
+
+    HealthConnector
+    - connect()
+    - disconnect()
+    - getPermissions()
+    - readActivities(range)
+    - readSteps(range)
+    - readDistance(range)
+    - readCalories(range)
+
+V1 reads only the minimum useful activity scopes:
+
+-   exercise sessions
+-   steps
+-   distance
+-   active/total calories where available
+-   optional heart rate only behind a separate parent consent
+
+Do not read or persist in V1:
+
+-   workout GPS routes / ExerciseRoute for child profiles
+-   medical records
+-   diagnoses
+-   medication
+-   glucose
+-   other clinical records unrelated to the product use case
+
+Prefer storing normalized summaries rather than copying all raw samples
+to the cloud.
+
+17.2 Activity planning
+
+System may generate non-medical, age-appropriate activity suggestions
+based on:
+
+-   age group
+-   selected interests
+-   time available
+-   prior activity summaries
+-   available equipment/space
+-   parent constraints
+
+Types include active play, walking/running, cycling, ball sports,
+mobility, age-appropriate bodyweight activity and coordination/balance.
+
+Do not diagnose health conditions or prescribe rehabilitation.
+Injury/medical scenarios should direct parents to qualified
+professionals.
+
+Store planning and summary fields such as:
+
+-   activity type
+-   planned duration
+-   actual duration
+-   intensity category when reliably available
+-   completion
+-   source connector
+-   personal-best metrics when relevant
+
+18. ARENA & TALENT LAB
+
+18.1 Arena architecture
+
+Create a plugin-style game interface:
+
+    GamePlugin
+    - gameType
+    - createSession()
+    - submitAction()
+    - validateResult()
+    - calculateSkillMetrics()
+    - calculateXpEligibility()
+
+Initial game families:
+
+-   Chess
+-   Sudoku
+-   Logic puzzles
+-   Memory
+-   Math battle
+-   English word/spelling battle
+-   Coding challenges
+-   Music rhythm/pitch activities
+-   Art/creative challenges
+
+18.2 Chess
+
+Support staged delivery:
+
+1.  puzzles
+2.  vs computer
+3.  local/friend challenge
+4.  online rated play
+
+Stockfish may be used for analysis and computer play. Keep chess rating
+independent from academic mastery.
+
+18.3 Sudoku / Logic
+
+Track:
+
+-   difficulty solved
+-   accuracy
+-   hints
+-   solve time
+-   logical strategy progression
+
+18.4 Coding/STEM
+
+Age pathways:
+
+-   Grade 1-3: visual block logic
+-   Grade 4-6: Blockly/Scratch-like concepts and introductory algorithms
+-   Grade 7-12: Python, algorithms, web/data/AI/robotics pathways
+
+Use a sandbox for executable code. Never execute untrusted code inside
+the core API process.
+
+18.5 Music
+
+Potential modules:
+
+-   rhythm matching
+-   pitch recognition
+-   music theory
+-   instrument practice logging
+-   composition exercises
+
+18.6 Art
+
+Store portfolios and activities. AI feedback should discuss dimensions
+like composition, color use, completion and experimentation rather than
+assigning a simplistic “talent” verdict.
+
+19. STRENGTH / TALENT ANALYTICS
+
+The purpose is to give parents evidence-based signals, not labels.
+
+Inputs may include:
+
+-   mastery growth rate
+-   school grade trends
+-   retention
+-   voluntary engagement
+-   difficulty level reached
+-   problem-solving/game performance
+-   coding progression
+-   creative portfolio activity
+-   English skill progression
+-   consistency
+
+Do not use XP or paid reward value as a strength signal.
+
+For each domain output:
+
+-   strength indicator 0-100
+-   confidence 0-1
+-   data sufficiency level
+-   contributing evidence
+-   trend
+-   recommended next opportunities
+
+Example:
+
+    Logic / Problem Solving
+    Indicator: 88
+    Confidence: 0.82
+    Evidence: strong math mastery growth, high Sudoku difficulty, chess puzzle progress
+    Recommendation: consider advanced math/problem-solving club or beginner competitive programming
+
+Never state that a child “must” pursue a career because of this profile.
+
+20. COMPETITION & OPPORTUNITY ENGINE
+
+20.1 Competition entity
+
+Required fields:
+
+-   title
+-   organizer
+-   description
+-   domains/subjects
+-   grade/age eligibility
+-   competition level:
+    school/district/province/region/national/international
+-   application open/close dates
+-   event dates
+-   location or online status
+-   source URL
+-   source type
+-   fee if known
+-   verification status
+-   last_verified_at
+
+20.2 Competition area and privacy
+
+Competition discovery uses a parent-selected coarse area, not continuous
+child GPS.
+
+Store:
+
+-   country
+-   province/city
+-   district (optional)
+-   search scope/radius category
+
+Do not require child location permission for competition discovery. Do
+not derive the child’s home address from health data.
+
+Competition matching may combine:
+
+    eligibility
+    + geographic reachability based on parent-selected area
+    + subject/skill fit
+    + interest
+    + current readiness
+    + application deadline
+
+Output a recommendation with an explanation, not an opaque ranking.
+
+20.3 Provider interface
+
+Implement competition ingestion behind provider adapters:
+
+-   AdminManualProvider
+-   CSVImportProvider
+-   WebFeedProvider (future)
+-   SchoolIntegrationProvider (future)
+
+This allows search/crawling integrations later without changing domain
+logic.
+
+21. AI & RAG ARCHITECTURE
+
+21.1 AI Gateway
+
+One internal API handles all model calls. Domain modules submit
+structured tasks, not vendor-specific prompts.
+
+Record:
+
+-   task type
+-   provider/model
+-   prompt template version
+-   student-context version
+-   source documents
+-   response status
+-   latency
+-   estimated cost
+
+21.2 RAG for AI Tutor
+
+    Student Question
+    -> safety/classification
+    -> student context
+    -> identify subject/skill
+    -> retrieve approved curriculum nodes
+    -> retrieve textbook/book chunks
+    -> retrieve approved examples
+    -> LLM response
+    -> source/provenance attachment
+    -> optional comprehension question
+
+AI Tutor should use a hint ladder where applicable:
+
+1.  conceptual hint
+2.  strategy hint
+3.  first-step hint
+4.  guided solution
+5.  full explanation when appropriate
+
+21.3 AI Question Factory
+
+    Learning Objective
+    -> Generator
+    -> answer/explanation generation
+    -> independent verifier
+    -> rule checks
+    -> duplicate similarity check
+    -> difficulty classification
+    -> human review
+    -> publish
+
+Question status:
+
+-   draft
+-   ai_generated
+-   needs_review
+-   approved
+-   rejected
+-   archived
+
+21.4 Parent AI
+
+Parent AI may summarize and explain evidence already in the system. It
+must distinguish:
+
+-   observed data
+-   inference
+-   recommendation
+-   insufficient data
+
+22. DATABASE ERD - LEVEL 1
+
+    User
+     └─ HouseholdMembership ─ Household ─ Student
+                                      ├─ StudentPreference
+                                      ├─ SchoolAssessment
+                                      ├─ StudentSkillState
+                                      ├─ TaskAssignment
+                                      ├─ CalendarEvent
+                                      ├─ ReadingSession
+                                      ├─ EnglishSession
+                                      ├─ ActivitySession
+                                      ├─ GameSession
+                                      ├─ RewardLedger
+                                      └─ CompetitionParticipation
+
+    CurriculumVersion
+     └─ CurriculumNode
+          ├─ KnowledgeEdge
+          ├─ ContentMapping ─ ContentSource ─ ContentChunk
+          └─ QuestionSkill ─ Question
+
+    Book
+     ├─ BookChapter
+     ├─ BookLocation
+     └─ ReadingSession
+
+    Competition
+     └─ CompetitionMatch
+
+23. DATABASE TABLES - LEVEL 2 CORE
+
+Implement UUID primary keys unless there is a strong reason otherwise.
+Include created_at, updated_at; use soft delete only where business
+history needs preservation.
+
+Identity / household
+
+-   users
+-   refresh_tokens
+-   households
+-   household_memberships
+-   students
+-   child_credentials
+-   student_preferences
+-   audit_logs
+
+Curriculum/content
+
+-   curriculum_versions
+-   curriculum_nodes
+-   knowledge_edges
+-   content_sources
+-   content_chunks
+-   content_mappings
+-   content_embeddings
+
+Questions/mastery
+
+-   questions
+-   question_options
+-   question_skills
+-   assessment_templates
+-   assessment_items
+-   assessment_attempts
+-   answer_attempts
+-   student_skill_states
+-   mistake_patterns
+-   review_schedule
+
+School
+
+-   school_subjects
+-   school_assessments
+-   school_assessment_skill_mappings
+-   school_timetable_entries
+
+Planner/tasks
+
+-   calendar_events
+-   task_templates
+-   task_assignments
+-   task_completions
+-   task_proofs
+-   habits
+-   habit_checkins
+
+Rewards
+
+-   reward_rules
+-   xp_ledger
+-   coin_ledger
+-   reward_redemptions
+-   daily_reward_snapshots
+
+English
+
+-   english_profiles
+-   english_sessions
+-   speaking_attempts
+-   listening_attempts
+-   reading_attempts
+-   writing_submissions
+-   english_skill_states
+
+Books/reading
+
+-   books
+-   book_chapters
+-   book_locations
+-   reading_goals
+-   reading_sessions
+-   reading_attention_events
+-   reading_comprehension_attempts
+
+Physical activity
+
+-   sport_profiles
+-   training_plans
+-   training_plan_items
+-   activity_sessions
+
+Arena/talent
+
+-   game_types
+-   game_sessions
+-   game_participants
+-   game_skill_metrics
+-   ratings
+-   creative_projects
+-   talent_domain_snapshots
+
+Competitions/location
+
+-   family_location_preferences
+-   consent_records
+-   policy_versions
+-   health_connections
+-   health_daily_summaries
+-   privacy_requests
+-   data_export_jobs
+-   data_deletion_jobs
+-   competitions
+-   competition_sources
+-   competition_matches
+-   competition_participations
+
+AI/analytics
+
+-   ai_runs
+-   ai_prompt_versions
+-   recommendations
+-   domain_events
+-   notification_jobs
+
+24. API CONTRACT - INITIAL ENDPOINTS
+
+Base: /api/v1
+
+Auth
+
+    POST /auth/firebase/session
+    POST /auth/logout
+    POST /auth/child/login
+    POST /auth/child/pair-device
+
+Household / students
+
+    GET  /household
+    POST /students
+    GET  /students/:studentId
+    PATCH /students/:studentId
+    POST /students/:studentId/reset-pin
+    POST /students/:studentId/revoke-sessions
+
+Consent / privacy
+
+    GET  /students/:studentId/consents
+    POST /students/:studentId/consents/:type/grant
+    POST /students/:studentId/consents/:type/revoke
+    POST /privacy/export
+    GET  /privacy/export/:jobId
+    POST /students/:studentId/delete-request
+    POST /account/delete-request
+
+Health connectors
+
+    GET    /health/connections
+    POST   /health/connections
+    DELETE /health/connections/:connectionId
+    POST   /health/sync
+    GET    /students/:studentId/activity/daily
+    GET    /students/:studentId/activity/weekly
+
+Today / planner
+
+    GET  /students/:id/today
+    POST /students/:id/today/recalculate
+    GET  /students/:id/calendar
+    POST /students/:id/tasks
+    PATCH /tasks/:taskId
+    POST /tasks/:taskId/complete
+    POST /tasks/:taskId/approve
+
+Learning
+
+    GET  /students/:id/learning-path
+    GET  /students/:id/knowledge-map
+    POST /learning/sessions
+    POST /learning/sessions/:id/answers
+    POST /learning/sessions/:id/finish
+
+Gradebook
+
+    GET  /students/:id/school-assessments
+    POST /students/:id/school-assessments
+    PATCH /school-assessments/:id
+    DELETE /school-assessments/:id
+
+Rewards
+
+    GET  /students/:id/rewards/wallet
+    GET  /students/:id/rewards/ledger
+    GET  /household/reward-rules
+    PATCH /household/reward-rules
+    POST /reward-redemptions
+    POST /reward-redemptions/:id/approve
+
+Reading
+
+    GET  /library/books
+    POST /library/books/import
+    GET  /books/:id
+    POST /reading/sessions
+    POST /reading/sessions/:id/attention-events
+    POST /reading/sessions/:id/finish
+    POST /reading/sessions/:id/comprehension
+
+English
+
+    GET  /students/:id/english/profile
+    POST /english/sessions
+    POST /english/speaking-attempts
+    POST /english/listening-attempts
+    POST /english/writing-submissions
+
+Arena
+
+    GET  /arena/games
+    POST /arena/sessions
+    POST /arena/sessions/:id/action
+    POST /arena/sessions/:id/finish
+    GET  /students/:id/arena/profile
+
+Competitions
+
+    GET  /competitions
+    GET  /students/:id/competition-matches
+    POST /competitions/:id/participation
+    PATCH /competition-participations/:id
+
+Admin
+
+    POST /admin/content/import
+    GET  /admin/content/review-queue
+    POST /admin/questions/:id/approve
+    POST /admin/questions/:id/reject
+    CRUD /admin/curriculum/*
+    CRUD /admin/competitions/*
+
+OpenAPI is mandatory and must be generated/validated in CI.
+
+25. DOMAIN EVENT CONTRACT
+
+Persist significant business events to an outbox table so event
+processing is reliable.
+
+Event envelope:
+
+    {
+      "eventId": "uuid",
+      "type": "TaskCompleted",
+      "occurredAt": "ISO-8601",
+      "actorType": "child",
+      "actorId": "uuid",
+      "studentId": "uuid",
+      "householdId": "uuid",
+      "payload": {},
+      "schemaVersion": 1
+    }
+
+Core events:
+
+-   ChildCreated
+-   TaskAssigned
+-   TaskCompleted
+-   TaskApproved
+-   LearningSessionFinished
+-   QuestionAnswered
+-   SkillStateUpdated
+-   SchoolScoreRecorded
+-   ReadingSessionFinished
+-   ComprehensionCompleted
+-   EnglishSessionFinished
+-   ActivitySessionFinished
+-   ArenaGameFinished
+-   XpGranted
+-   CoinGranted
+-   RewardRedeemed
+-   CompetitionMatched
+-   CompetitionParticipationUpdated
+
+Consumers must be idempotent.
+
+26. OFFLINE CHILD APP
+
+Child App must support an offline learning pack containing:
+
+-   Today’s tasks
+-   selected lessons
+-   question payloads
+-   required images/audio cached locally where licensed
+-   reading progress metadata
+
+Queue offline actions with local UUID idempotency keys. Synchronize when
+connectivity returns.
+
+Conflicts:
+
+-   server owns parent edits and reward rules
+-   child completion events merge if unique
+-   school grade edits are parent-only and server authoritative
+
+27. SECURITY & CHILD PRIVACY
+
+Mandatory design rules:
+
+-   TLS everywhere
+-   secrets never stored in source control
+-   scoped object-storage signed URLs
+-   authorization checked in service/domain layer, not only UI
+-   audit parent/admin access to sensitive child data
+-   encrypt sensitive fields where appropriate
+-   rate-limit login/PIN and AI abuse paths
+-   no unrestricted public child messaging in v1
+-   no precise child-location collection for normal child flows;
+    competition discovery uses parent-selected coarse area
+-   parent consent controls camera, microphone, AI-personalization and
+    health connector features
+-   Health Connect permissions must be least-privilege and revocable
+-   do not ingest child workout GPS routes in v1
+-   raw eye-tracking camera feed is processed on-device and is not
+    retained/uploaded by default
+-   microphone is user-initiated only and must not run continuously in
+    background
+-   privacy center must support consent review/revoke, data export,
+    child deletion and household deletion
+-   all policy/consent versions must be auditable
+-   production launch requires jurisdiction-specific child privacy/legal
+    review
+
+28. OBSERVABILITY & ANALYTICS
+
+Use OpenTelemetry-compatible traces/metrics/logs.
+
+Track technical metrics:
+
+-   API p50/p95/p99 latency
+-   error rate
+-   queue depth
+-   DB connections/query latency
+-   AI latency/cost/error rate
+-   upload/parser failures
+
+Product events:
+
+-   app opened
+-   today item started/completed
+-   lesson started/finished
+-   reading started/finished
+-   task completion
+-   English practice
+-   Arena game
+-   reward conversion/redemption
+
+Avoid analytics payloads containing unnecessary private child
+text/content.
+
+29. TESTING STRATEGY
+
+Unit tests
+
+Required for:
+
+-   reward calculations
+-   mastery calculation
+-   planner priority rules
+-   permissions
+-   competition eligibility
+-   strength/talent aggregation
+
+Integration tests
+
+Use ephemeral/test Postgres and Redis for:
+
+-   auth
+-   child credential reset
+-   question -> mastery update
+-   task -> reward flow
+-   daily Coin cap
+-   reading completion
+-   gradebook
+
+End-to-end critical flows
+
+1.  Parent registers.
+2.  Parent creates child.
+3.  Child signs in with ID/PIN.
+4.  Parent assigns task.
+5.  Child completes task.
+6.  Parent approves if required.
+7.  XP ledger updates.
+8.  Coin conversion obeys weekday/weekend cap.
+9.  Parent sees updated dashboard.
+
+Second vertical slice:
+
+1.  Admin publishes a curriculum skill/question.
+2.  Child completes question.
+3.  Mastery changes.
+4.  Planner recommendation updates.
+
+30. MAC MINI M4 LOCAL LAB ENVIRONMENT
+
+The first VionX server is a Mac mini M4, 16GB unified memory. The
+objective is to run 85-95% of VionX locally during internal testing with
+near-zero cloud infrastructure cost.
+
+30.1 Host runtime
+
+Install on macOS:
+
+-   Xcode Command Line Tools
+-   Homebrew
+-   Git
+-   Docker Desktop for Apple Silicon
+-   Node.js LTS / pnpm
+-   Flutter SDK + Android SDK
+-   Python 3.11+
+-   Ollama and/or MLX-LM server natively on macOS
+-   optional ffmpeg, poppler, OCR utilities
+
+All scripts must work on arm64 macOS.
+
+30.2 Docker services
+
+Default docker compose up starts only the core stack:
+
+    vionx-api
+    vionx-worker
+    postgres-pgvector
+    redis
+    minio
+    mailpit
+
+Optional profiles:
+
+    --profile monitoring   # prometheus/grafana if resources allow
+    --profile ocr          # OCR worker if containerized tool is ARM64-safe
+    --profile games        # sandbox/engine helpers
+
+Do not run the primary LLM container inside this compose stack on the
+16GB Mac mini.
+
+30.3 Docker resource limits
+
+Start with roughly:
+
+    Docker Desktop RAM: 5-6 GB
+    Swap: 1-2 GB
+    CPU: leave at least 2 performance/efficiency cores available to host work
+
+Per-service guidance:
+
+    PostgreSQL/pgvector : 1.0-1.5 GB cap
+    API                 : 512 MB-1 GB
+    Worker              : 512 MB-1 GB
+    Redis               : 256-512 MB
+    MinIO               : 256-512 MB
+    Mailpit             : 128 MB
+    Monitoring          : optional; disabled when memory pressure is high
+
+Exact limits are configuration defaults, not promises. Measure and tune
+with Activity Monitor and docker stats.
+
+30.4 Local AI
+
+Required provider abstraction:
+
+    AIProvider
+    ├─ OllamaProvider              # default local
+    ├─ MlxOpenAICompatibleProvider # optional Apple-native alternative
+    ├─ GeminiProvider              # optional cloud
+    ├─ OpenAIProvider              # optional cloud
+    └─ AnthropicProvider           # optional cloud
+
+Recommended local roles:
+
+    FAST_MODEL      small quantized model for tagging/classification/simple generation
+    TUTOR_MODEL     quantized 7B/8B-class model, loaded only when required
+    EMBED_MODEL     small local embedding model
+
+On the 16GB Mac mini:
+
+-   do not assume two medium LLMs can remain loaded together;
+-   unload/switch models when worker mode changes;
+-   serialize heavy generation jobs;
+-   keep prompt context small and grounded;
+-   never solve memory pressure by silently swapping to a cloud provider
+    unless config explicitly allows cloud fallback.
+
+30.5 Local storage
+
+Support both:
+
+    STORAGE_PROVIDER=local
+    STORAGE_PROVIDER=minio
+
+Directory design:
+
+    data/
+    ├─ source-books/
+    ├─ parsed/
+    ├─ ocr/
+    ├─ chunks/
+    ├─ generated/
+    ├─ audio/
+    ├─ exports/
+    └─ backups/
+
+Allow VIONX_DATA_ROOT to point to an external SSD.
+
+30.6 Local speech and media
+
+Default internal-test path:
+
+-   STT: whisper.cpp or equivalent Apple-Silicon-friendly local
+    implementation
+-   TTS: local adapter (macOS speech/Piper-compatible provider
+    acceptable for test)
+-   audio normalization: ffmpeg
+-   pronunciation scoring in early local builds is heuristic/practice
+    feedback, not official IELTS/TOEIC scoring
+
+30.7 Local auth and notifications
+
+    AUTH_MODE=local
+    OTP_PROVIDER=mock
+    DEV_OTP=123456
+    NOTIFICATION_PROVIDER=local
+
+Local mode must reproduce production authorization and consent rules
+even though OTP delivery is mocked.
+
+Google Sign-In real integration may be tested with Internet separately.
+Phone OTP production integration is deferred until a Vietnam-compatible
+provider is selected.
+
+30.8 Local health data
+
+Health Connect lives on Android, not on the Mac server.
+
+Test paths:
+
+-   real Android device with Health Connect
+-   emulator/test fixtures
+-   fake connector for automated tests
+
+The server stores normalized summaries, not exercise GPS routes.
+
+30.9 Backups
+
+For the Mac mini internal server:
+
+-   nightly PostgreSQL dump
+-   nightly data-directory snapshot
+-   keep source books immutable
+-   copy backups to a physically separate disk or encrypted backup
+    destination
+-   test restore before calling the environment reliable
+
+31. BOOK -> KNOWLEDGE -> LEARNING DATA PIPELINE
+
+Books are source material; they are not the core data model. VionX
+converts source books into normalized document data, curriculum
+mappings, skills, grounded chunks and approved learning content.
+
+31.1 Supported source classes
+
+    SGK  = concept/explanation/examples
+    SBT  = exercise patterns/practice variations
+    SGV  = learning objectives/teaching intent/common misconceptions
+    Reference book = supplementary evidence; lower default trust
+    Family-imported reading book = reading library; not automatically curriculum truth
+
+Supported import formats initially:
+
+    PDF
+    EPUB
+    DOCX (optional import adapter)
+    Images / scanned PDF
+    Google Drive selected file/folder
+    Local folder
+
+31.2 Canonical document representation
+
+Every source converts into a common representation preserving
+provenance:
+
+    {
+      "documentId": "...",
+      "bookVersionId": "...",
+      "grade": 6,
+      "subject": "MATH",
+      "bookType": "SGK",
+      "curriculumVersion": "2026-2027",
+      "pages": [
+        {
+          "page": 67,
+          "blocks": [
+            {"type":"heading","text":"..."},
+            {"type":"paragraph","text":"..."},
+            {"type":"example","text":"..."},
+            {"type":"exercise","text":"..."}
+          ]
+        }
+      ]
+    }
+
+Never discard page references during transformation.
+
+31.3 Extraction pipeline
+
+    SOURCE FILE
+       |
+       v
+    File validation + hash
+       |
+       v
+    Text-layer inspection
+       |
+       +--> text PDF ------> PyMuPDF fast extraction
+       |
+       +--> scan/image ----> local OCR
+       |
+       v
+    Layout / structure normalization
+       |
+       v
+    Canonical Document JSON
+       |
+       v
+    TOC / chapter / lesson extraction
+       |
+       v
+    Curriculum mapping proposal
+       |
+       v
+    Concept + Skill extraction
+       |
+       +--> semantic chunks --> embeddings --> pgvector
+       |
+       +--> source mapping --> Knowledge Graph
+       |
+       v
+    Human/admin review
+
+Use OCR only on pages that need it. Do not OCR every page by default.
+
+31.4 Knowledge hierarchy
+
+    Curriculum Version
+     -> Grade
+     -> Subject
+     -> Domain
+     -> Topic
+     -> Lesson
+     -> Learning Objective
+     -> Concept
+     -> Skill
+
+Each skill is the smallest mastery unit.
+
+Knowledge edges:
+
+    PREREQUISITE_OF
+    PART_OF
+    RELATED_TO
+    NEXT_RECOMMENDED
+    EQUIVALENT_OR_OVERLAP
+
+31.5 RAG chunking
+
+Do not chunk books by fixed token windows alone. Prefer semantic chunks
+tied to:
+
+-   heading/lesson
+-   definition
+-   explanation
+-   worked example
+-   exercise group
+-   table/figure explanation
+
+Every chunk stores:
+
+    bookVersionId
+    pageStart/pageEnd
+    grade
+    subject
+    lessonId
+    skillIds[]
+    contentType
+    text
+    embedding
+    extractionConfidence
+    reviewStatus
+
+Retrieval first filters grade/subject/skill/content type, then performs
+semantic vector search.
+
+31.6 AI Tutor grounding
+
+Tutor pipeline:
+
+    student question
+     -> classify intent
+     -> resolve student/current skill
+     -> retrieve approved source chunks
+     -> optionally retrieve prerequisites
+     -> compose bounded prompt
+     -> local/cloud model
+     -> source/provenance check
+     -> response
+
+The Tutor must not answer curriculum questions from model memory when
+approved evidence is available but contradictory. If evidence is
+insufficient, say so and request/admin-queue missing content rather than
+invent curriculum facts.
+
+32. LEARNING CONTENT FACTORY
+
+The Content Factory transforms approved skills and sources into
+reusable, reviewable learning assets.
+
+32.1 Learning Pack
+
+For each Skill generate a structured pack:
+
+    Concept Card
+    Beginner Explanation
+    Key Points
+    Worked Examples
+    Guided Practice
+    Independent Practice
+    Challenge
+    Flashcards
+    Common Mistakes
+    Spaced Review Items
+    Optional visual brief
+
+Generated assets remain DRAFT until validation/review rules pass.
+
+32.2 Question levels
+
+Questions must explicitly store cognitive intent:
+
+    L1 Recall
+    L2 Understand
+    L3 Apply
+    L4 Reason
+    L5 Challenge
+
+Question entities include:
+
+    skillId
+    difficulty
+    cognitiveLevel
+    type
+    stem
+    options/answer
+    explanation
+    misconceptionTags
+    sourceRefs[]
+    generatedByModel
+    promptVersion
+    validationStatus
+
+32.3 Generation and validation pipeline
+
+    Skill + approved sources
+          |
+          v
+    Generator
+          |
+          v
+    Independent verifier
+          |
+          v
+    Deterministic rule checks
+          |
+          v
+    Duplicate detection
+          |
+          v
+    Difficulty / age suitability check
+          |
+          +--> high confidence -> eligible for bulk approval rule
+          |
+          +--> conflict/low confidence -> NEEDS_REVIEW
+
+Do not let one model’s self-approval be the only validation mechanism.
+
+32.4 Content publishing states
+
+    DRAFT
+    AI_GENERATED
+    VALIDATING
+    NEEDS_REVIEW
+    APPROVED
+    PUBLISHED
+    REJECTED
+    ARCHIVED
+
+All published content must have provenance.
+
+33. ADMIN LIBRARY & CONTENT DASHBOARD
+
+The Admin CMS is the control room for turning source books into
+curriculum and learning content. This module is required before bulk
+ingestion of Grade 1-12.
+
+33.1 Navigation
+
+    Dashboard
+    Library
+      Books
+      Import
+      Processing Queue
+      Sources
+    Curriculum
+      Grades
+      Subjects
+      Chapters
+      Lessons
+      Concepts
+      Skills
+    Knowledge Graph
+    Learning Content
+      Learning Packs
+      Questions
+      Flashcards
+      Reviews
+    AI Factory
+      Generation Jobs
+      Validation
+      Prompt Versions
+      Model Config
+    Students
+    Competitions
+    Analytics
+    Privacy & Audit
+    System
+
+33.2 Dashboard KPIs
+
+Show:
+
+-   books total / processing / ready / failed
+-   curriculum grades / subjects / lessons / skills
+-   approved vs review-needed skills
+-   generated questions / approved / failed
+-   parsing/OCR/embedding/mapping queue health
+-   Mac mini CPU/RAM/disk and processing concurrency
+-   local model/job status
+
+33.3 Book Import Wizard
+
+Steps:
+
+1.  Select source: upload/local folder/Google Drive.
+2.  Choose one or many files.
+3.  Detect or edit metadata: title, grade, subject, book type, volume,
+    publisher, edition, curriculum year, language.
+4.  Inspect pages: text pages, scanned pages, images/tables, OCR
+    requirement.
+5.  Choose mode: AUTO, TEXT_ONLY, FORCE_OCR.
+6.  Submit processing job.
+
+AI may propose metadata, but Admin confirms before publish.
+
+33.4 Processing Queue
+
+States:
+
+    UPLOADED
+    VALIDATING
+    PARSING
+    OCR
+    STRUCTURING
+    CURRICULUM_EXTRACTION
+    SKILL_EXTRACTION
+    EMBEDDING
+    READY_FOR_REVIEW
+    FAILED
+
+Support pause/retry/cancel/logs and bounded concurrency.
+
+For Mac mini 16GB, defaults should favor one heavy job at a time.
+
+33.5 Book Inspector
+
+Tabs:
+
+    Overview
+    Pages
+    Structure
+    Curriculum
+    Skills
+    Chunks
+    Embeddings
+    Generated Content
+    Versions
+    Processing Logs
+
+Provide original-page vs extracted-block comparison so OCR/extraction
+errors can be corrected.
+
+33.6 Structure Editor
+
+Admin can:
+
+-   rename chapter/lesson
+-   split/merge structure nodes
+-   drag/drop hierarchy
+-   re-map pages to lessons
+-   approve detected TOC
+
+33.7 Skill Builder
+
+Admin can:
+
+-   accept/edit AI-proposed objectives/skills
+-   merge/split skills
+-   map a proposed skill to an existing canonical skill
+-   see similarity/duplicate warning
+-   add prerequisite/related edges
+
+Prevent duplicate knowledge nodes when multiple textbook series cover
+the same skill.
+
+33.8 Knowledge Graph Editor
+
+Visual graph supports:
+
+-   prerequisite editing
+-   related/equivalent links
+-   source evidence panel
+-   cycle detection
+-   orphan-node warnings
+
+33.9 RAG Chunk Inspector
+
+For each chunk display source/book/pages/skill/content type/token
+length/review state and provide Test Retrieval where Admin submits a
+query and sees ranked chunks and scores.
+
+33.10 Content Factory UI
+
+Admin selects one/many skills and generation targets:
+
+    summary
+    explanation
+    worked examples
+    guided practice
+    independent practice
+    challenge
+    flashcards
+    review questions
+    common mistakes
+
+Select count, difficulty mix, source policy and language.
+
+33.11 Review Queue
+
+Review cards show:
+
+-   content/question
+-   correct answer and explanation
+-   source page links
+-   skill
+-   difficulty
+-   generator model
+-   verifier model
+-   prompt version
+-   validator results
+
+Actions:
+
+    Approve
+    Edit
+    Reject
+    Flag
+    Bulk approve eligible high-confidence items
+
+33.12 Version management
+
+Never destructively overwrite published curriculum/book versions.
+Support compare between curriculum years and flag affected
+skills/content for regeneration.
+
+33.13 Admin roles
+
+Minimum:
+
+    SUPER_ADMIN
+    CONTENT_ADMIN
+    CURRICULUM_EDITOR
+    CONTENT_REVIEWER
+    LIBRARIAN
+    ANALYST
+
+All sensitive actions write audit logs.
+
+34. LOCAL-FIRST PRIVACY / AUTH / HEALTH CONTRACT
+
+34.1 Parent authentication
+
+Production target:
+
+    Google Sign-In
+    or
+    Phone OTP through OtpProvider
+
+Local target:
+
+    DevAuthProvider
+    MockOtpProvider (fixed/dev-generated OTP)
+
+Do not bypass authorization, household boundaries or consent in local
+mode.
+
+34.2 Consent
+
+Consent must be scoped/versioned/auditable/revocable, including:
+
+    CORE_SERVICE
+    EDUCATION_ANALYTICS
+    AI_PERSONALIZATION
+    CAMERA_READING
+    MICROPHONE_SPEAKING
+    HEALTH_CONNECT_ACTIVITY
+    HEALTH_CONNECT_HEART_RATE (optional, separate)
+    COMPETITION_AREA
+
+34.3 Permissions
+
+-   Camera: contextual disclosure, on-device reading-attention signal;
+    no raw eye video upload by default.
+-   Microphone: only during explicit speaking/reading/music activities;
+    no background listening.
+-   Location: Child App does not require continuous precise GPS.
+    Competition discovery uses parent-selected province/city/district or
+    coarse search area.
+-   Health: read only minimum necessary activity types through Health
+    Connect; do not read workout GPS routes for child profiles in v1.
+
+34.4 Privacy Center
+
+Parent can:
+
+-   inspect/revoke consent
+-   disconnect health source
+-   export parent/child data
+-   delete child profile
+-   delete family account
+-   see policy versions accepted
+
+Support privacy_requests, data_export_jobs, data_deletion_jobs,
+policy_versions.
+
+35. MULTI-AGENT EXECUTION ROADMAP
+
+Execute one bounded segment/task at a time. Never ask either agent to
+build the entire application in one pass. Use
+VIONX_ENGINEERING_CONTRACT.md, the current task pack and structured
+handoffs. Every task ends with the checks required by its task pack and
+a written handoff/report.
+
+Segment L0 - Mac mini foundation
+
+Deliver:
+
+-   monorepo
+-   NestJS API
+-   Parent/Admin Next.js scaffolds
+-   Flutter child scaffold
+-   ARM64 Docker Compose: Postgres/pgvector, Redis, MinIO, Mailpit
+-   local provider interfaces and placeholders
+-   migration/seed framework
+-   .env.local.example
+-   health checks
+-   README Mac mini setup
+-   basic CI
+
+Acceptance:
+
+    docker compose up -d
+    API health = OK
+    Postgres pgvector = OK
+    Redis = OK
+    MinIO = OK
+    Parent/Admin build
+    Flutter analyze
+    API tests pass
+
+Segment L1 - Identity, household, privacy foundation
+
+Deliver:
+
+-   DevAuth + Mock OTP
+-   Google/Firebase auth adapter interfaces
+-   production OTP provider interface
+-   household
+-   child profile
+-   Child ID/PIN
+-   consent records/policy versions
+-   privacy center skeleton
+-   export/delete job skeleton
+
+Acceptance: Parent creates household/child, grants consent, child logs
+in; revocation guards work.
+
+Segment L2 - Planner, tasks, rewards
+
+Deliver timetable, tasks, recurring tasks, approval, XP/Coin immutable
+ledgers, weekday/weekend limits and Today screen.
+
+Acceptance: idempotent completion -> XP -> Coin passes cap tests.
+
+Segment C0 - Admin Library foundation
+
+Deliver Admin navigation, book/source tables, upload/local-folder
+import, metadata wizard, processing job model, queue screen, Book
+Inspector shell and audit log.
+
+Acceptance: admin imports one local PDF and sees a persisted processing
+job/book version.
+
+Segment C1 - Parser / OCR / canonical document
+
+Deliver PDF inspection, PyMuPDF parser, OCR fallback adapter, page/block
+canonical JSON, page inspector, structure proposal and processing logs.
+
+Acceptance: one text PDF and one scanned sample become canonical
+documents with page provenance.
+
+Segment C2 - Curriculum / Knowledge Graph
+
+Deliver curriculum hierarchy, mapping UI, Skill Builder, duplicate
+detection, prerequisite graph, source mapping, graph validation.
+
+Acceptance: selected Grade 6 Math book produces reviewed
+lessons/objectives/skills and valid graph edges.
+
+Segment C3 - Embeddings / RAG
+
+Deliver local embedding provider, pgvector indexes, semantic chunks,
+metadata filters, retrieval test UI, RAG service and provenance.
+
+Acceptance: Admin Test Retrieval returns relevant Grade 6 Math chunks
+with book/page refs.
+
+Segment C4 - Learning Content Factory
+
+Deliver generation jobs, prompt versions, generator/verifier adapters,
+deterministic validation, duplicate detection, review queue and publish
+states.
+
+Acceptance: one approved skill produces a grounded learning pack and a
+batch of reviewed questions.
+
+Segment L3 - Student learning / mastery
+
+Deliver assessment sessions, question delivery, answers, mastery state,
+mistakes, spaced review and learning planner.
+
+Acceptance: child answers approved questions -> mastery updates -> next
+recommendation changes.
+
+Segment L4 - Gradebook / Parent reports
+
+Deliver school assessments, manual score entry, curriculum/skill
+mapping, school grade vs app mastery report.
+
+Segment L5 - Reading
+
+Deliver library, reading sessions, goals, comprehension, optional
+on-device attention-signal interface and analytics.
+
+Segment L6 - English
+
+Deliver four-skill profile; local TTS/STT adapters;
+speaking/listening/reading/writing practice; label IELTS/TOEIC results
+as practice estimates.
+
+Segment L7 - Health / activity
+
+Deliver Health Connect Android adapter, fake connector, normalized
+activity summary, sport plan and habits. No continuous GPS.
+
+Segment L8 - Arena
+
+Order:
+
+1.  Sudoku/logic
+2.  chess puzzles/vs Stockfish
+3.  coding sandbox
+4.  multiplayer infrastructure
+5.  music/art experiments
+
+Segment L9 - Talent analytics
+
+Deliver evidence-based domain indicators, confidence/data sufficiency,
+trends and parent recommendations. No deterministic aptitude/career
+labels.
+
+Segment L10 - Competitions
+
+Deliver admin competition catalog, coarse parent area, matching,
+participation/result tracking. Live external discovery adapters are
+optional after local fixtures work.
+
+Segment P0 - Production adapters
+
+Only after local alpha is stable:
+
+-   Google Sign-In real configuration
+-   Vietnam OTP provider
+-   FCM
+-   cloud object storage adapter
+-   optional cloud AI/STT/TTS/OCR
+-   staging configuration
+
+Segment P1 - Production hardening
+
+Security/privacy review, backup/restore, observability, load tests,
+accessibility, data export/delete verification, store release
+configuration.
+
+Internal Alpha Gate
+
+Internal alpha is reached after L0 + L1 + L2 + C0 + C1 + C2 + C3 + C4 +
+L3 are stable for one subject/grade slice.
+
+Start with:
+
+    Grade 6 Mathematics
+    SGK + SGV + SBT
+
+Do not bulk-ingest Grade 1-12 until the Grade 6 Math pipeline passes
+quality review.
+
+36. MULTI-AGENT EXECUTION PROTOCOL
+
+For every task:
+
+1.  Read the appropriate agent contract (CLAUDE.md or AGENTS.md).
+2.  Read VIONX_ENGINEERING_CONTRACT.md.
+3.  Read only the current TASK_PACKS/<SEGMENT>/TASK.md and named
+    dependency handoffs/reports.
+4.  Declare/observe the task write set and do not overlap another active
+    agent.
+5.  Implement only the assigned ownership slice.
+6.  Keep provider boundaries, authorization and privacy rules intact.
+7.  Run formatting/lint/typecheck/tests/builds required by the task.
+8.  Generate/validate OpenAPI/client contracts where APIs changed.
+9.  Write/update HANDOFF.md or docs/milestones/<SEGMENT>_REPORT.md.
+10. Stop. Do not start the next task automatically.
+
+For Antigravity work, Claude performs the integration review using only
+the Engineering Contract, task pack, handoff and git diff unless an
+architecture conflict requires a cited Master Spec section.
+
+Heavy jobs on the 16GB Mac mini must respect the resource modes in
+section 51 and the Mac mini runbook.
+
+37. MAC MINI OPERATING COMMANDS
+
+Claude should expose a small command surface, for example:
+
+    make doctor            # validate host dependencies / arm64
+    make dev               # core services + dev apps
+    make infra-up          # Docker core stack
+    make infra-down
+    make migrate
+    make seed
+    make test
+    make lint
+    make api-docs
+    make ai-check          # verify native local AI endpoint
+    make import-sample     # import controlled sample book
+    make backup
+    make restore-check
+
+Exact implementation may use just, task, pnpm scripts or Make, but
+README must present one canonical path.
+
+38. PRODUCTION MIGRATION MAP
+
+Local infrastructure is intentionally replaceable:
+
+    LOCAL                              PRODUCTION
+    PostgreSQL/pgvector      ------>   Managed PostgreSQL/pgvector
+    Redis                    ------>   Managed Redis
+    MinIO/local files         ------>   Cloud object storage
+    Ollama/MLX                ------>   Local or cloud AI provider
+    whisper.cpp               ------>   Local or cloud STT
+    local TTS                 ------>   Local or cloud TTS
+    Mock OTP                  ------>   Vietnam SMS/OTP provider
+    Local notifications       ------>   FCM
+    Competition fixtures      ------>   verified external providers/crawlers
+
+Business rules and domain models must remain unchanged across this
+migration.
+
+39. V1 UI ROUTES
+
+Child
+
+    /login
+    /today
+    /learn
+    /learn/knowledge-map
+    /learn/session/:id
+    /english
+    /reading
+    /reading/:bookId
+    /arena
+    /arena/:gameType
+    /grow
+    /profile
+    /rewards
+
+Bottom nav:
+
+    Today | Learn | Arena | Grow | Me
+
+Parent
+
+    /login
+    /home
+    /children
+    /children/:id
+    /children/:id/school
+    /children/:id/learning
+    /children/:id/english
+    /children/:id/reading
+    /children/:id/activity
+    /children/:id/talent
+    /planner
+    /tasks
+    /rewards
+    /reports
+    /settings
+
+Admin
+
+    /admin/dashboard
+    /admin/curriculum
+    /admin/content
+    /admin/questions
+    /admin/review
+    /admin/books
+    /admin/competitions
+    /admin/users
+    /admin/analytics
+    /admin/settings
+
+40. DEFINITION OF DONE FOR FEATURES
+
+A feature is not complete until:
+
+-   authorization is implemented
+-   DB migrations exist
+-   validation exists
+-   errors have usable messages
+-   unit tests cover business rules
+-   integration tests cover persistence
+-   audit/event behavior is defined
+-   analytics event is added where meaningful
+-   UI loading/empty/error states exist
+-   relevant OpenAPI documentation is updated
+-   privacy impact is considered
+-   feature works in seeded local environment
+
+41. CODE QUALITY RULES
+
+-   strict TypeScript
+-   no any without documented reason
+-   DTO validation at API boundary
+-   domain logic in services/domain classes, not controllers
+-   repository/data-access boundary where useful
+-   transactions for multi-ledger operations
+-   idempotency for reward/event processing
+-   database indexes defined intentionally
+-   pagination on list endpoints
+-   no N+1 data access patterns in high-volume endpoints
+-   structured logging with correlation/request IDs
+-   feature flags for incomplete AI/vision/game functionality
+
+42. FIRST EXECUTION PROMPT — MULTI-AGENT EDITION
+
+Use START_HERE.txt and the task pack rather than asking an agent to read
+the entire Master Spec.
+
+First core prompt:
+
+  Read CLAUDE.md, VIONX_ENGINEERING_CONTRACT.md, and
+  TASK_PACKS/L0/TASK.md. Implement only the Claude-owned/core portion of
+  L0. Target Mac mini M4 16GB. Run required checks, write the
+  handoff/report, and stop. Read the Master Spec only if the task pack
+  cites a specific section or a contract conflict cannot otherwise be
+  resolved.
+
+First Antigravity prompt after the L0 core contract is ready:
+
+  Read AGENTS.md, VIONX_ENGINEERING_CONTRACT.md, TASK_PACKS/L0/TASK.md,
+  and the L0 core handoff. Implement only the Antigravity-owned L0
+  presentation/scaffold/test work. Do not change schema or core
+  architecture. Run required checks, write HANDOFF.md, and stop.
+
+All later segments use the same pattern via
+VIONX_MULTI_AGENT_EXECUTION_PLAN_v1.3.md.
+
+43. ACCEPTANCE TARGET FOR THE FIRST REAL PRODUCT SLICE
+
+The first usable internal alpha is reached after Milestone 3 when all of
+the following work:
+
+    Parent signs up
+    -> creates 3 child profiles
+    -> each receives Child ID/PIN
+    -> parent adds timetable and tasks
+    -> child logs in
+    -> child sees Today
+    -> child completes tasks/learning
+    -> system records mastery and XP
+    -> XP converts to Coin under daily rules
+    -> parent sees updated progress and reward balance
+    -> admin can manage a small Grade/Subject/Skill/Question curriculum subset
+
+This vertical slice should be stabilized before the system expands into
+eye tracking, advanced AI, multiplayer Arena or competition crawling.
+
+44. FINAL ARCHITECTURE PRINCIPLE
+
+VionX is not a collection of disconnected features. Every module
+contributes evidence to the student’s Digital Twin, but each domain
+maintains its own valid measurement model.
+
+    Curriculum / School / Reading / English / Sport / Arena / Creative / Tasks
+                                     |
+                                     v
+                             Student Digital Twin
+                                     |
+                 +-------------------+-------------------+
+                 |                                       |
+          Next Best Action                       Parent Insights
+                 |                                       |
+                 v                                       v
+            Student Today                         Growth Decisions
+
+The system optimizes for long-term learning and healthy development, not
+maximum screen time, maximum XP, or one synthetic ranking of a child.
+
+45. BRAND IMPLEMENTATION CONTRACT
+
+Public-facing product identity is VionX.
+
+Tagline: Think. Explore. Grow.
+
+Implementation rules:
+
+-   Use VionX in UI copy, app metadata, documentation examples and
+    default seeded branding.
+-   Use vionx for repository/package/service slugs where lowercase ASCII
+    is required.
+-   Suggested Android application ID namespace: com.vionx.app (final
+    legal/domain verification required before store release).
+-   Do not expose the former working name CDOS in customer-facing UI.
+-   Internal technical terms such as Student Digital Twin, Knowledge
+    Graph, Mastery Engine and Family OS remain valid architecture
+    terminology.
+-   The tagline should appear in onboarding/brand surfaces, not on every
+    functional screen.
+
+46. MULTI-AGENT DEVELOPMENT MODEL
+
+VionX v1.3 uses two specialized coding-agent roles to reduce repeated
+context/token cost while preserving architectural control.
+
+    Product Owner
+        |
+    Engineering Contract + Task Pack
+        |
+        +-------------------+
+        |                   |
+    Claude Code         Antigravity
+    Lead/Core           Build Team
+        |                   |
+        +--------+----------+
+                 |
+            Handoff + Diff
+                 |
+            Claude Review
+                 |
+              develop
+
+Claude Code is the architecture/core/security/review authority.
+Antigravity is the preferred implementer for bounded UI, CRUD,
+visualizations, routine tests, browser/emulator work and repetitive
+documentation.
+
+The goal is not to maximize simultaneous agents. The goal is to minimize
+repeated context and avoid duplicate implementation.
+
+47. CONTEXT AND TOKEN-EFFICIENCY CONTRACT
+
+Normal task context is deliberately small:
+
+1.  CLAUDE.md or AGENTS.md;
+2.  VIONX_ENGINEERING_CONTRACT.md;
+3.  one TASK_PACKS/<segment>/TASK.md;
+4.  named dependency handoff/report files;
+5.  git diff for reviews.
+
+The Master Spec is an escalation reference. Agents must not load it
+automatically for every task.
+
+Task handoff files replace conversational memory between agents.
+Tests/OpenAPI/migrations are executable contracts and have priority over
+stale prose.
+
+48. OWNERSHIP AND WRITE-SET CONTRACT
+
+Default Claude ownership:
+
+-   backend core domain/security modules;
+-   migrations and schema;
+-   authentication/authorization/consent/privacy;
+-   rewards/mastery/curriculum/Knowledge Graph semantics;
+-   RAG/provider contracts and provenance;
+-   release integration review.
+
+Default Antigravity ownership:
+
+-   Admin/Parent presentation layers;
+-   Flutter presentation layer;
+-   CRUD/forms/data grids/dashboards;
+-   Admin Library import/processing/inspection UX;
+-   routine UI/e2e/accessibility/device/browser testing;
+-   repetitive documentation.
+
+Shared paths require explicit task ownership. Two agents must not
+concurrently edit the same write set.
+
+49. HANDOFF AND REVIEW CONTRACT
+
+Every agent task ends in a structured HANDOFF.md. A handoff must contain
+changed files, contracts used, commands/tests, evidence,
+architecture/privacy/security changes, known issues and requested review
+focus.
+
+Claude review of Antigravity work defaults to
+Engineering Contract + Task Pack + HANDOFF + git diff. Claude should fix
+blocking/core defects, not rewrite acceptable presentation code for
+preference.
+
+50. GIT AND INTEGRATION CONTRACT
+
+Use protected main, integration develop, and one task branch per owner,
+such as ag/c0-admin-library-ui or cl/c0-library-domain.
+
+Database migrations are serialized through Claude-owned work.
+OpenAPI/generated clients are refreshed at contract boundaries. Split
+segments normally run core contract first, presentation second, review
+third.
+
+51. MAC MINI MULTI-AGENT RESOURCE MODES
+
+The 16GB Mac mini uses time-sharing rather than maximal concurrency.
+
+Build Mode: Docker core on, Ollama heavy model off, 1-2 Antigravity
+agents maximum, Claude on demand.
+AI Test Mode: Docker core on, native Ollama/MLX on, Antigravity heavy
+parallel work off, batch concurrency 1 by default.
+Device Test Mode: prefer one physical Android device or one emulator;
+turn off unnecessary LLM/agents.
+
+Memory pressure and swap are operational limits. Agent parallelism must
+be reduced before compromising database stability or causing unreliable
+AI/test behavior.
