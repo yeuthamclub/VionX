@@ -1,0 +1,182 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VionX API",
+    "version": "1.0.0",
+    "description": "Single entry point for the VionX Android app and admin SPA (Supabase Edge Function `api`)."
+  },
+  "servers": [
+    {
+      "url": "/functions/v1",
+      "description": "Supabase Edge Functions base"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "checks": {
+            "type": "object",
+            "properties": {
+              "db": {
+                "$ref": "#/components/schemas/HealthCheck"
+              },
+              "storage": {
+                "$ref": "#/components/schemas/HealthCheck"
+              },
+              "queue": {
+                "$ref": "#/components/schemas/HealthCheck"
+              },
+              "ai": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/HealthCheck"
+                  },
+                  {
+                    "description": "ANTHROPIC_API_KEY is configured (no call made)."
+                  }
+                ]
+              }
+            },
+            "required": [
+              "db",
+              "storage",
+              "queue",
+              "ai"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "version",
+          "time",
+          "requestId",
+          "checks"
+        ]
+      },
+      "HealthCheck": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "critical": {
+            "type": "boolean"
+          },
+          "latencyMs": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "critical"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "VALIDATION_FAILED",
+              "UNAUTHENTICATED",
+              "FORBIDDEN",
+              "FORBIDDEN_HOUSEHOLD",
+              "NOT_FOUND",
+              "CONFLICT",
+              "CONSENT_REQUIRED",
+              "REWARD_CAP_REACHED",
+              "TUTOR_QUOTA_REACHED",
+              "RATE_LIMITED",
+              "NOT_IMPLEMENTED",
+              "SERVICE_UNAVAILABLE",
+              "INTERNAL"
+            ],
+            "example": "VALIDATION_FAILED"
+          },
+          "message": {
+            "type": "string",
+            "example": "Request body is invalid"
+          },
+          "details": {},
+          "requestId": {
+            "type": "string",
+            "example": "a1b2c3d4-..."
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "requestId"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Service health",
+        "description": "Checks the database, storage and the pgmq \"events\" queue, and reports whether an Anthropic API key is configured. Public; no authentication.",
+        "responses": {
+          "200": {
+            "description": "All critical checks pass",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "At least one critical check failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}
