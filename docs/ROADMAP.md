@@ -6,7 +6,7 @@ Status: TODO | IN_PROGRESS | DONE | BLOCKED.
 ## Phase A — Family loop alpha (Grade 2 + Grade 6 Math libraries)
 | ID | Module | Depends on | Status |
 |---|---|---|---|
-| M00 | Foundation: monorepo, Supabase, `api` function, Expo app, admin SPA, AiGateway, queues/cron | – | TODO |
+| M00 | Foundation: monorepo, Supabase, `api` function, Expo app, admin SPA, AiGateway, queues/cron | – | IN_PROGRESS (code complete; owner checks pending, see M00_REPORT) |
 | M01 | Identity & household (parent Google/OTP, child ID+PIN) | M00 | TODO |
 | M02 | Consent & privacy core | M01 | TODO |
 | M03 | Calendar, timetable & tasks | M02 | TODO |
