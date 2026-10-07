@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "VionX",
+    "slug": "vionx",
+    "scheme": "vionx",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "platforms": ["android"],
+    "android": {
+      "package": "vn.vionx.app",
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": ["expo-router", "@sentry/react-native/expo"],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "eas": {}
+    }
+  }
+}

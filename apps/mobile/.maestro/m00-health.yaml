@@ -1,0 +1,19 @@
+# M00 main path: first launch shows "Phụ huynh / Con" and the API health status.
+# Prereqs: development build installed on an emulator, `pnpm db:start && pnpm fn:serve` on the host,
+# `pnpm dev:mobile` running. Run: maestro test apps/mobile/.maestro/m00-health.yaml
+appId: vn.vionx.app
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Phụ huynh'
+    timeout: 60000
+- assertVisible: 'Con'
+- assertVisible: 'Kết nối máy chủ'
+- extendedWaitUntil:
+    visible: 'Hoạt động tốt'
+    timeout: 20000
+- takeScreenshot: m00-welcome-health
+- tapOn:
+    id: 'role-parent'
+- assertVisible: 'Chế độ Phụ huynh sẽ có từ M01.'
