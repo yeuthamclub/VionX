@@ -1,0 +1,6 @@
+# Cloudflare Pages project for the VionX admin SPA.
+# Deploy: pnpm --filter @vionx/admin build && npx wrangler pages deploy apps/admin/dist
+# Set VITE_API_URL / VITE_SENTRY_DSN as Pages build environment variables.
+name = "vionx-admin"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-01"
