@@ -1,15 +1,18 @@
 // M02 acceptance (TASK_PACKS/M02.md). Requires `pnpm db:start && pnpm fn:serve` (local only: signs
-// up throwaway email parents and simulates the 30-day clock in the database).
+// up throwaway email parents and simulates the 14-day clock in the database).
 //   pnpm acceptance m02
 // Flow: policies accepted → no child login before CORE_SERVICE consent → grant → login → AI consent
 // with child assent → revoke → CONSENT_REQUIRED and queued AI jobs dropped → export contains only the
-// own household → delete request blocks login at once → pg_cron purge after 30 days anonymises
-// ledgers. Plus the public deletion page and the legal drafts.
+// own household → delete request blocks login at once → the parent can cancel it during the 14
+// days (login restored; another household gets 404) → pg_cron purge after 14 days anonymises
+// ledgers and keeps only pseudonymous audit logs/events, deleted 1 year later. Account deletion
+// can be cancelled after signing in again. Plus the public deletion page and the legal drafts.
 import { randomUUID } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { inflateRawSync } from 'node:zlib';
-import { signUpWithEmail, type AuthSession } from '../lib/local-supabase.ts';
+import { signInWithPassword, signUpWithEmail, type AuthSession } from '../lib/local-supabase.ts';
+import { DELETION_GRACE_DAYS } from '../../packages/domain/src/consent/privacy.ts';
 import { assert, connectDb, env, SkipStep, type Scenario } from './lib.ts';
 
 const API = `${env.functionsUrl}/api/v1`;
@@ -77,6 +80,7 @@ function unzip(buf: Buffer): Map<string, string> {
 
 interface Family {
   email: string;
+  password: string;
   parent: AuthSession;
   householdId: string;
   child: { id: string; childLoginId: string; pin: string };
@@ -92,7 +96,8 @@ const users: string[] = [];
 
 async function newFamily(label: string): Promise<Family> {
   const email = `acceptance-m02-${label}-${randomUUID()}@vionx.test`;
-  const parent = await signUpWithEmail(email, `pw-${randomUUID()}`);
+  const password = `pw-${randomUUID()}`;
+  const parent = await signUpWithEmail(email, password);
   users.push(parent.userId);
   const household = await call('POST', '/household', { parent }, { name: `Gia đình ${label}` });
   assert(household.status === 201, `POST /household ${household.status}`);
@@ -108,6 +113,7 @@ async function newFamily(label: string): Promise<Family> {
   );
   return {
     email,
+    password,
     parent,
     householdId: (household.body.household as { id: string }).id,
     child: {
@@ -264,7 +270,50 @@ export const scenario: Scenario = {
       },
     },
     {
-      name: 'Delete request disables the child at once; pg_cron purge after 30 days deletes it and anonymises ledgers',
+      name: 'Parent cancels a child deletion during the 14-day grace period: login restored, job CANCELLED; another household gets 404',
+      run: async () => {
+        const a = state.a!;
+        const req = await call(
+          'POST',
+          `/students/${a.child.id}/delete-request`,
+          { parent: a.parent },
+          { confirm: true, source: 'app' },
+        );
+        assert(req.status === 202, `delete-request ${req.status} ${JSON.stringify(req.body)}`);
+        const jobId = (req.body.deletion as { id: string }).id;
+        const blocked = await childLogin(a);
+        assert(blocked.body.code === 'ACCOUNT_DISABLED', `login while pending ${blocked.status}`);
+        const other = await call('POST', `/students/${a.child.id}/delete-request/cancel`, {
+          parent: state.b!.parent,
+        });
+        assert(other.status === 404, `other household cancel → ${other.status}`);
+        const res = await call('POST', `/students/${a.child.id}/delete-request/cancel`, {
+          parent: a.parent,
+        });
+        assert(res.status === 200, `cancel ${res.status} ${JSON.stringify(res.body)}`);
+        const deletion = res.body.deletion as { status: string; cancelledAt: string | null };
+        assert(deletion.status === 'CANCELLED' && deletion.cancelledAt, 'not CANCELLED');
+        const login = await childLogin(a);
+        assert(login.status === 200, `login after cancel ${login.status}`);
+        state.childToken = String(login.body.token);
+        const audit = await sql`
+          select 1 from ops.audit_logs
+          where action = 'privacy.child_deletion_cancelled' and target_id = ${a.child.id}`;
+        assert(audit.length === 1, `cancel audit rows ${audit.length}`);
+        const event = await sql`
+          select 1 from ops.domain_events
+          where type = 'privacy.deletion_cancelled' and aggregate_id = ${jobId}`;
+        assert(event.length === 1, `privacy.deletion_cancelled events ${event.length}`);
+        // The purge skips a cancelled job even past its date.
+        await sql`update app.data_deletion_jobs set purge_after = now() - interval '1 minute' where id = ${jobId}`;
+        await sql`select ops.purge_due_deletions()`;
+        const still = await sql`select 1 from app.students where id = ${a.child.id}`;
+        assert(still.length === 1, 'cancelled child was purged');
+        return 'request → login ACCOUNT_DISABLED; household B cancel → 404; cancel → 200 CANCELLED; login → 200; audit + privacy.deletion_cancelled; purge skips the job';
+      },
+    },
+    {
+      name: 'Delete request disables the child at once; pg_cron purge after 14 days deletes it and anonymises ledgers',
       run: async () => {
         const a = state.a!;
         await sql.unsafe(`
@@ -297,7 +346,10 @@ export const scenario: Scenario = {
         const deletion = res.body.deletion as { requestedAt: string; purgeAfter: string };
         const days =
           (Date.parse(deletion.purgeAfter) - Date.parse(deletion.requestedAt)) / 86_400_000;
-        assert(Math.round(days) === 30, `grace ${days} days`);
+        assert(
+          Math.round(days) === DELETION_GRACE_DAYS && DELETION_GRACE_DAYS === 14,
+          `grace ${days} days`,
+        );
         const login = await childLogin(a);
         assert(login.body.code === 'ACCOUNT_DISABLED', `login after request ${login.status}`);
         const session = await call('GET', '/auth/child/session', { child: state.childToken! });
@@ -305,7 +357,7 @@ export const scenario: Scenario = {
 
         const cron = await sql`select active from cron.job where jobname = 'vionx-privacy-purge'`;
         assert(cron[0]?.active, 'cron job vionx-privacy-purge missing');
-        // Simulate the 30 days, then run what pg_cron runs.
+        // Simulate the 14 days, then run what pg_cron runs.
         await sql`
           update app.data_deletion_jobs set purge_after = now() - interval '1 minute'
           where student_id = ${a.child.id} and status = 'SCHEDULED'`;
@@ -316,11 +368,49 @@ export const scenario: Scenario = {
           select student_id, amount from ${sql(LEDGER)}`;
         assert(ledger.length === 1 && ledger[0]!.amount === 7, 'ledger row lost');
         assert(ledger[0]!.student_id !== a.child.id, 'ledger not anonymised');
-        return `202, purge after ${Math.round(days)} days; login → ACCOUNT_DISABLED, session revoked; cron vionx-privacy-purge active; purge deleted the child, ledger row kept with an anonymised id`;
+        const late = await call('POST', `/students/${a.child.id}/delete-request/cancel`, {
+          parent: a.parent,
+        });
+        assert(late.status === 404, `cancel after purge → ${late.status}`);
+        return `202, purge after ${Math.round(days)} days; login → ACCOUNT_DISABLED, session revoked; cron vionx-privacy-purge active; purge deleted the child, ledger row kept with an anonymised id; cancel after purge → 404`;
       },
     },
     {
-      name: 'Account deletion (in-app path) signs the parent out and hides the household',
+      name: 'Audit logs and events of the purged child keep only pseudonymous ids and are deleted 1 year after the purge',
+      run: async () => {
+        const a = state.a!;
+        const rows = await sql<{ purged: boolean; details: Record<string, unknown> }[]>`
+          select purged_at is not null as purged, details from ops.audit_logs
+          where target_id = ${a.child.id}`;
+        assert(rows.length > 0, 'no audit rows for the purged child');
+        assert(
+          rows.every((r) => r.purged),
+          'audit rows not marked for retention',
+        );
+        const personal = /displayName|display_name|phone|email|childLoginId/;
+        assert(!rows.some((r) => personal.test(JSON.stringify(r.details))), 'personal field kept');
+        const events = await sql<{ purged: boolean }[]>`
+          select purged_at is not null as purged from ops.domain_events
+          where aggregate_id = ${a.child.id} or payload->>'studentId' = ${a.child.id}`;
+        assert(events.length > 0 && events.every((e) => e.purged), 'events not marked');
+        const cron =
+          await sql`select active from cron.job where jobname = 'vionx-purged-log-retention'`;
+        assert(cron[0]?.active, 'cron job vionx-purged-log-retention missing');
+        await sql`select ops.delete_expired_purged_logs(now() + interval '364 days')`;
+        const kept = await sql`select 1 from ops.audit_logs where target_id = ${a.child.id}`;
+        assert(kept.length === rows.length, 'rows deleted before 1 year');
+        await sql`select ops.delete_expired_purged_logs(now() + interval '366 days')`;
+        const left = await sql`
+          select 1 from ops.audit_logs where target_id = ${a.child.id}
+          union all
+          select 1 from ops.domain_events
+          where aggregate_id = ${a.child.id} or payload->>'studentId' = ${a.child.id}`;
+        assert(left.length === 0, `${left.length} rows left after 1 year`);
+        return `${rows.length} audit rows + ${events.length} events scrubbed and marked at purge; kept at +364 days, deleted at +366 days; cron vionx-purged-log-retention active`;
+      },
+    },
+    {
+      name: 'Account deletion (in-app path) signs the parent out and hides the household; the parent can sign in again and cancel it',
       run: async () => {
         const b = state.b!;
         const res = await call(
@@ -332,10 +422,27 @@ export const scenario: Scenario = {
         assert(res.status === 202, `account delete ${res.status} ${JSON.stringify(res.body)}`);
         const login = await childLogin(b);
         assert(login.body.code === 'ACCOUNT_DISABLED', `child login ${login.status}`);
-        const [user] = await sql<{ banned: boolean }[]>`
-          select banned_until > now() as banned from auth.users where id = ${b.parent.userId}`;
-        assert(user?.banned, 'parent not banned');
-        return 'scope ACCOUNT scheduled; child login → ACCOUNT_DISABLED; parent auth user banned';
+        const sessions = await sql`select 1 from auth.sessions where user_id = ${b.parent.userId}`;
+        assert(sessions.length === 0, 'parent still has sessions');
+        // Signing in again only reaches the deletion status and cancel routes.
+        const parent = await signInWithPassword(b.email, b.password);
+        const household = await call('GET', '/household', { parent });
+        assert(
+          household.status === 403 && household.body.details?.reason === 'DELETION_PENDING',
+          `household while pending ${household.status} ${JSON.stringify(household.body)}`,
+        );
+        const me = await call('GET', '/me', { parent });
+        assert(me.body.pendingAccountDeletion, 'me.pendingAccountDeletion missing');
+        const cancel = await call('POST', '/account/delete-request/cancel', { parent });
+        assert(cancel.status === 200, `cancel ${cancel.status} ${JSON.stringify(cancel.body)}`);
+        assert((await call('GET', '/household', { parent })).status === 200, 'household hidden');
+        const restored = await childLogin(b);
+        assert(restored.status === 200, `child login after cancel ${restored.status}`);
+        const other = await call('POST', '/account/delete-request/cancel', {
+          parent: state.a!.parent,
+        });
+        assert(other.status === 404, `cancel without a pending deletion → ${other.status}`);
+        return 'scope ACCOUNT scheduled; child login → ACCOUNT_DISABLED; parent signed out, sign-in again only reaches status/cancel (403 DELETION_PENDING); cancel → 200, household and child login restored';
       },
     },
     {
@@ -343,6 +450,11 @@ export const scenario: Scenario = {
       run: async () => {
         const router = readFileSync(resolve(root, 'apps/admin/src/router.tsx'), 'utf8');
         assert(/path: '\/delete-account'/.test(router), 'route missing');
+        const page = readFileSync(resolve(root, 'apps/admin/src/DeleteAccountPage.tsx'), 'utf8');
+        assert(
+          /Hủy yêu cầu xóa/.test(page) && /cancel/i.test(page),
+          'page does not mention cancelling',
+        );
         assert(
           /getParentRoute: \(\) => rootRoute,\s*path: '\/delete-account'/.test(router),
           'route is inside the authenticated shell',
@@ -353,7 +465,7 @@ export const scenario: Scenario = {
         }
         const redirects = readFileSync(resolve(dist, '_redirects'), 'utf8');
         assert(/^\/\*\s+\/index\.html\s+200/m.test(redirects), 'SPA fallback missing');
-        return 'route registered outside the admin shell; build has index.html + SPA fallback';
+        return 'route registered outside the admin shell, text mentions cancelling within the 14 days; build has index.html + SPA fallback';
       },
     },
     {
@@ -371,6 +483,17 @@ export const scenario: Scenario = {
           if (type === 'PRIVACY_POLICY') {
             assert(/Singapore/.test(text) && /Supabase/.test(text), `${file}: hosting`);
             assert(/Anthropic/.test(text), `${file}: AI processor`);
+            assert(
+              locale === 'vi'
+                ? /Hủy yêu cầu xóa/.test(text) && /1 năm/.test(text)
+                : /cancel the request/.test(text) && /1 year/.test(text),
+              `${file}: cancellation / 1-year log retention`,
+            );
+            assert(
+              (locale === 'vi' ? /\*\*14 ngày\*\*/ : /\*\*14 days\*\*/).test(text) &&
+                !/30 ngày|30 days/.test(text),
+              `${file}: grace period must be 14 days`,
+            );
           }
           const [row] = await sql<{ content_md: string }[]>`
             select content_md from app.policy_versions

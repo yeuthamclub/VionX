@@ -8,8 +8,10 @@ history, and an assent card on the child's home for AI, microphone and health fe
 is 7 or older. Revoking a consent takes effect at once (guarded calls answer `CONSENT_REQUIRED`, queued
 jobs of that scope are dropped; revoking core service signs the child out). The Privacy Center lets a
 parent download the household's data as a zip (24 h link), delete a child or the whole account; the
-child is disabled at once and hard-deleted after 30 days. Google Play's account-deletion URL is the
-public admin page `/delete-account`.
+child is disabled at once and hard-deleted after 14 days. Until then the parent can cancel the
+request ("Hủy yêu cầu xóa" in the Privacy Center, with the days left). After a purge, audit logs and
+domain events keep only pseudonymous ids for 1 year and are then deleted. Google Play's
+account-deletion URL is the public admin page `/delete-account`.
 
 ## Changed
 - Migrations:
@@ -35,7 +37,18 @@ public admin page `/delete-account`.
       - Private Storage bucket `privacy-exports`.
       - RLS on all new tables; no client grants.
   - `0004_policy_v1.sql`: policy version 1 (vi and en), taken verbatim from `docs/legal`. A unit test
-    keeps the two in sync.
+    keeps the two in sync. Edited in place for the follow-up below (v1 has not shipped; PR #3 is
+    unmerged).
+  - `0005_deletion_cancel_retention.sql` (follow-up):
+    - `app.data_deletion_jobs`: `restore_state`, `cancelled_at`, `cancelled_by`; CANCELLED iff
+      `cancelled_at` is set.
+    - `ops.audit_logs` / `ops.domain_events`: `purged_at`. Their append-only trigger becomes
+      `ops.retained_log_guard()`: only the privacy functions below may change details/payload and
+      `purged_at`, or delete.
+    - `ops.strip_personal_fields(jsonb)`, `ops.scrub_purged_logs()`, and `ops.purge_due_deletions()`
+      redefined to scrub and mark the retained rows.
+    - `ops.delete_expired_purged_logs()`, run by the pg_cron job `vionx-purged-log-retention` daily at
+      03:47 ICT, deletes them 365 days after the purge.
 - API routes:
   - Policies:
     - `GET /v1/policies/current` (public; adds acceptance state when a parent is signed in).
@@ -51,6 +64,14 @@ public admin page `/delete-account`.
   - Deletion:
     - `POST /v1/students/{id}/delete-request`.
     - `POST /v1/account/delete-request`.
+    - `POST /v1/students/{id}/delete-request/cancel` and `POST /v1/account/delete-request/cancel`
+      (follow-up): 200 with the CANCELLED job; 404 when nothing is pending (including after the
+      purge) or for another household; 409 once the purge is due. Audited
+      (`privacy.*_deletion_cancelled`); emit `privacy.deletion_cancelled`.
+  - While an account deletion is pending, every route except `GET /v1/me`,
+    `GET /v1/policies/current`, `GET /v1/privacy/overview`, the account delete-request and its cancel
+    answers 403 `ACCOUNT_DISABLED` with `details.reason = DELETION_PENDING`. `Me` gains
+    `pendingAccountDeletion`; `DeletionJob` gains `cancelledAt`.
   - Child login now gates on CORE_SERVICE.
   - New error code `CONSENT_REQUIRED` (403), with `details.consentType` and `details.reason`.
   - `Student` gains `coreServiceConsent` and `deletionScheduledFor`.
@@ -69,17 +90,20 @@ public admin page `/delete-account`.
     appears.
   - Child consents screen with history and "delete child".
   - Privacy Center: consents per child, accepted policy versions, export with download, delete
-    account.
+    account, and pending deletions with the days left and "Hủy yêu cầu xóa". A parent whose account
+    deletion is pending is routed there after sign-in and sees only that section.
   - Child assent screen and an assent card on the child's home.
 - Admin screens: the public `/delete-account` route, outside the admin shell, with phone OTP or Google
-  verification.
+  verification. Its text says the request can be cancelled in the app within 14 days.
 - Config / env vars:
   - `VIONX_PUBLIC_SUPABASE_URL` (functions): the base URL for signed download links.
   - Test OTP `84900000004` (Maestro M02).
   - Seed: the demo parent has accepted v1, and the demo children have CORE_SERVICE.
   - CI runs `pnpm acceptance m02`.
 - Legal: `docs/legal/{privacy-policy,terms}.{vi,en}.md`, marked DRAFT. They disclose Supabase hosting
-  in Singapore and AI processing by Anthropic.
+  in Singapore and AI processing by Anthropic. Follow-up edits are limited to: cancellation during
+  the grace period and 1-year retention of pseudonymous logs (privacy policy, section 6), and 30 → 14
+  days (privacy policy and terms).
 
 ## Evidence
 All checks ran after `supabase db reset`.
@@ -88,16 +112,16 @@ All checks ran after `supabase db reset`.
 
   | Package | Tests |
   |---|---|
-  | domain | 48 |
-  | functions | 53 |
+  | domain | 54 |
+  | functions | 64 |
   | ai | 20 |
   | admin | 8 |
-  | mobile (Vitest) | 19 |
+  | mobile (Vitest) | 21 |
   | mobile (Jest) | 7 |
   | tokens | 2 |
   | contracts | 1 |
 
-- `pnpm test:api`: 62/62 passed. Coverage:
+- `pnpm test:api`: 69/69 passed. Coverage:
   - Cross-household 404 on every new child endpoint.
   - Re-consent after a new policy version.
   - Assent rules.
@@ -105,10 +129,14 @@ All checks ran after `supabase db reset`.
   - Export contents and private bucket.
   - Rate limit.
   - Deletion and purge with ledger anonymisation.
-  - Account ban.
+  - Account deletion: sign-out, ACCOUNT_DISABLED gate, sign-in again to cancel.
+  - Cancellation: child and account, cross-household 404, 409 once due, 404 after the purge, a child
+    disabled before the request stays disabled, the purge skips cancelled jobs.
+  - Retention: personal fields scrubbed at purge, rows kept at +364 days and deleted at +366 days
+    (with their `processed_events`), unrelated rows untouched, append-only still enforced.
   - No client privileges.
 - Acceptance:
-  - `pnpm acceptance m02`: 9 passed, 0 failed, 1 skipped (Maestro).
+  - `pnpm acceptance m02`: 11 passed, 0 failed, 1 skipped (Maestro).
   - `m00` re-run: 7 passed, 2 skipped.
   - `m01` re-run: 9 passed, 1 skipped.
 - Builds:
@@ -129,11 +157,29 @@ All checks ran after `supabase db reset`.
     asks rather than skips).
   - Until the child answers, the consent is not effective.
 - Policy acceptance is enforced by the app flow, not by the API.
-- Deletion:
-  - A deletion request cannot be cancelled in v1, and a child scheduled for deletion cannot be
-    re-enabled (409).
-  - Account deletion disables the household, bans the parent's auth user and deletes their sessions.
-    The purge deletes the household and any auth users left without one.
+- Deletion (product owner decisions 2026-10-08, grace period changed by legal review):
+  - Grace period: **14 days** (`DELETION_GRACE_DAYS` in `@vionx/domain`, the single value used by
+    the api, the app, the admin page and the tests). Decree 356/2025 Art. 5(4) requires deletion
+    within 20 days; the daily purge completes at the latest on day 15.
+  - The parent can cancel a child or account deletion during the grace period. Cancelling marks the
+    job and its privacy request CANCELLED (the purge only takes SCHEDULED jobs), restores the login,
+    writes an audit log and emits `privacy.deletion_cancelled`. Child sessions revoked by the
+    request stay revoked; a child the parent had disabled before the request stays disabled.
+  - A child scheduled for deletion cannot be re-enabled through `/disable` (409); cancelling is the
+    way back.
+  - Account deletion no longer bans the parent's auth user: a banned user cannot sign in, so they
+    could never cancel. Instead the request deletes their sessions, hides the household, disables the
+    children, and the api answers `ACCOUNT_DISABLED` (`DELETION_PENDING`) to everything except the
+    deletion status and cancel routes. The purge deletes the household and any auth users left
+    without one.
+  - Cancel is refused (409) once `purge_after` has passed, even if the cron has not run yet.
+- Retention after a purge: audit logs and domain events about the purged child/household/accounts
+  are kept for 1 year with pseudonymous ids only. At purge time personal keys (names, phone, email,
+  address, birth date, login id, raw device id, IP, user agent; `PERSONAL_DATA_KEYS`, mirrored in
+  SQL and kept in sync by a test) are stripped from `details`/`payload` and `purged_at` is set; the
+  daily job deletes the rows 365 days later. Today's writers store ids only, so the scrub is a
+  safeguard. `privacy_requests` and `data_deletion_jobs` (ids only) are still kept as proof of
+  fulfilment.
 - Ledgers are anonymised in place: ids are replaced by `md5(id || random salt)`, and the salt is
   discarded.
 - The push notifier is an outbox-event stub until the push module adds FCM.
@@ -155,8 +201,8 @@ All checks ran after `supabase db reset`.
   - Register `https://<admin-domain>/delete-account` in Play Console.
 - The account purge and ban write to `auth.users` and `auth.sessions` with SQL. This needs a check on
   hosted Supabase; if it is refused, move it to the Auth admin API.
-- After a purge, `ops.domain_events` and `ops.audit_logs` still hold raw ids. Decide on retention and
-  scrubbing in the ops/observability module.
+- The Maestro flow does not cover cancellation (Alert buttons share their label with the screen
+  button, so a reliable selector needs an emulator to check). Covered by API tests and acceptance.
 - EDUCATION_ANALYTICS and COMPETITION_AREA guards exist (`requireConsent`), but no feature uses them
   yet. `ai_jobs` has no consumer until the AI tutor module.
 - Not verified here: the Maestro flows, real push delivery, and the emulator download link (needs
@@ -173,5 +219,8 @@ All checks ran after `supabase db reset`.
   trigger.
 - Exports: add data sections to `EXPORT_SECTIONS` in `supabase/functions/worker/privacy-export.ts`.
 - Events: `consent.granted`, `consent.revoked`, `consent.child_assent_recorded`,
-  `privacy.export_requested`, `privacy.deletion_requested`, `notification.push_requested`.
+  `privacy.export_requested`, `privacy.deletion_requested`, `privacy.deletion_cancelled`,
+  `notification.push_requested`.
+- Retention: modules writing audit logs or events about a child should put the child id in
+  `target_id`/`aggregate_id` or a `studentId` field so the purge scrub finds the rows.
 - Shared helpers: `ObjectStorage` (`_shared/storage.ts`) and `ParentNotifier` / `OutboxPushNotifier` (`_shared/notify.ts`).

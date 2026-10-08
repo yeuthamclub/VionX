@@ -71,7 +71,7 @@ supabase db push && supabase functions deploy api worker ai-batch
 
 - Data exports are written to the private Storage bucket `privacy-exports` (created by migration
   `0003_consent_privacy.sql`); links are signed for the remaining 24 h.
-- Deletion requests are purged after 30 days by the pg_cron job `vionx-privacy-purge`.
+- Deletion requests are purged after the 14-day grace period (cancellable until then) by the pg_cron job `vionx-privacy-purge`.
 - Public account-deletion page for Google Play: `https://<admin-domain>/delete-account` (no admin
   login; the parent signs in with phone OTP or Google).
 - Legal drafts: `docs/legal/` (vi + en, DRAFT, need legal review); version 1 is loaded by migration
