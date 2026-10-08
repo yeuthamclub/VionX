@@ -123,3 +123,30 @@ button.link {
   color: var(--vx-primary);
   cursor: pointer;
 }
+.public {
+  display: grid;
+  justify-items: center;
+  padding: var(--vx-space-xl) var(--vx-space-md);
+  line-height: 1.5;
+}
+.public form,
+.public label {
+  display: grid;
+  gap: var(--vx-space-sm);
+  margin-bottom: var(--vx-space-md);
+}
+.public label.check {
+  display: block;
+}
+.actions {
+  display: flex;
+  gap: var(--vx-space-md);
+  align-items: center;
+}
+button.danger {
+  background: var(--vx-danger);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

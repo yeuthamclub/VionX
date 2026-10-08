@@ -1,6 +1,7 @@
 import { createRootRoute, createRoute, createRouter, Link, Outlet } from '@tanstack/react-router';
 import { isGroup, NAV, navLeaves } from './nav.ts';
 import { supabase } from './auth.ts';
+import { DeleteAccountPage } from './DeleteAccountPage.tsx';
 import { AdminGate, DashboardPage, LoginPage, NotFoundPage, StubPage } from './pages.tsx';
 
 function Shell() {
@@ -62,6 +63,13 @@ const loginRoute = createRoute({
   component: LoginPage,
 });
 
+// Public (no admin login): the Google Play account-deletion URL.
+const deleteAccountRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/delete-account',
+  component: DeleteAccountPage,
+});
+
 const shellRoute = createRoute({ getParentRoute: () => rootRoute, id: 'shell', component: Shell });
 
 const pageRoutes = navLeaves().map((leaf) =>
@@ -72,7 +80,11 @@ const pageRoutes = navLeaves().map((leaf) =>
   }),
 );
 
-const routeTree = rootRoute.addChildren([loginRoute, shellRoute.addChildren(pageRoutes)]);
+const routeTree = rootRoute.addChildren([
+  loginRoute,
+  deleteAccountRoute,
+  shellRoute.addChildren(pageRoutes),
+]);
 
 export const router = createRouter({ routeTree });
 
