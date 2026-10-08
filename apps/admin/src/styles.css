@@ -1,0 +1,112 @@
+/* Colour/spacing variables are injected from @vionx/tokens in main.tsx. */
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  background: var(--vx-background);
+  color: var(--vx-text);
+}
+a {
+  color: var(--vx-primary);
+  text-decoration: none;
+}
+.shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+.sidebar {
+  background: var(--vx-surface);
+  border-right: 1px solid var(--vx-border);
+  padding: var(--vx-space-lg);
+  overflow-y: auto;
+}
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.sidebar ul ul {
+  padding-left: var(--vx-space-md);
+}
+.sidebar a {
+  display: block;
+  padding: var(--vx-space-xs) var(--vx-space-sm);
+  border-radius: var(--vx-radius-sm);
+  color: var(--vx-text);
+}
+.sidebar a.active {
+  background: var(--vx-surface-muted);
+  color: var(--vx-primary);
+  font-weight: 600;
+}
+.brand {
+  font-weight: 700;
+  margin-bottom: var(--vx-space-lg);
+}
+.group {
+  display: block;
+  margin-top: var(--vx-space-md);
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--vx-text-muted);
+}
+.signout {
+  margin-top: var(--vx-space-xl);
+}
+.content {
+  padding: var(--vx-space-xl);
+}
+.card {
+  background: var(--vx-surface);
+  border: 1px solid var(--vx-border);
+  border-radius: var(--vx-radius-md);
+  padding: var(--vx-space-lg);
+  max-width: 720px;
+}
+.empty {
+  color: var(--vx-text-muted);
+}
+.muted {
+  color: var(--vx-text-muted);
+}
+.ok {
+  color: var(--vx-success);
+}
+.warn {
+  color: var(--vx-warning);
+}
+.error {
+  color: var(--vx-danger);
+}
+table td {
+  padding: var(--vx-space-xs) var(--vx-space-md) var(--vx-space-xs) 0;
+}
+.login {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
+.login form {
+  display: grid;
+  gap: var(--vx-space-md);
+}
+.login label {
+  display: grid;
+  gap: var(--vx-space-xs);
+}
+input,
+button {
+  font: inherit;
+  padding: var(--vx-space-sm) var(--vx-space-md);
+  border-radius: var(--vx-radius-sm);
+  border: 1px solid var(--vx-border);
+}
+button {
+  background: var(--vx-primary);
+  color: var(--vx-on-primary);
+  border: none;
+  cursor: pointer;
+}

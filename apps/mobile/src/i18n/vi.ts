@@ -1,0 +1,23 @@
+// Vietnamese strings (default language).
+export const vi = {
+  'app.name': 'VionX',
+  'welcome.title': 'Chào mừng đến với VionX',
+  'welcome.subtitle': 'Ai đang dùng máy này?',
+  'welcome.parent': 'Phụ huynh',
+  'welcome.parentHint': 'Quản lý gia đình, lịch học và phần thưởng',
+  'welcome.child': 'Con',
+  'welcome.childHint': 'Học bài, làm nhiệm vụ, nhận XP',
+  'health.title': 'Kết nối máy chủ',
+  'health.checking': 'Đang kiểm tra…',
+  'health.ok': 'Hoạt động tốt',
+  'health.degraded': 'Một số dịch vụ đang lỗi',
+  'health.offline': 'Không kết nối được máy chủ',
+  'health.retry': 'Thử lại',
+  'health.check.db': 'Cơ sở dữ liệu',
+  'health.check.storage': 'Lưu trữ',
+  'health.check.queue': 'Hàng đợi',
+  'health.check.ai': 'AI',
+  'parent.placeholder': 'Chế độ Phụ huynh sẽ có từ M01.',
+  'child.placeholder': 'Chế độ Con sẽ có từ M01.',
+  'common.back': 'Quay lại',
+} as const;

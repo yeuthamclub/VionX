@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, typecheck, unit tests, builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      # Unit tests use FakeAiProvider only; no paid API calls (CONTRACT §6).
+      - run: pnpm test
+      - run: pnpm openapi:check
+      - run: pnpm --filter @vionx/admin build
+      - name: Bundle Android JS (no EAS)
+        run: pnpm --filter @vionx/mobile export:android
+        env:
+          CI: '1'
+
+  api:
+    name: API integration + acceptance (local Supabase)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Start Supabase
+        run: pnpm exec supabase start -x studio,imgproxy,vector,logflare,supavisor,mailpit,realtime,postgres-meta
+      - name: Serve Edge Functions
+        run: |
+          cp supabase/functions/.env.example supabase/functions/.env
+          nohup pnpm exec supabase functions serve > /tmp/functions.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:54321/functions/v1/api/v1/health && break
+            sleep 3
+          done
+      - run: pnpm test:api
+      - run: pnpm acceptance m00
+        env:
+          SKIP_ADMIN_BUILD: '1'
+      - name: Functions log
+        if: failure()
+        run: cat /tmp/functions.log

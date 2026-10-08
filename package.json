@@ -1,0 +1,55 @@
+{
+  "name": "vionx",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:mobile": "pnpm --filter @vionx/mobile start",
+    "dev:admin": "pnpm --filter @vionx/admin dev",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:migrate": "supabase migration up",
+    "db:seed": "tsx scripts/db-seed.ts",
+    "fn:serve": "supabase functions serve",
+    "lint": "turbo run lint && prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:api": "pnpm --filter @vionx/functions test:api",
+    "build": "turbo run build",
+    "openapi": "tsx scripts/openapi.ts",
+    "openapi:check": "tsx scripts/openapi.ts --check",
+    "check:static": "pnpm lint && pnpm typecheck && pnpm test && pnpm openapi:check",
+    "check": "pnpm check:static && pnpm test:api",
+    "acceptance": "tsx scripts/acceptance/run.ts",
+    "ai:check": "pnpm --filter @vionx/ai ai:check"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.5",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "openapi-typescript": "^7.13.0",
+    "postgres": "^3.4.9",
+    "prettier": "^3.9.9",
+    "supabase": "^2.120.0",
+    "tsx": "^4.23.15",
+    "turbo": "^2.11.7",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^5.0.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "supabase",
+      "deno",
+      "esbuild"
+    ]
+  }
+}

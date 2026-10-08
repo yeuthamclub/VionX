@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"]
+  },
+  "include": ["**/*.ts"],
+  // Deno entrypoints (Deno.serve / Deno.env) are checked by `deno check` instead.
+  "exclude": ["api/index.ts", "worker/index.ts", "ai-batch/index.ts", "node_modules"]
+}

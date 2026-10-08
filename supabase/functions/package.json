@@ -1,0 +1,25 @@
+{
+  "name": "@vionx/functions",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json && pnpm run deno:check",
+    "deno:check": "deno check --config deno.json api/index.ts worker/index.ts ai-batch/index.ts",
+    "test": "vitest run",
+    "test:api": "vitest run --config vitest.integration.config.ts"
+  },
+  "dependencies": {
+    "@hono/zod-openapi": "^1.6.3",
+    "@vionx/ai": "workspace:*",
+    "@vionx/contracts": "workspace:*",
+    "@vionx/domain": "workspace:*",
+    "hono": "^4.13.13",
+    "postgres": "^3.4.9",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "deno": "^2.9.6"
+  }
+}

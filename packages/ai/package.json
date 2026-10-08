@@ -1,0 +1,20 @@
+{
+  "name": "@vionx/ai",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./anthropic": "./src/providers/anthropic.ts",
+    "./schemas": "./schemas/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "ai:check": "tsx scripts/ai-check.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0"
+  }
+}
