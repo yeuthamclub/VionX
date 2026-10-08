@@ -16,4 +16,5 @@ appId: vn.vionx.app
 - takeScreenshot: m00-welcome-health
 - tapOn:
     id: 'role-parent'
-- assertVisible: 'Chế độ Phụ huynh sẽ có từ M01.'
+# Since M01 the parent role opens the sign-in screen.
+- assertVisible: 'Đăng nhập Phụ huynh'

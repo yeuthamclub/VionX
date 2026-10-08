@@ -11,7 +11,7 @@
       "package": "vn.vionx.app",
       "edgeToEdgeEnabled": true
     },
-    "plugins": ["expo-router", "@sentry/react-native/expo"],
+    "plugins": ["expo-router", "expo-secure-store", "@sentry/react-native/expo"],
     "experiments": {
       "typedRoutes": false
     },

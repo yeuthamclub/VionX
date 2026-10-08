@@ -1,0 +1,40 @@
+# Sub-flow: add one child from the parent home, check the credential card, return home.
+# env: NAME, YEAR, GRADE, PIN ('' = generated). Leaves the login id in maestro.copiedText.
+appId: vn.vionx.app
+---
+- tapOn:
+    id: 'add-child'
+- tapOn:
+    id: 'child-name'
+- inputText: ${NAME}
+- tapOn:
+    id: 'child-birth-year'
+- inputText: ${YEAR}
+- hideKeyboard
+- tapOn:
+    id: 'grade-${GRADE}'
+- runFlow:
+    when:
+      true: ${PIN != ''}
+    commands:
+      - tapOn:
+          id: 'child-pin'
+      - inputText: ${PIN}
+      - hideKeyboard
+- tapOn:
+    id: 'child-create'
+- extendedWaitUntil:
+    visible:
+      id: 'credential-card'
+    timeout: 15000
+- assertVisible:
+    id: 'credential-login-id'
+    text: 'vx-[2-9a-hjkmnp-z]{6}'
+- copyTextFrom:
+    id: 'credential-login-id'
+- tapOn:
+    id: 'credentials-done'
+- extendedWaitUntil:
+    visible:
+      id: 'add-child'
+    timeout: 15000
