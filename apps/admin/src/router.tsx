@@ -1,8 +1,13 @@
 import { createRootRoute, createRoute, createRouter, Link, Outlet } from '@tanstack/react-router';
 import { isGroup, NAV, navLeaves } from './nav.ts';
-import { DashboardPage, LoginPage, NotFoundPage, StubPage } from './pages.tsx';
+import { supabase } from './auth.ts';
+import { AdminGate, DashboardPage, LoginPage, NotFoundPage, StubPage } from './pages.tsx';
 
 function Shell() {
+  return <AdminGate>{(access) => <ShellLayout userLabel={access.userLabel} />}</AdminGate>;
+}
+
+function ShellLayout({ userLabel }: { userLabel: string }) {
   return (
     <div className="shell">
       <nav className="sidebar" aria-label="Admin">
@@ -35,9 +40,12 @@ function Shell() {
             ),
           )}
         </ul>
-        <Link to="/login" className="signout">
-          Sign out
-        </Link>
+        <div className="signout">
+          <div className="muted">{userLabel}</div>
+          <button type="button" className="link" onClick={() => void supabase.auth.signOut()}>
+            Sign out
+          </button>
+        </div>
       </nav>
       <main className="content">
         <Outlet />

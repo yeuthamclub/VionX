@@ -7,7 +7,7 @@ Status: TODO | IN_PROGRESS | DONE | BLOCKED.
 | ID | Module | Depends on | Status |
 |---|---|---|---|
 | M00 | Foundation: monorepo, Supabase, `api` function, Expo app, admin SPA, AiGateway, queues/cron | – | IN_PROGRESS (code complete; owner checks pending, see M00_REPORT) |
-| M01 | Identity & household (parent Google/OTP, child ID+PIN) | M00 | TODO |
+| M01 | Identity & household (parent Google/OTP, child ID+PIN) | M00 | DONE (runnable acceptance green; Maestro flow and Google sign-in need an emulator and owner OAuth setup, see M01_REPORT) |
 | M02 | Consent & privacy core | M01 | TODO |
 | M03 | Calendar, timetable & tasks | M02 | TODO |
 | M04 | Reward engine | M03 | TODO |

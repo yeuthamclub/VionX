@@ -15,6 +15,10 @@ export const ERROR_CODES = [
   'NOT_IMPLEMENTED',
   'SERVICE_UNAVAILABLE',
   'INTERNAL',
+  // M01
+  'INVALID_CREDENTIALS',
+  'ACCOUNT_LOCKED',
+  'ACCOUNT_DISABLED',
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 

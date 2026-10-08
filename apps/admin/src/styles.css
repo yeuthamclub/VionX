@@ -110,3 +110,16 @@ button {
   border: none;
   cursor: pointer;
 }
+button.secondary {
+  margin-top: var(--vx-space-sm);
+  background: transparent;
+  color: var(--vx-primary);
+  border: 1px solid var(--vx-border);
+}
+button.link {
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--vx-primary);
+  cursor: pointer;
+}

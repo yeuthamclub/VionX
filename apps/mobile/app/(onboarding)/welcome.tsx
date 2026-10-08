@@ -49,7 +49,7 @@ export default function Welcome() {
           label={t('welcome.parent')}
           hint={t('welcome.parentHint')}
           color={c.parent}
-          to="/parent"
+          to="/sign-in"
         />
         <RoleButton
           id="role-child"

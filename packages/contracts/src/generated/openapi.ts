@@ -57,6 +57,743 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Signed-in parent account
+     * @description Profile, households and admin permissions of the Supabase Auth user.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Account */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Me'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/household': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The parent’s household and children */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Household */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['HouseholdResponse'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Create the household
+     * @description Creates the parent’s household with the parent as OWNER. One household per parent in v1.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['HouseholdCreateRequest'];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['HouseholdResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add a child
+     * @description Creates the child profile and login. The response carries the one-time credentials (login id + PIN); the PIN is never retrievable again.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['StudentCreateRequest'];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['StudentCreateResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** A child in the parent’s household */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Child */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Student'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Edit a child profile */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['StudentPatchRequest'];
+        };
+      };
+      responses: {
+        /** @description Updated */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Student'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/api/v1/students/{id}/reset-pin': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reset a child’s PIN
+     * @description Sets a new PIN (given or generated), clears the lock and failed attempts. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['ResetPinRequest'];
+        };
+      };
+      responses: {
+        /** @description New credentials */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ResetPinResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/revoke-sessions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sign a child out on every device
+     * @description Revokes all active child sessions. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Revoked */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['RevokeSessionsResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/disable': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Disable (or re-enable) a child login
+     * @description Disabling also revokes every session. `{ "disabled": false }` re-enables. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['DisableRequest'];
+        };
+      };
+      responses: {
+        /** @description Updated */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Student'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/auth/child/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Child sign-in with login id + PIN
+     * @description Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['ChildLoginRequest'];
+        };
+      };
+      responses: {
+        /** @description Signed in */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ChildLoginResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Too many wrong PINs; locked for 15 minutes (ACCOUNT_LOCKED) */
+        423: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Too many attempts (RATE_LIMITED); see Retry-After */
+        429: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/auth/child/session': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Current child session
+     * @description Validates the stored token (app start) and returns the child profile. Extends the sliding expiry.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Active session */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ChildSession'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/auth/child/logout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Child sign-out (revokes this session) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Signed out */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ChildLogoutResponse'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -99,12 +836,190 @@ export interface components {
         | 'RATE_LIMITED'
         | 'NOT_IMPLEMENTED'
         | 'SERVICE_UNAVAILABLE'
-        | 'INTERNAL';
+        | 'INTERNAL'
+        | 'INVALID_CREDENTIALS'
+        | 'ACCOUNT_LOCKED'
+        | 'ACCOUNT_DISABLED';
       /** @example Request body is invalid */
       message: string;
       details?: unknown;
       /** @example a1b2c3d4-... */
       requestId: string;
+    };
+    Me: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      userId: string;
+      phone: string | null;
+      email: string | null;
+      displayName: string | null;
+      households: {
+        /**
+         * Format: uuid
+         * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+         */
+        id: string;
+        name: string;
+        role: components['schemas']['HouseholdRole'];
+        timezone: string;
+      }[];
+      adminPermissions: components['schemas']['AdminPermission'][];
+    };
+    /** @enum {string} */
+    HouseholdRole: 'OWNER' | 'GUARDIAN';
+    /** @enum {string} */
+    AdminPermission:
+      | 'SUPER_ADMIN'
+      | 'CONTENT_ADMIN'
+      | 'CURRICULUM_EDITOR'
+      | 'CONTENT_REVIEWER'
+      | 'LIBRARIAN'
+      | 'SUPPORT'
+      | 'ANALYST';
+    HouseholdResponse: {
+      household: components['schemas']['Household'];
+      students: components['schemas']['Student'][];
+    };
+    Household: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      name: string;
+      timezone: string;
+      role: components['schemas']['HouseholdRole'];
+      /** Format: date-time */
+      createdAt: string;
+    };
+    Student: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      displayName: string;
+      birthYear: number;
+      grade: number;
+      avatar: components['schemas']['Avatar'];
+      /**
+       * @description `vx-` + 6 characters
+       * @example vx-k7m2pq
+       */
+      childLoginId: string;
+      status: components['schemas']['StudentStatus'];
+      /** Format: date-time */
+      lockedUntil: string | null;
+      failedAttempts: number;
+      activeSessions: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    /** @enum {string} */
+    Avatar: 'owl' | 'fox' | 'cat' | 'dog' | 'panda' | 'rabbit' | 'tiger' | 'turtle';
+    /** @enum {string} */
+    StudentStatus: 'active' | 'locked' | 'disabled';
+    HouseholdCreateRequest: {
+      /** @example Gia đình Minh */
+      name: string;
+      /** @example Asia/Ho_Chi_Minh */
+      timezone?: string;
+    };
+    StudentCreateResponse: {
+      student: components['schemas']['Student'];
+      credentials: components['schemas']['ChildCredentials'];
+    };
+    ChildCredentials: {
+      /**
+       * @description `vx-` + 6 characters
+       * @example vx-k7m2pq
+       */
+      childLoginId: string;
+      /**
+       * @description Shown once on the credential card; never stored in clear.
+       * @example 582913
+       */
+      pin: string;
+    };
+    StudentCreateRequest: {
+      /** @example Minh */
+      displayName: string;
+      /** @example 2014 */
+      birthYear: number;
+      /** @example 6 */
+      grade: number;
+      avatar?: components['schemas']['Avatar'];
+      /**
+       * @description Omit to let the server generate a 6-digit PIN.
+       * @example 582913
+       */
+      pin?: string;
+    };
+    StudentPatchRequest: {
+      /** @example Minh */
+      displayName?: string;
+      /** @example 2014 */
+      birthYear?: number;
+      /** @example 6 */
+      grade?: number;
+      avatar?: components['schemas']['Avatar'];
+    };
+    ResetPinResponse: {
+      credentials: components['schemas']['ChildCredentials'];
+      revokedSessions: number;
+    };
+    ResetPinRequest: {
+      /**
+       * @description Omit to generate a new 6-digit PIN.
+       * @example 582913
+       */
+      pin?: string;
+      /** @description Also sign the child out everywhere. */
+      revokeSessions?: boolean;
+    };
+    RevokeSessionsResponse: {
+      revokedSessions: number;
+    };
+    DisableRequest: {
+      /** @description Default true. false re-enables the child login. */
+      disabled?: boolean;
+    };
+    ChildLoginResponse: {
+      /** @description Opaque; send as `x-vionx-child-session`. */
+      token: string;
+      /** Format: date-time */
+      expiresAt: string;
+      student: components['schemas']['ChildProfile'];
+    };
+    ChildProfile: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      displayName: string;
+      grade: number;
+      avatar: components['schemas']['Avatar'];
+    };
+    ChildLoginRequest: {
+      /** @example vx-k7m2pq */
+      childLoginId: string;
+      /** @example 582913 */
+      pin: string;
+      /** @example android-6f1c… */
+      deviceId: string;
+    };
+    ChildSession: {
+      /** Format: date-time */
+      expiresAt: string;
+      student: components['schemas']['ChildProfile'];
+    };
+    ChildLogoutResponse: {
+      revoked: boolean;
     };
   };
   responses: never;

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import openapiTS, { astToString } from 'openapi-typescript';
 import { format, resolveConfig } from 'prettier';
 import { SkeletonActorResolver } from '../supabase/functions/_shared/actor.ts';
+import { noDatabase } from '../supabase/functions/api/deps.ts';
 import { createApp, OPENAPI_INFO } from '../supabase/functions/api/app.ts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -17,6 +18,8 @@ const app = createApp({
   version: 'openapi',
   allowedOrigins: [],
   actors: new SkeletonActorResolver('unused'),
+  sql: noDatabase,
+  admins: { permissionsOf: async () => [] },
   probes: {
     db: async () => {},
     storage: async () => {},
