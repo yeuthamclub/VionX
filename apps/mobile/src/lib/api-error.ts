@@ -1,6 +1,15 @@
 import type { ApiErrorBody } from '@vionx/contracts/client';
 import { t, type MessageKey } from '../i18n/index.ts';
 
+/** The parent's account deletion is pending: only the Privacy Center (cancel) is reachable. */
+export function isAccountDeletionPending(error: unknown): boolean {
+  return (
+    error instanceof AppError &&
+    error.code === 'ACCOUNT_DISABLED' &&
+    (error.body?.details as { reason?: unknown } | undefined)?.reason === 'DELETION_PENDING'
+  );
+}
+
 /** Thrown by `unwrap` for non-2xx responses; `offline` for network failures. */
 export class AppError extends Error {
   constructor(
@@ -58,6 +67,10 @@ export function describeError(error: unknown, now: Date = new Date()): string {
         : Math.max(1, Math.ceil((until - now.getTime()) / 60_000));
       return t('error.locked', { n: minutes });
     }
+    case 'ACCOUNT_DISABLED':
+      return details.reason === 'DELETION_PENDING'
+        ? t('error.accountDeletionPending')
+        : t('error.childDisabled');
     case 'CONSENT_REQUIRED':
       return details.consentType === 'CORE_SERVICE'
         ? t('error.consentRequired')

@@ -1,3 +1,4 @@
+import { DELETION_GRACE_DAYS } from '@vionx/domain';
 import type { ConsentState, ConsentType } from '@vionx/contracts/client';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -91,26 +92,30 @@ export default function ChildConsents() {
   };
 
   const deleteChild = (name: string) =>
-    Alert.alert(t('consents.deleteChild'), t('consents.deleteChildConfirm', { name }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.continue'),
-        style: 'destructive',
-        onPress: () =>
-          void act(async () => {
-            const res = await unwrap(
-              parentApi.POST('/api/v1/students/{id}/delete-request', {
-                ...path,
-                body: { confirm: true, source: 'app' },
-              }),
-            );
-            setMessage({
-              text: t('consents.deletionScheduled', { date: formatDay(res.deletion.purgeAfter) }),
-              tone: 'info',
-            });
-          }),
-      },
-    ]);
+    Alert.alert(
+      t('consents.deleteChild'),
+      t('consents.deleteChildConfirm', { name, days: DELETION_GRACE_DAYS }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.continue'),
+          style: 'destructive',
+          onPress: () =>
+            void act(async () => {
+              const res = await unwrap(
+                parentApi.POST('/api/v1/students/{id}/delete-request', {
+                  ...path,
+                  body: { confirm: true, source: 'app' },
+                }),
+              );
+              setMessage({
+                text: t('consents.deletionScheduled', { date: formatDay(res.deletion.purgeAfter) }),
+                tone: 'info',
+              });
+            }),
+        },
+      ],
+    );
 
   const name = state.kind === 'ready' ? state.data.student.displayName : '';
   return (

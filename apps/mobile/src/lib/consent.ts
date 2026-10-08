@@ -1,4 +1,5 @@
-import type { ConsentState, ConsentType } from '@vionx/contracts/client';
+import type { ConsentState, ConsentType, DeletionJob } from '@vionx/contracts/client';
+import { deletionDaysLeft } from '@vionx/domain';
 import type { MessageKey } from '../i18n/index.ts';
 
 /** Status line of a consent row. */
@@ -46,4 +47,40 @@ export function formatDayTime(iso: string): string {
   const d = new Date(new Date(iso).getTime() + 7 * 3600_000);
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())} ${formatDay(iso)}`;
+}
+
+export interface PendingDeletionItem {
+  id: string;
+  scope: 'CHILD' | 'ACCOUNT';
+  studentId: string | null;
+  /** Child's name when the household is visible (null for the account or an unknown child). */
+  name: string | null;
+  purgeAfter: string;
+  daysLeft: number;
+}
+
+/**
+ * Deletions still in their grace period (Privacy Center "Hủy yêu cầu xóa"), account first,
+ * then by purge date.
+ */
+export function pendingDeletions(
+  deletions: readonly Pick<DeletionJob, 'id' | 'scope' | 'studentId' | 'status' | 'purgeAfter'>[],
+  students: readonly { id: string; displayName: string }[],
+  now: Date = new Date(),
+): PendingDeletionItem[] {
+  return deletions
+    .filter((d) => d.status === 'SCHEDULED')
+    .map((d) => ({
+      id: d.id,
+      scope: d.scope,
+      studentId: d.studentId,
+      name: students.find((s) => s.id === d.studentId)?.displayName ?? null,
+      purgeAfter: d.purgeAfter,
+      daysLeft: deletionDaysLeft(new Date(d.purgeAfter), now),
+    }))
+    .sort(
+      (a, b) =>
+        Number(b.scope === 'ACCOUNT') - Number(a.scope === 'ACCOUNT') ||
+        a.purgeAfter.localeCompare(b.purgeAfter),
+    );
 }

@@ -1,3 +1,4 @@
+import { DELETION_GRACE_DAYS } from '@vionx/contracts/client';
 import { useEffect, useState, type FormEvent } from 'react';
 import { api } from './api.ts';
 import { supabase, useSession } from './auth.ts';
@@ -89,8 +90,13 @@ export function DeleteAccountPage() {
             Tài khoản phụ huynh và tài khoản đăng nhập của các con bị <strong>khoá ngay</strong>.
           </li>
           <li>
-            Sau <strong>30 ngày</strong>, toàn bộ dữ liệu của gia đình (hồ sơ các con, bài làm, tiến
-            độ, lựa chọn đồng ý) bị <strong>xoá vĩnh viễn</strong>.
+            Trong {DELETION_GRACE_DAYS} ngày đó, bạn có thể đăng nhập lại vào ứng dụng và bấm{' '}
+            <strong>Hủy yêu cầu xóa</strong> ở mục <em>Quyền riêng tư</em>: tài khoản và đăng nhập
+            của các con được mở lại.
+          </li>
+          <li>
+            Sau <strong>{DELETION_GRACE_DAYS} ngày</strong>, toàn bộ dữ liệu của gia đình (hồ sơ các
+            con, bài làm, tiến độ, lựa chọn đồng ý) bị <strong>xoá vĩnh viễn</strong>.
           </li>
           <li>
             Sổ điểm thưởng được ẩn danh hoá thay vì xoá; chỉ giữ lại bản ghi rằng yêu cầu đã được
@@ -103,15 +109,18 @@ export function DeleteAccountPage() {
         </ul>
         <p className="muted">
           Your parent account and your children&apos;s logins are disabled at once; all household
-          data is permanently deleted after 30 days (reward ledgers are anonymised). You can also do
-          this in the app under Privacy → Delete account.
+          data is permanently deleted after {DELETION_GRACE_DAYS} days (reward ledgers are
+          anonymised). Within those {DELETION_GRACE_DAYS} days you can sign in to the app again and
+          cancel the request under Privacy → Cancel deletion request. You can also delete the
+          account in the app under Privacy → Delete account.
         </p>
 
         {purgeAfter ? (
           <p className="ok" role="status" data-testid="deletion-scheduled">
             Đã nhận yêu cầu. Tài khoản đã bị khoá và dữ liệu sẽ bị xoá vĩnh viễn vào ngày{' '}
-            {formatPurgeDate(purgeAfter)}. / Request received; data will be deleted on{' '}
-            {formatPurgeDate(purgeAfter)}.
+            {formatPurgeDate(purgeAfter)}; trước ngày đó bạn có thể hủy yêu cầu trong ứng dụng. /
+            Request received; data will be deleted on {formatPurgeDate(purgeAfter)} unless you
+            cancel the request in the app before then.
           </p>
         ) : loading ? (
           <p className="muted">Đang tải… / Loading…</p>
@@ -127,8 +136,9 @@ export function DeleteAccountPage() {
                 checked={understood}
                 onChange={(e) => setUnderstood(e.target.checked)}
               />{' '}
-              Tôi hiểu rằng toàn bộ dữ liệu của gia đình sẽ bị xoá và không thể khôi phục. / I
-              understand this cannot be undone.
+              Tôi hiểu rằng sau {DELETION_GRACE_DAYS} ngày toàn bộ dữ liệu của gia đình sẽ bị xoá và
+              không thể khôi phục. / I understand this cannot be undone after {DELETION_GRACE_DAYS}{' '}
+              days.
             </label>
             <div className="actions">
               <button

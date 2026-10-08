@@ -20,7 +20,10 @@ export async function routeSignedInParent(): Promise<void> {
     needsPolicyAcceptance(),
   ]);
   await deviceMode.set('shared'); // a parent signing in on this phone leaves child-device mode
-  if (needsAcceptance) router.replace('/policies');
+  // Account deletion pending: the Privacy Center, where the request can be cancelled, is all
+  // the account can reach.
+  if (me.pendingAccountDeletion) router.replace('/privacy');
+  else if (needsAcceptance) router.replace('/policies');
   else router.replace(me.households.length > 0 ? '/parent' : '/household-new');
 }
 
@@ -29,7 +32,7 @@ export async function routeSignedInParent(): Promise<void> {
  * valid); otherwise a signed-in parent goes to Parent mode; everyone else sees the role chooser.
  */
 export async function startRoute(): Promise<
-  '/child-home' | '/child' | '/parent' | '/policies' | '/welcome'
+  '/child-home' | '/child' | '/parent' | '/policies' | '/privacy' | '/welcome'
 > {
   const mode = await deviceMode.get();
   const token = await childToken.get();
@@ -48,6 +51,7 @@ export async function startRoute(): Promise<
         unwrap(parentApi.GET('/api/v1/me')),
         needsPolicyAcceptance(),
       ]);
+      if (me.pendingAccountDeletion) return '/privacy';
       if (me.households.length > 0 && needsAcceptance) return '/policies';
       return me.households.length > 0 ? '/parent' : '/welcome';
     } catch {

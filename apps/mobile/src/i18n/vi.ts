@@ -171,7 +171,7 @@ export const vi = {
   'consents.policyVersion': 'Theo Chính sách quyền riêng tư phiên bản {v}',
   'consents.deleteChild': 'Xoá hồ sơ của con',
   'consents.deleteChildConfirm':
-    'Xoá hồ sơ của {name}? Con bị đăng xuất ngay và dữ liệu bị xoá vĩnh viễn sau 30 ngày.',
+    'Xoá hồ sơ của {name}? Con bị đăng xuất ngay và dữ liệu bị xoá vĩnh viễn sau {days} ngày (có thể hủy trong thời gian này).',
   'consents.deletionScheduled': 'Hồ sơ sẽ bị xoá vĩnh viễn vào ngày {date}.',
   'privacy.title': 'Quyền riêng tư',
   'privacy.children': 'Quyền của từng con',
@@ -191,10 +191,23 @@ export const vi = {
   'privacy.exportExpired': 'Đường dẫn đã hết hạn. Hãy tạo bản xuất mới.',
   'privacy.deleteAccount': 'Xoá tài khoản',
   'privacy.deleteAccountHint':
-    'Khoá ngay tài khoản của bố mẹ và các con; toàn bộ dữ liệu bị xoá vĩnh viễn sau 30 ngày.',
+    'Khoá ngay tài khoản của bố mẹ và các con; toàn bộ dữ liệu bị xoá vĩnh viễn sau {days} ngày.',
   'privacy.deleteAccountConfirm':
-    'Xoá tài khoản và toàn bộ dữ liệu của gia đình? Việc này không thể hoàn tác.',
+    'Xoá tài khoản và toàn bộ dữ liệu của gia đình? Bạn có thể hủy yêu cầu trong {days} ngày; sau đó không thể hoàn tác.',
   'privacy.deleteAccountDone': 'Đã nhận yêu cầu. Dữ liệu sẽ bị xoá vĩnh viễn vào ngày {date}.',
+  'privacy.pending': 'Yêu cầu xoá đang chờ',
+  'privacy.pendingAccount': 'Tài khoản và toàn bộ dữ liệu của gia đình',
+  'privacy.pendingChild': 'Hồ sơ của {name}',
+  'privacy.pendingChildUnknown': 'Hồ sơ của một con',
+  'privacy.daysLeft': 'Sẽ bị xoá vĩnh viễn vào ngày {date} (còn {n} ngày).',
+  'privacy.cancelDeletion': 'Hủy yêu cầu xóa',
+  'privacy.cancelDeletionConfirm':
+    'Hủy yêu cầu xóa? Dữ liệu được giữ lại và việc đăng nhập được mở lại.',
+  'privacy.cancelDeletionDone': 'Đã hủy yêu cầu xóa.',
+  'privacy.accountPending':
+    'Tài khoản đang chờ xoá. Bạn có thể hủy yêu cầu trước ngày xoá hoặc đăng xuất.',
+  'error.accountDeletionPending':
+    'Tài khoản đang chờ xoá. Hãy mở mục Quyền riêng tư để hủy yêu cầu xóa.',
   'children.privacy': 'Quyền riêng tư',
   'children.needsConsent': 'Chưa cho phép',
   'student.consents': 'Quyền và sự đồng ý',

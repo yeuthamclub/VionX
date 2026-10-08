@@ -173,7 +173,7 @@ export const en: Record<keyof typeof vi, string> = {
   'consents.policyVersion': 'Under Privacy Policy version {v}',
   'consents.deleteChild': 'Delete this child’s profile',
   'consents.deleteChildConfirm':
-    'Delete {name}’s profile? They are signed out now and the data is permanently deleted after 30 days.',
+    'Delete {name}’s profile? They are signed out now and the data is permanently deleted after {days} days (you can cancel until then).',
   'consents.deletionScheduled': 'The profile will be permanently deleted on {date}.',
   'privacy.title': 'Privacy',
   'privacy.children': 'Permissions per child',
@@ -193,10 +193,23 @@ export const en: Record<keyof typeof vi, string> = {
   'privacy.exportExpired': 'The link has expired. Create a new export.',
   'privacy.deleteAccount': 'Delete account',
   'privacy.deleteAccountHint':
-    'Disables your account and your children’s logins now; all data is permanently deleted after 30 days.',
+    'Disables your account and your children’s logins now; all data is permanently deleted after {days} days.',
   'privacy.deleteAccountConfirm':
-    'Delete the account and all household data? This cannot be undone.',
+    'Delete the account and all household data? You can cancel the request within {days} days; after that it cannot be undone.',
   'privacy.deleteAccountDone': 'Request received. The data will be permanently deleted on {date}.',
+  'privacy.pending': 'Pending deletion requests',
+  'privacy.pendingAccount': 'Your account and all household data',
+  'privacy.pendingChild': '{name}’s profile',
+  'privacy.pendingChildUnknown': 'A child’s profile',
+  'privacy.daysLeft': 'Will be permanently deleted on {date} ({n} days left).',
+  'privacy.cancelDeletion': 'Cancel deletion request',
+  'privacy.cancelDeletionConfirm':
+    'Cancel the deletion request? The data is kept and sign-in works again.',
+  'privacy.cancelDeletionDone': 'The deletion request was cancelled.',
+  'privacy.accountPending':
+    'This account is waiting to be deleted. You can cancel the request before the deletion date, or sign out.',
+  'error.accountDeletionPending':
+    'This account is waiting to be deleted. Open Privacy to cancel the deletion request.',
   'children.privacy': 'Privacy',
   'children.needsConsent': 'Not allowed yet',
   'student.consents': 'Permissions and consent',
