@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@sentry/react": "^11.5.0",
+    "@supabase/supabase-js": "2.117.3",
     "@tanstack/react-query": "^5.104.1",
     "@tanstack/react-router": "^1.170.41",
     "@vionx/contracts": "workspace:*",
