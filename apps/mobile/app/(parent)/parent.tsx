@@ -4,7 +4,8 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import type { HouseholdResponse, Student } from '@vionx/contracts/client';
 import { parentApi } from '../../src/api.ts';
 import { t, type MessageKey } from '../../src/i18n/index.ts';
-import { AppError, unwrap } from '../../src/lib/api-error.ts';
+import { AppError, isAccountDeletionPending, unwrap } from '../../src/lib/api-error.ts';
+import { canChildSignIn } from '../../src/lib/consent.ts';
 import { childToken, deviceMode } from '../../src/state/device.ts';
 import { signOutGoogle } from '../../src/state/google.ts';
 import { signOutParent } from '../../src/state/supabase.ts';
@@ -24,6 +25,7 @@ export default function ParentHome() {
       return await unwrap(parentApi.GET('/api/v1/household'));
     } catch (e) {
       if (e instanceof AppError && e.status === 404) return null;
+      if (isAccountDeletionPending(e)) router.replace('/privacy');
       if (e instanceof AppError && e.status === 401) {
         router.replace('/sign-in');
       }
@@ -93,11 +95,18 @@ export default function ParentHome() {
         style={[
           theme.typography.caption,
           {
-            color: s.status === 'active' ? c.success : s.status === 'locked' ? c.warning : c.danger,
+            color:
+              s.status === 'active' && canChildSignIn(s)
+                ? c.success
+                : s.status === 'disabled'
+                  ? c.danger
+                  : c.warning,
           },
         ]}
       >
-        {t(`children.status.${s.status}` as MessageKey)}
+        {s.status === 'active' && !canChildSignIn(s)
+          ? t('children.needsConsent')
+          : t(`children.status.${s.status}` as MessageKey)}
       </Text>
     </Pressable>
   );
@@ -126,6 +135,12 @@ export default function ParentHome() {
         label={t('children.add')}
         color={c.parent}
         onPress={() => router.push('/child-new')}
+      />
+      <Button
+        testID="privacy-center"
+        label={t('children.privacy')}
+        variant="secondary"
+        onPress={() => router.push('/privacy')}
       />
       <Button
         testID="child-device"

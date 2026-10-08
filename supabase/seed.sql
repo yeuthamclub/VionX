@@ -72,3 +72,26 @@ insert into app.child_credentials (student_id, household_id, child_login_id, pin
   ('00000000-0000-4000-c000-000000000009', '00000000-0000-4000-b000-00000000de01', 'vx-demy99',
    '$argon2id$v=19$m=19456,t=2,p=1$P8EO8FrOJ4gPf3CHRFFcfg$i8sFSm3d4SYmcV1JoN12DDHJ8GT+BHCXBGZMPJYSxjo')
 on conflict do nothing;
+
+-- ---------------------------------------------------------------------------
+-- M02 consent seed (LOCAL ONLY): the demo parent accepted policy version 1 and granted
+-- CORE_SERVICE and CROSS_BORDER_TRANSFER to the three demo children, so the demo logins keep working.
+-- ---------------------------------------------------------------------------
+insert into app.policy_acceptances (user_id, policy_type, policy_version, locale) values
+  ('00000000-0000-4000-a000-00000000de01', 'PRIVACY_POLICY', 1, 'vi'),
+  ('00000000-0000-4000-a000-00000000de01', 'TERMS_OF_SERVICE', 1, 'vi')
+on conflict do nothing;
+
+insert into app.consent_records (
+  household_id, student_id, consent_type, policy_version, status, granted_by_parent_id,
+  child_assent_required, child_assent_status
+)
+select '00000000-0000-4000-b000-00000000de01', s.id, t.consent_type, 1, 'GRANTED',
+       '00000000-0000-4000-a000-00000000de01', false, 'NOT_REQUIRED'
+from app.students s
+cross join (values ('CORE_SERVICE'), ('CROSS_BORDER_TRANSFER')) as t (consent_type)
+where s.household_id = '00000000-0000-4000-b000-00000000de01'
+  and not exists (
+    select 1 from app.consent_records c
+    where c.student_id = s.id and c.consent_type = t.consent_type and c.status = 'GRANTED'
+  );

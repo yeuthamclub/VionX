@@ -1,4 +1,6 @@
-# Sub-flow: add one child from the parent home, check the credential card, return home.
+# Sub-flow: add one child from the parent home, grant CORE_SERVICE and the separate
+# CROSS_BORDER_TRANSFER consent, check the credential
+# card, return home.
 # env: NAME, YEAR, GRADE, PIN ('' = generated). Leaves the login id in maestro.copiedText.
 appId: vn.vionx.app
 ---
@@ -23,6 +25,26 @@ appId: vn.vionx.app
       - hideKeyboard
 - tapOn:
     id: 'child-create'
+# M02: the parent grants CORE_SERVICE and, as its own step, CROSS_BORDER_TRANSFER before the
+# credentials are shown
+- extendedWaitUntil:
+    visible:
+      id: 'screen-consents'
+    timeout: 15000
+- tapOn:
+    id: 'grant-CORE_SERVICE'
+- extendedWaitUntil:
+    visible:
+      id: 'revoke-CORE_SERVICE'
+    timeout: 15000
+- tapOn:
+    id: 'grant-CROSS_BORDER_TRANSFER'
+- extendedWaitUntil:
+    visible:
+      id: 'revoke-CROSS_BORDER_TRANSFER'
+    timeout: 15000
+- tapOn:
+    id: 'consent-continue'
 - extendedWaitUntil:
     visible:
       id: 'credential-card'

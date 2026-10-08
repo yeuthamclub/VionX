@@ -14,6 +14,8 @@ export interface WorkerDeps {
   queue: EventQueue;
   handlers: EventHandlers;
   options?: Partial<ConsumeOptions>;
+  /** Periodic housekeeping run on every tick after the queue (e.g. expiring export files). */
+  maintenance?: () => Promise<Record<string, number>>;
 }
 
 export function createWorkerHandler(deps: WorkerDeps): (request: Request) => Promise<Response> {
@@ -29,7 +31,19 @@ export function createWorkerHandler(deps: WorkerDeps): (request: Request) => Pro
     const log = (msg: string, extra?: Record<string, unknown>) =>
       console.log(JSON.stringify({ level: 'info', fn: 'worker', requestId, msg, ...extra }));
     const summary = await consumeEvents(deps.queue, deps.handlers, options, log);
-    log('tick', { ...summary });
-    return Response.json({ requestId, ...summary }, { headers: { 'x-request-id': requestId } });
+    let maintenance: Record<string, number> | { error: string } = {};
+    if (deps.maintenance) {
+      try {
+        maintenance = await deps.maintenance();
+      } catch (error) {
+        // Housekeeping never fails the tick; it runs again next minute.
+        maintenance = { error: error instanceof Error ? error.message : String(error) };
+      }
+    }
+    log('tick', { ...summary, maintenance });
+    return Response.json(
+      { requestId, ...summary, maintenance },
+      { headers: { 'x-request-id': requestId } },
+    );
   };
 }

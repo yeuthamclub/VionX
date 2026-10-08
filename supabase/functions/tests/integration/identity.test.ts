@@ -47,6 +47,26 @@ async function api(method: string, path: string, auth: Auth = {}, body?: unknown
 const login = (childLoginId: string, pin: string, deviceId = `it-${randomUUID()}`) =>
   api('POST', '/auth/child/login', {}, { childLoginId, pin, deviceId });
 
+/**
+ * M02: a child signs in only once CORE_SERVICE and CROSS_BORDER_TRANSFER are granted (each its own
+ * consent) on the current policy version.
+ */
+async function grantCoreService(parent: AuthSession, studentId: string) {
+  const policies = await api('GET', '/policies/current');
+  const version = (policies.body.policies as { type: string; version: number }[]).find(
+    (p) => p.type === 'PRIVACY_POLICY',
+  )!.version;
+  for (const type of ['CORE_SERVICE', 'CROSS_BORDER_TRANSFER']) {
+    const res = await api(
+      'POST',
+      `/students/${studentId}/consents/${type}/grant`,
+      { parent },
+      { policyVersion: version },
+    );
+    expect(res.status).toBe(200);
+  }
+}
+
 async function newParent(): Promise<AuthSession> {
   return signUpWithEmail(`it-${randomUUID()}@vionx.test`, `pw-${randomUUID()}`);
 }
@@ -62,7 +82,9 @@ async function newFamily(name: string) {
     { displayName: `${name} child`, birthYear: 2015, grade: 6, pin: '4826' },
   );
   expect(created.status).toBe(201);
-  return { parent, ...StudentCreateResponseSchema.parse(created.body) };
+  const family = { parent, ...StudentCreateResponseSchema.parse(created.body) };
+  await grantCoreService(parent, family.student.id);
+  return family;
 }
 
 const createdUsers: string[] = [];
@@ -148,7 +170,15 @@ describe('household and children', () => {
       const { student, credentials } = StudentCreateResponseSchema.parse(res.body);
       expect(credentials.childLoginId).toMatch(/^vx-[23456789abcdefghjkmnpqrstuvwxyz]{6}$/);
       expect(credentials.pin).toMatch(/^\d{6}$/);
-      expect(student).toMatchObject({ grade, status: 'active', activeSessions: 0 });
+      expect(student).toMatchObject({
+        grade,
+        status: 'active',
+        activeSessions: 0,
+        coreServiceConsent: false,
+        crossBorderTransferConsent: false,
+        deletionScheduledFor: null,
+      });
+      await grantCoreService(parent, student.id);
       students.push({ id: student.id, ...credentials });
     }
     const household = HouseholdResponseSchema.parse(
@@ -291,7 +321,8 @@ describe('household and children', () => {
     expect(StudentSchema.parse(enabled.body).status).toBe('active');
     expect((await login(s.childLoginId, s.pin)).status).toBe(200);
     const actions = await sql<{ action: string }[]>`
-      select action from ops.audit_logs where target_id = ${s.id} order by created_at`;
+      select action from ops.audit_logs
+      where target_id = ${s.id} and action like 'student.%' order by created_at`;
     expect(actions.map((a) => a.action)).toEqual(['student.disabled', 'student.enabled']);
   });
 
@@ -357,8 +388,10 @@ describe('cross-household isolation (404)', () => {
     expect(own).toMatchObject({ displayName: 'A child', status: 'active' });
     expect((await login(familyA.credentials.childLoginId, '4826')).status).toBe(200);
     expect((await login(familyA.credentials.childLoginId, '1111')).status).toBe(401);
-    const audits = await sql`select 1 from ops.audit_logs where target_id = ${familyA.student.id}`;
-    expect(audits).toHaveLength(0);
+    // Only family A's own two consent grants are on record; nothing by the other parents.
+    const audits = await sql<{ action: string }[]>`
+      select action from ops.audit_logs where target_id = ${familyA.student.id}`;
+    expect(audits.map((a) => a.action)).toEqual(['consent.granted', 'consent.granted']);
   });
 
   it('a household lists only its own children', async () => {

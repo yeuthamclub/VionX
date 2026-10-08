@@ -110,4 +110,127 @@ export const en: Record<keyof typeof vi, string> = {
   'avatar.rabbit': 'Rabbit',
   'avatar.tiger': 'Tiger',
   'avatar.turtle': 'Turtle',
+  'error.consentRequired': 'A parent needs to allow VionX for you before you can sign in.',
+  'error.featureConsent': 'This feature needs a parent’s permission.',
+  'error.policyChanged': 'The policy was just updated. Please review it and try again.',
+  'policyType.PRIVACY_POLICY': 'Privacy Policy',
+  'policyType.TERMS_OF_SERVICE': 'Terms of Service',
+  'policies.title': 'Your family’s privacy',
+  'policies.subtitle': 'Before you start, please read and accept how VionX handles data.',
+  'policies.point.storage':
+    'Family data is stored on Supabase in Singapore and always encrypted in transit.',
+  'policies.point.ai':
+    'The AI assistant, provided by Anthropic, runs only if you turn it on and never receives your child’s name.',
+  'policies.point.speech': 'Your child’s voice is processed on the phone and never uploaded.',
+  'policies.point.control':
+    'You can turn each permission off, export data or delete the account at any time under Privacy.',
+  'policies.version': 'Version {v}',
+  'policies.read': 'Read the full text',
+  'policies.hide': 'Hide',
+  'policies.agree': 'I have read and accept the Privacy Policy and the Terms of Service.',
+  'policies.continue': 'Accept and continue',
+  'consent.CORE_SERVICE.title': 'Core service',
+  'consent.CORE_SERVICE.body':
+    'Creates your child’s account and stores answers and progress so VionX works. Required to sign in.',
+  'consent.CROSS_BORDER_TRANSFER.title': 'Transfer of data abroad',
+  'consent.CROSS_BORDER_TRANSFER.body':
+    'Your child’s data is stored on Supabase servers in Singapore. If you turn on the AI assistant, questions are sent to Anthropic in the United States. Required for your child to sign in; you can decline, but your child then cannot use VionX.',
+  'consent.EDUCATION_ANALYTICS.title': 'Learning analytics',
+  'consent.EDUCATION_ANALYTICS.body':
+    'Statistics about your child’s learning for suggestions and parent reports.',
+  'consent.AI_PERSONALIZATION.title': 'AI assistant',
+  'consent.AI_PERSONALIZATION.body':
+    'Sends questions and your child’s skill state (no name) to Anthropic’s AI service in the United States for explanations and hints. Needs Transfer of data abroad first.',
+  'consent.MICROPHONE_SPEAKING.title': 'Microphone for speaking practice',
+  'consent.MICROPHONE_SPEAKING.body':
+    'Uses the microphone when your child starts a speaking exercise. Audio stays on the phone.',
+  'consent.HEALTH_CONNECT_ACTIVITY.title': 'Activity (Health Connect)',
+  'consent.HEALTH_CONNECT_ACTIVITY.body':
+    'Reads steps and active minutes. No heart rate, no location.',
+  'consent.COMPETITION_AREA.title': 'Competition area',
+  'consent.COMPETITION_AREA.body':
+    'Uses the province or city you choose to suggest suitable competitions.',
+  'consent.state.on': 'On',
+  'consent.state.off': 'Off',
+  'consent.state.assentPending': 'On, waiting for your child to agree',
+  'consent.state.assentDeclined': 'Your child has not agreed',
+  'consent.state.reconsent': 'Turn on again under the new policy',
+  'consent.state.prerequisite': 'On, needs Transfer of data abroad',
+  'consent.record.GRANTED': 'On',
+  'consent.record.REVOKED': 'Off',
+  'consent.record.SUPERSEDED': 'Replaced by a newer grant',
+  'consents.title': '{name}’s permissions',
+  'consents.onboarding':
+    'Last step: allow {name} to use VionX. The two permissions below are asked separately; you can turn on the others later.',
+  'consents.turnOn': 'Turn on',
+  'consents.turnOff': 'Turn off',
+  'consents.revokeConfirm': 'Turn off “{title}” for {name}? This takes effect immediately.',
+  'consents.revokeCoreConfirm':
+    'Turn off the core service? {name} will be signed out and cannot sign in until you turn it back on.',
+  'consents.revokeCrossBorderConfirm':
+    'Turn off the transfer of data abroad? {name} will be signed out, the AI assistant stops, and your child cannot sign in until you turn it back on.',
+  'consents.assentNote':
+    'Children aged 7+: the feature runs only when your child also agrees on their phone.',
+  'consents.coreRequired':
+    'Turn on the core service and the transfer of data abroad so your child can sign in.',
+  'consents.continue': 'Continue',
+  'consents.history': 'History',
+  'consents.historyEmpty': 'No changes yet.',
+  'consents.historyLine': '{date} · {title}: {status}',
+  'consents.policyVersion': 'Under Privacy Policy version {v}',
+  'consents.deleteChild': 'Delete this child’s profile',
+  'consents.deleteChildConfirm':
+    'Delete {name}’s profile? They are signed out now and the data is permanently deleted after {days} days (you can cancel until then).',
+  'consents.deletionScheduled': 'The profile will be permanently deleted on {date}.',
+  'privacy.title': 'Privacy',
+  'privacy.children': 'Permissions per child',
+  'privacy.childOn': 'Using VionX',
+  'privacy.childOff': 'Not allowed to sign in yet',
+  'privacy.policies': 'Accepted policies',
+  'privacy.policyLine': '{title}, version {v} · {date}',
+  'privacy.viewPolicies': 'View policies',
+  'privacy.export': 'Export data',
+  'privacy.exportHint':
+    'Creates a ZIP file with all household data. The download link is valid for 24 hours.',
+  'privacy.exportStart': 'Create export',
+  'privacy.exportQueued': 'Preparing the file…',
+  'privacy.exportReady': 'The file is ready; download it before {time}.',
+  'privacy.exportDownload': 'Download',
+  'privacy.exportFailed': 'The export failed. Please try again.',
+  'privacy.exportExpired': 'The link has expired. Create a new export.',
+  'privacy.deleteAccount': 'Delete account',
+  'privacy.deleteAccountHint':
+    'Disables your account and your children’s logins now; all data is permanently deleted after {days} days.',
+  'privacy.deleteAccountConfirm':
+    'Delete the account and all household data? You can cancel the request within {days} days; after that it cannot be undone.',
+  'privacy.deleteAccountDone': 'Request received. The data will be permanently deleted on {date}.',
+  'privacy.pending': 'Pending deletion requests',
+  'privacy.pendingAccount': 'Your account and all household data',
+  'privacy.pendingChild': '{name}’s profile',
+  'privacy.pendingChildUnknown': 'A child’s profile',
+  'privacy.daysLeft': 'Will be permanently deleted on {date} ({n} days left).',
+  'privacy.cancelDeletion': 'Cancel deletion request',
+  'privacy.cancelDeletionConfirm':
+    'Cancel the deletion request? The data is kept and sign-in works again.',
+  'privacy.cancelDeletionDone': 'The deletion request was cancelled.',
+  'privacy.accountPending':
+    'This account is waiting to be deleted. You can cancel the request before the deletion date, or sign out.',
+  'error.accountDeletionPending':
+    'This account is waiting to be deleted. Open Privacy to cancel the deletion request.',
+  'children.privacy': 'Privacy',
+  'children.needsConsent': 'Not allowed yet',
+  'student.consents': 'Permissions and consent',
+  'assent.title': 'Your parent is asking you',
+  'assent.AI_PERSONALIZATION':
+    'Your parent wants to turn on the AI helper to explain lessons and give hints. It does not know your name. Do you agree?',
+  'assent.MICROPHONE_SPEAKING':
+    'Your parent wants to turn on the microphone for speaking practice. It only listens when you press start, and your voice is never sent anywhere. Do you agree?',
+  'assent.HEALTH_CONNECT_ACTIVITY':
+    'Your parent wants VionX to count your steps and active minutes. Do you agree?',
+  'assent.yes': 'I agree',
+  'assent.no': 'Not now',
+  'assent.none': 'Nothing to answer right now.',
+  'assent.thanks': 'Thank you! Your parent will see your answer.',
+  'childHome.assentPending': 'Your parent is asking you about {n} thing(s).',
+  'childHome.assentOpen': 'See and answer',
 };

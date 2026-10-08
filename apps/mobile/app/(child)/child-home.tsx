@@ -3,20 +3,32 @@ import { Text, View } from 'react-native';
 import { childApi } from '../../src/api.ts';
 import { t } from '../../src/i18n/index.ts';
 import { AppError, unwrap } from '../../src/lib/api-error.ts';
+import { pendingAssents } from '../../src/lib/consent.ts';
 import { childToken } from '../../src/state/device.ts';
 import { useTheme } from '../../src/theme.ts';
 import { AVATAR_GLYPHS } from '../../src/ui/avatars.ts';
 import { Button } from '../../src/ui/Button.tsx';
+import { Notice } from '../../src/ui/Notice.tsx';
 import { Screen } from '../../src/ui/Screen.tsx';
 import { StateView } from '../../src/ui/StateView.tsx';
 import { useLoad } from '../../src/ui/useLoad.ts';
 
-/** Child home placeholder (Today arrives with M07): greeting and sign-out. */
+/** Child home placeholder (Today arrives with M07): greeting, pending assent requests, sign-out. */
 export default function ChildHome() {
   const theme = useTheme();
   const { state, reload } = useLoad(async () => {
     try {
-      return await unwrap(childApi.GET('/api/v1/auth/child/session'));
+      const session = await unwrap(childApi.GET('/api/v1/auth/child/session'));
+      // Requests for the child's own agreement (age 7+); never blocks the home screen.
+      const pending = await unwrap(
+        childApi.GET('/api/v1/students/{id}/consents', {
+          params: { path: { id: session.student.id } },
+        }),
+      ).then(
+        (c) => pendingAssents(c.consents).length,
+        () => 0,
+      );
+      return { ...session, pending };
     } catch (e) {
       if (e instanceof AppError && e.status === 401) {
         await childToken.clear();
@@ -58,6 +70,21 @@ export default function ChildHome() {
             >
               {t('childHome.subtitle', { n: session.student.grade })}
             </Text>
+            {session.pending > 0 && (
+              <View style={{ gap: theme.spacing.sm, alignSelf: 'stretch' }}>
+                <Notice
+                  testID="assent-pending"
+                  tone="info"
+                  message={t('childHome.assentPending', { n: session.pending })}
+                />
+                <Button
+                  testID="open-assent"
+                  label={t('childHome.assentOpen')}
+                  color={theme.colors.child}
+                  onPress={() => router.push('/assent')}
+                />
+              </View>
+            )}
           </View>
         )}
       </StateView>

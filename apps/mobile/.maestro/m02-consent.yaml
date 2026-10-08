@@ -1,0 +1,142 @@
+# M02 main path: parent accepts the policies → adds a child (CORE_SERVICE consent step) → turns on
+# AI personalisation for the child → child answers the assent card → parent exports the
+# household's data from the Privacy Center.
+# Prereqs: as m01-identity.yaml (development build on an emulator, local Supabase + functions,
+# `pnpm dev:mobile`). VIONX_PUBLIC_SUPABASE_URL must be reachable from the emulator
+# (http://10.0.2.2:54321) for the download link to open.
+# Uses the LOCAL test OTP number 0900000004 / 123456 (supabase/config.toml).
+# Run: maestro test apps/mobile/.maestro/m02-consent.yaml
+appId: vn.vionx.app
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Phụ huynh'
+    timeout: 60000
+- tapOn:
+    id: 'role-parent'
+- tapOn:
+    id: 'phone-input'
+- inputText: '0900000004'
+- tapOn:
+    id: 'send-code'
+- extendedWaitUntil:
+    visible:
+      id: 'otp-input'
+    timeout: 15000
+- tapOn:
+    id: 'otp-input'
+- inputText: '123456'
+- tapOn:
+    id: 'verify-code'
+
+# Privacy policy & terms: the button stays disabled until the box is ticked
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục'
+    timeout: 20000
+- runFlow:
+    when:
+      visible:
+        id: 'policies-accept'
+    commands:
+      - takeScreenshot: m02-policies
+      - tapOn:
+          id: 'policies-agree'
+      - tapOn:
+          id: 'policies-accept'
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình'
+    timeout: 20000
+- runFlow:
+    when:
+      visible: 'Tạo gia đình'
+    commands:
+      - tapOn:
+          id: 'household-name'
+      - inputText: 'Gia đình Đồng ý'
+      - tapOn:
+          id: 'household-create'
+- extendedWaitUntil:
+    visible:
+      id: 'add-child'
+    timeout: 15000
+
+# Add a grade-6 child: CORE_SERVICE consent is required before the credentials appear
+- runFlow:
+    file: subflows/m01-add-child.yaml
+    env:
+      NAME: 'Minh'
+      YEAR: '2014'
+      GRADE: '6'
+      PIN: '2468'
+- evalScript: ${output.loginId = maestro.copiedText}
+
+# Turn on the AI assistant for the child (needs the child's assent, age >= 7)
+- tapOn:
+    id: 'student-${output.loginId}'
+- tapOn:
+    id: 'open-consents'
+- extendedWaitUntil:
+    visible:
+      id: 'grant-AI_PERSONALIZATION'
+    timeout: 15000
+- tapOn:
+    id: 'grant-AI_PERSONALIZATION'
+- extendedWaitUntil:
+    visible:
+      id: 'revoke-AI_PERSONALIZATION'
+    timeout: 15000
+- takeScreenshot: m02-child-consents
+- back
+- back
+
+# Privacy Center: request an export and wait for the download link
+- tapOn:
+    id: 'privacy-center'
+- extendedWaitUntil:
+    visible:
+      id: 'export-start'
+    timeout: 15000
+- tapOn:
+    id: 'export-start'
+- extendedWaitUntil:
+    visible:
+      id: 'export-download'
+    timeout: 60000
+- takeScreenshot: m02-export-ready
+- back
+
+# The child answers the assent card on a child device
+- tapOn:
+    id: 'child-device'
+- tapOn: 'Tiếp tục'
+- extendedWaitUntil:
+    visible:
+      id: 'child-login-id'
+    timeout: 15000
+- tapOn:
+    id: 'child-login-id'
+- inputText: ${output.loginId}
+- runFlow:
+    file: subflows/m01-enter-pin.yaml
+    env:
+      DIGITS: '2,4,6,8'
+- tapOn:
+    id: 'child-login-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'assent-pending'
+    timeout: 15000
+- tapOn:
+    id: 'open-assent'
+- extendedWaitUntil:
+    visible:
+      id: 'assent-AI_PERSONALIZATION'
+    timeout: 15000
+- takeScreenshot: m02-assent
+- tapOn:
+    id: 'assent-yes'
+- extendedWaitUntil:
+    visible:
+      id: 'assent-done'
+    timeout: 15000

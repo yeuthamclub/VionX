@@ -97,6 +97,24 @@ export const scenario: Scenario = {
           assert(/^\d{4,8}$/.test(credentials.pin), 'PIN format');
           state.children.push({ id: student.id, grade, ...credentials });
         }
+        // M02: a child can sign in only after the parent grants CORE_SERVICE and the separate
+        // CROSS_BORDER_TRANSFER consent.
+        const policies = await call('GET', '/policies/current');
+        const version = (policies.body.policies as { type: string; version: number }[]).find(
+          (p) => p.type === 'PRIVACY_POLICY',
+        )?.version;
+        assert(version, 'no current PRIVACY_POLICY');
+        for (const child of state.children) {
+          for (const type of ['CORE_SERVICE', 'CROSS_BORDER_TRANSFER']) {
+            const grant = await call(
+              'POST',
+              `/students/${child.id}/consents/${type}/grant`,
+              state.parent,
+              { policyVersion: version },
+            );
+            assert(grant.status === 200, `grant ${grant.status} ${JSON.stringify(grant.body)}`);
+          }
+        }
         const household = await call('GET', '/household', state.parent);
         const grades = (household.body.students as { grade: number }[]).map((s) => s.grade);
         assert(JSON.stringify(grades) === '[2,6,9]', `grades ${JSON.stringify(grades)}`);
@@ -107,7 +125,7 @@ export const scenario: Scenario = {
         assert(events[0]?.n === 3, `ChildCreated events: ${events[0]?.n}`);
         return (
           state.children.map((c) => `grade ${c.grade}: ${c.childLoginId}`).join(', ') +
-          '; 3 identity.child_created events'
+          '; 3 identity.child_created events; CORE_SERVICE and CROSS_BORDER_TRANSFER consents granted (M02)'
         );
       },
     },

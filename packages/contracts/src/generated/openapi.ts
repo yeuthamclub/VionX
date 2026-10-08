@@ -196,6 +196,15 @@ export interface paths {
             'application/json': components['schemas']['Error'];
           };
         };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
         /** @description Conflict (CONFLICT) */
         409: {
           headers: {
@@ -552,7 +561,7 @@ export interface paths {
     put?: never;
     /**
      * Disable (or re-enable) a child login
-     * @description Disabling also revokes every session. `{ "disabled": false }` re-enables. Audited.
+     * @description Disabling also revokes every session. `{ "disabled": false }` re-enables (409 while a deletion is scheduled). Audited.
      */
     post: {
       parameters: {
@@ -605,6 +614,15 @@ export interface paths {
             'application/json': components['schemas']['Error'];
           };
         };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
       };
     };
     delete?: never;
@@ -624,7 +642,7 @@ export interface paths {
     put?: never;
     /**
      * Child sign-in with login id + PIN
-     * @description Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id.
+     * @description Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id. A correct PIN without CORE_SERVICE and CROSS_BORDER_TRANSFER consent in force answers 403 CONSENT_REQUIRED (`details.consentType` names the missing one).
      */
     post: {
       parameters: {
@@ -666,7 +684,7 @@ export interface paths {
             'application/json': components['schemas']['Error'];
           };
         };
-        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED) */
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
         403: {
           headers: {
             [name: string]: unknown;
@@ -794,6 +812,993 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/policies/current': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Current privacy policy and terms
+     * @description Public. With a parent token the response also lists the parent’s acceptances and whether the current versions still need accepting (onboarding consent step).
+     */
+    get: {
+      parameters: {
+        query?: {
+          locale?: components['schemas']['PolicyLocale'] & unknown;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Policies in force */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PoliciesResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description A dependency is unavailable (SERVICE_UNAVAILABLE) */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/policies/accept': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Accept policy versions (parent onboarding consent step)
+     * @description Versions must be the current ones (409 CONFLICT otherwise). Idempotent.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['PolicyAcceptRequest'];
+        };
+      };
+      responses: {
+        /** @description All acceptances of this parent */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PolicyAcceptResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/consents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A child’s consents and their history
+     * @description Parent: any child of the household. Child: only their own id (assent screen). Other ids answer 404.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Consents */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['StudentConsents'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/consents/{type}/grant': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Grant a consent for a child
+     * @description Recorded against the current PRIVACY_POLICY version (409 if `policyVersion` is not current). Idempotent for the same version; a grant on a newer version supersedes the old record. AI, microphone and health grants for a child aged 7+ wait for the child’s assent. CROSS_BORDER_TRANSFER is its own explicit grant (never implied by accepting the policy); AI_PERSONALIZATION needs it in force first (403 CONSENT_REQUIRED, `details.consentType` CROSS_BORDER_TRANSFER). Audited; emits `consent.granted`.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+          type: components['schemas']['ConsentType'];
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['ConsentGrantRequest'];
+        };
+      };
+      responses: {
+        /** @description Consent state after the grant */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ConsentState'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/consents/{type}/revoke': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Revoke a consent
+     * @description Takes effect immediately and emits `consent.revoked`; the worker drops queued jobs of that scope. Revoking CORE_SERVICE or CROSS_BORDER_TRANSFER ends the service: the child is signed out everywhere and every consent-scoped queue is cleared. Idempotent. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+          type: components['schemas']['ConsentType'];
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['ConsentRevokeRequest'];
+        };
+      };
+      responses: {
+        /** @description Consent state after the revocation */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ConsentState'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/consents/{type}/child-assent': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * The child agrees or declines (assent)
+     * @description Child actor, own id only. Allowed once per grant that needs assent (409 otherwise). Audited; emits `consent.child_assent_recorded`.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+          type: components['schemas']['ConsentType'];
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['ChildAssentRequest'];
+        };
+      };
+      responses: {
+        /** @description Consent state after the answer */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ConsentState'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/child/consents/{type}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Consent guard for a child feature
+     * @description The child app calls this before opening a consent-guarded feature (AI, microphone, health, competition area). 403 CONSENT_REQUIRED with `details.consentType` and `details.reason` when the consent or a prerequisite (AI_PERSONALIZATION needs CROSS_BORDER_TRANSFER) is not in force.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          type: components['schemas']['ConsentType'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Consent in force */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ChildConsentCheck'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/privacy/export': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Export the household’s data
+     * @description Queues a job: the worker zips the household’s JSON into private storage, then notifies the parent. Returns the running job if one exists. 3 requests per household per day. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Queued (or already running) */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ExportJobResponse'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Too many attempts (RATE_LIMITED); see Retry-After */
+        429: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/privacy/export/{jobId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Export status and download link
+     * @description When READY, `downloadUrl` is a signed URL valid until `expiresAt` (24 hours after completion).
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          jobId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Job */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ExportJobResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description A dependency is unavailable (SERVICE_UNAVAILABLE) */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/privacy/overview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Privacy Center overview
+     * @description Accepted policy versions, recent exports, deletions and privacy requests.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Overview */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PrivacyOverview'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/delete-request': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Delete a child’s profile
+     * @description The child login is turned off and every session revoked at once; the profile is hard-deleted after the 14-day grace period, during which the parent can cancel (ledgers anonymised). Idempotent. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['DeleteRequest'];
+        };
+      };
+      responses: {
+        /** @description Deletion scheduled */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['DeletionResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/account/delete-request': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Delete the parent account and household data
+     * @description Owner: the household is hidden, every child login turned off and the parent signed out everywhere at once; until the purge the parent can still sign in, but every route except this one, its cancel, `GET /v1/me`, `GET /v1/policies/current` and `GET /v1/privacy/overview` answers 403 ACCOUNT_DISABLED (`details.reason` DELETION_PENDING). Everything is hard-deleted after the 14-day grace period (ledgers anonymised). Reachable in the app and from the public web page. Idempotent. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['DeleteRequest'];
+        };
+      };
+      responses: {
+        /** @description Deletion scheduled */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['DeletionResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/delete-request/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel a child’s pending deletion
+     * @description During the 14-day grace period: the job becomes CANCELLED (the purge skips it) and the child can sign in again (unless the parent had disabled the child before the request; sessions revoked by the request stay revoked). 404 when there is no pending deletion (including after the purge) or for another household’s child; 409 once the purge is due. Audited; emits `privacy.deletion_cancelled`.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Deletion cancelled */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['DeletionResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/account/delete-request/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel the pending account deletion
+     * @description During the 14-day grace period: the job becomes CANCELLED (the purge skips it), the account works again, the household is visible again and its children can sign in (except those disabled before the request or with their own pending deletion). 404 when there is no pending account deletion; 409 once the purge is due. Audited; emits `privacy.deletion_cancelled`.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Deletion cancelled */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['DeletionResponse'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -866,6 +1871,16 @@ export interface components {
         timezone: string;
       }[];
       adminPermissions: components['schemas']['AdminPermission'][];
+      /** @description Set while this account’s deletion request is in its grace period (DELETION_GRACE_DAYS, 14 days): the app then shows only the Privacy Center, where the request can be cancelled. */
+      pendingAccountDeletion: {
+        /**
+         * Format: uuid
+         * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+         */
+        id: string;
+        /** Format: date-time */
+        purgeAfter: string;
+      } | null;
     };
     /** @enum {string} */
     HouseholdRole: 'OWNER' | 'GUARDIAN';
@@ -914,6 +1929,15 @@ export interface components {
       lockedUntil: string | null;
       failedAttempts: number;
       activeSessions: number;
+      /** @description CORE_SERVICE consent is in force (granted on an accepted policy version). Without it the child cannot sign in. */
+      coreServiceConsent: boolean;
+      /** @description CROSS_BORDER_TRANSFER consent is in force. Required with CORE_SERVICE before the child can sign in. */
+      crossBorderTransferConsent: boolean;
+      /**
+       * Format: date-time
+       * @description Deletion requested: the login is off and the profile is purged at this time.
+       */
+      deletionScheduledFor: string | null;
       /** Format: date-time */
       createdAt: string;
       /** Format: date-time */
@@ -1020,6 +2044,242 @@ export interface components {
     };
     ChildLogoutResponse: {
       revoked: boolean;
+    };
+    PoliciesResponse: {
+      locale: components['schemas']['PolicyLocale'];
+      policies: components['schemas']['Policy'][];
+      minimumAcceptedVersions: {
+        PRIVACY_POLICY: number;
+        TERMS_OF_SERVICE: number;
+      };
+      /** @description The signed-in parent’s acceptances; null without a parent token. */
+      acceptances: components['schemas']['PolicyAcceptance'][] | null;
+      /** @description True when the parent must accept the current versions. */
+      needsAcceptance: boolean | null;
+    };
+    /** @enum {string} */
+    PolicyLocale: 'vi' | 'en';
+    Policy: {
+      type: components['schemas']['PolicyType'];
+      version: number;
+      locale: components['schemas']['PolicyLocale'];
+      title: string;
+      /** Format: date-time */
+      effectiveAt: string;
+      requiresReconsent: boolean;
+      /** @description Markdown. Version 1 is a DRAFT. */
+      contentMd: string;
+    };
+    /** @enum {string} */
+    PolicyType: 'PRIVACY_POLICY' | 'TERMS_OF_SERVICE';
+    PolicyAcceptance: {
+      type: components['schemas']['PolicyType'];
+      version: number;
+      locale: components['schemas']['PolicyLocale'];
+      /** Format: date-time */
+      acceptedAt: string;
+    };
+    PolicyAcceptResponse: {
+      acceptances: components['schemas']['PolicyAcceptance'][];
+    };
+    PolicyAcceptRequest: {
+      policies: {
+        type: components['schemas']['PolicyType'];
+        version: number;
+      }[];
+      locale?: components['schemas']['PolicyLocale'];
+      /**
+       * @description Stored only as a sha-256 hash.
+       * @example android-6f1c…
+       */
+      deviceId?: string;
+    };
+    StudentConsents: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      policy: {
+        /** @enum {string} */
+        type: 'PRIVACY_POLICY';
+        currentVersion: number;
+        minimumAcceptedVersion: number;
+      };
+      consents: components['schemas']['ConsentState'][];
+      /** @description All records, newest first. */
+      history: components['schemas']['ConsentRecord'][];
+    };
+    ConsentState: {
+      type: components['schemas']['ConsentType'];
+      effective: boolean;
+      reason: components['schemas']['ConsentDeniedReason'] | null;
+      record: components['schemas']['ConsentRecord'] | null;
+      /** @description A grant made now would need the child’s assent (age ≥ 7). */
+      childAssentRequiredNow: boolean;
+      /** @description With reason PREREQUISITE_MISSING: the consent this one depends on (AI_PERSONALIZATION needs CROSS_BORDER_TRANSFER). */
+      missingPrerequisite: components['schemas']['ConsentType'] | null;
+    };
+    /** @enum {string} */
+    ConsentType:
+      | 'CORE_SERVICE'
+      | 'CROSS_BORDER_TRANSFER'
+      | 'EDUCATION_ANALYTICS'
+      | 'AI_PERSONALIZATION'
+      | 'MICROPHONE_SPEAKING'
+      | 'HEALTH_CONNECT_ACTIVITY'
+      | 'COMPETITION_AREA';
+    /** @enum {string} */
+    ConsentDeniedReason:
+      | 'NOT_GRANTED'
+      | 'REVOKED'
+      | 'RECONSENT_REQUIRED'
+      | 'CHILD_ASSENT_PENDING'
+      | 'CHILD_ASSENT_DECLINED'
+      | 'PREREQUISITE_MISSING';
+    ConsentRecord: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      consentType: components['schemas']['ConsentType'];
+      policyVersion: number;
+      /** @enum {string} */
+      status: 'GRANTED' | 'REVOKED' | 'SUPERSEDED';
+      /** Format: date-time */
+      grantedAt: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      grantedByParentId: string | null;
+      /** Format: date-time */
+      revokedAt: string | null;
+      /** @enum {string|null} */
+      revokedByType: 'parent' | 'system' | null;
+      childAssentRequired: boolean;
+      childAssentStatus: components['schemas']['ChildAssentStatus'];
+      /** Format: date-time */
+      childAssentAt: string | null;
+    };
+    /** @enum {string} */
+    ChildAssentStatus: 'NOT_REQUIRED' | 'PENDING' | 'GIVEN' | 'DECLINED';
+    ConsentGrantRequest: {
+      /** @description The PRIVACY_POLICY version the parent was shown; must be the current one. */
+      policyVersion: number;
+      /**
+       * @description Stored only as a sha-256 hash.
+       * @example android-6f1c…
+       */
+      deviceId?: string;
+    };
+    ConsentRevokeRequest: {
+      /**
+       * @description Stored only as a sha-256 hash.
+       * @example android-6f1c…
+       */
+      deviceId?: string;
+    };
+    ChildAssentRequest: {
+      /** @enum {string} */
+      decision: 'GIVEN' | 'DECLINED';
+    };
+    ChildConsentCheck: {
+      type: components['schemas']['ConsentType'];
+      /** @enum {boolean} */
+      effective: true;
+    };
+    ExportJobResponse: {
+      job: components['schemas']['ExportJob'];
+    };
+    ExportJob: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** @enum {string} */
+      status: 'QUEUED' | 'RUNNING' | 'READY' | 'FAILED' | 'EXPIRED';
+      /** Format: date-time */
+      requestedAt: string;
+      /** Format: date-time */
+      startedAt: string | null;
+      /** Format: date-time */
+      completedAt: string | null;
+      /** Format: date-time */
+      expiresAt: string | null;
+      sizeBytes: number | null;
+      /** @description Signed URL to the zip, valid until expiresAt (24 h after completion). */
+      downloadUrl: string | null;
+    };
+    PrivacyOverview: {
+      acceptances: components['schemas']['PolicyAcceptance'][];
+      /** @description Latest 5 exports (downloadUrl is null here). */
+      exports: components['schemas']['ExportJob'][];
+      deletions: components['schemas']['DeletionJob'][];
+      requests: components['schemas']['PrivacyRequest'][];
+    };
+    DeletionJob: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** @enum {string} */
+      scope: 'CHILD' | 'ACCOUNT';
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string | null;
+      /** @enum {string} */
+      status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'FAILED';
+      /** Format: date-time */
+      requestedAt: string;
+      /** Format: date-time */
+      purgeAfter: string;
+      /** Format: date-time */
+      completedAt: string | null;
+      /**
+       * Format: date-time
+       * @description Set when the parent cancelled the request during the grace period (14 days).
+       */
+      cancelledAt: string | null;
+    };
+    PrivacyRequest: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** @enum {string} */
+      type: 'EXPORT' | 'DELETE_CHILD' | 'DELETE_ACCOUNT';
+      /** @enum {string} */
+      status: 'RECEIVED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'FAILED';
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string | null;
+      /** @enum {string} */
+      source: 'app' | 'web';
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      completedAt: string | null;
+    };
+    DeletionResponse: {
+      deletion: components['schemas']['DeletionJob'];
+    };
+    DeleteRequest: {
+      /**
+       * @description Must be true.
+       * @enum {boolean}
+       */
+      confirm: true;
+      /** @enum {string} */
+      source?: 'app' | 'web';
     };
   };
   responses: never;

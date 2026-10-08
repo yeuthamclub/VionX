@@ -2,6 +2,8 @@ import createClient, { type Middleware } from 'openapi-fetch';
 import type { components, paths } from './generated/openapi.ts';
 
 export type { paths as ApiPaths } from './generated/openapi.ts';
+/** Days a deletion request can be cancelled before the purge (admin deletion page copy). */
+export { DELETION_GRACE_DAYS } from '@vionx/domain';
 export type HealthResponse = components['schemas']['HealthResponse'];
 export type ApiErrorBody = components['schemas']['Error'];
 export type MeResponse = components['schemas']['Me'];
@@ -13,6 +15,16 @@ export type ChildLoginResponse = components['schemas']['ChildLoginResponse'];
 export type ChildProfile = components['schemas']['ChildProfile'];
 export type ChildSession = components['schemas']['ChildSession'];
 export type Avatar = components['schemas']['Avatar'];
+export type ConsentType = components['schemas']['ConsentType'];
+export type ConsentState = components['schemas']['ConsentState'];
+export type ConsentRecord = components['schemas']['ConsentRecord'];
+export type StudentConsents = components['schemas']['StudentConsents'];
+export type Policy = components['schemas']['Policy'];
+export type PolicyType = components['schemas']['PolicyType'];
+export type PoliciesResponse = components['schemas']['PoliciesResponse'];
+export type ExportJob = components['schemas']['ExportJob'];
+export type DeletionJob = components['schemas']['DeletionJob'];
+export type PrivacyOverview = components['schemas']['PrivacyOverview'];
 export const CHILD_SESSION_HEADER = 'x-vionx-child-session';
 
 export interface ApiClientOptions {

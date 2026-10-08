@@ -2,6 +2,8 @@
 
 export interface FunctionEnv {
   supabaseUrl: string;
+  /** URL clients reach Supabase on (signed Storage links). Defaults to SUPABASE_URL. */
+  publicSupabaseUrl: string;
   dbUrl: string;
   serviceRoleKey: string;
   serviceSecret: string;
@@ -25,6 +27,10 @@ export function readEnv(get: EnvGetter): FunctionEnv {
   const supabaseUrl = required('SUPABASE_URL').replace(/\/+$/, '');
   return {
     supabaseUrl,
+    publicSupabaseUrl: (get('VIONX_PUBLIC_SUPABASE_URL')?.trim() || supabaseUrl).replace(
+      /\/+$/,
+      '',
+    ),
     dbUrl: required('SUPABASE_DB_URL'),
     serviceRoleKey: get('SUPABASE_SERVICE_ROLE_KEY')?.trim() ?? '',
     serviceSecret: required('VIONX_SERVICE_SECRET'),

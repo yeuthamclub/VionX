@@ -35,6 +35,10 @@ export const MeResponseSchema = z
       z.object({ id: Uuid, name: z.string(), role: HouseholdRoleSchema, timezone: z.string() }),
     ),
     adminPermissions: z.array(AdminPermissionSchema),
+    pendingAccountDeletion: z.object({ id: Uuid, purgeAfter: DateTime }).nullable().openapi({
+      description:
+        'Set while this account’s deletion request is in its grace period (DELETION_GRACE_DAYS, 14 days): the app then shows only the Privacy Center, where the request can be cancelled.',
+    }),
   })
   .openapi('Me');
 export type MeResponse = z.infer<typeof MeResponseSchema>;
@@ -73,6 +77,17 @@ export const StudentSchema = z
     lockedUntil: DateTime.nullable(),
     failedAttempts: z.int().nonnegative(),
     activeSessions: z.int().nonnegative(),
+    coreServiceConsent: z.boolean().openapi({
+      description:
+        'CORE_SERVICE consent is in force (granted on an accepted policy version). Without it the child cannot sign in.',
+    }),
+    crossBorderTransferConsent: z.boolean().openapi({
+      description:
+        'CROSS_BORDER_TRANSFER consent is in force. Required with CORE_SERVICE before the child can sign in.',
+    }),
+    deletionScheduledFor: DateTime.nullable().openapi({
+      description: 'Deletion requested: the login is off and the profile is purged at this time.',
+    }),
     createdAt: DateTime,
     updatedAt: DateTime,
   })

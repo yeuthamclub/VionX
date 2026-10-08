@@ -8,6 +8,7 @@ const me = (adminPermissions: string[], email: string | null = 'a@vionx.local') 
   displayName: null,
   households: [],
   adminPermissions: adminPermissions as never,
+  pendingAccountDeletion: null,
 });
 
 describe('adminAccess', () => {

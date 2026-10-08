@@ -27,10 +27,12 @@ export function scoped(sql: Sql, householdIds: readonly string[]): Scope {
 
 /** Households a parent belongs to, OWNER first, then oldest membership. */
 export async function parentHouseholds(sql: Sql, userId: string): Promise<ParentHousehold[]> {
+  // A household whose account deletion is pending is no longer reachable (disabled until purge).
   const rows = await sql<{ household_id: string; role: HouseholdRole }[]>`
-    select household_id, role from app.household_memberships
-    where user_id = ${userId}
-    order by (role = 'OWNER') desc, created_at`;
+    select m.household_id, m.role from app.household_memberships m
+    join app.households h on h.id = m.household_id
+    where m.user_id = ${userId} and h.deletion_requested_at is null
+    order by (m.role = 'OWNER') desc, m.created_at`;
   return rows.map((r) => ({ householdId: r.household_id, role: r.role }));
 }
 

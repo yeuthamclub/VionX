@@ -19,6 +19,9 @@ export interface StudentRow {
   failed_attempts: number;
   locked_until: Date | null;
   active_sessions: number;
+  core_service_consent: boolean;
+  cross_border_transfer_consent: boolean;
+  deletion_scheduled_for: Date | null;
 }
 
 export interface HouseholdRow {
@@ -35,7 +38,7 @@ export interface AuditEntry {
   action: string;
   targetType: string;
   targetId: string;
-  householdId: string;
+  householdId: string | null;
   requestId: string;
   details?: Record<string, unknown>;
 }
@@ -51,7 +54,7 @@ export async function writeEvent(
   db: Db,
   e: {
     type: string;
-    householdId: string;
+    householdId: string | null;
     aggregateType: string;
     aggregateId: string;
     payload: Record<string, unknown>;
@@ -82,7 +85,7 @@ export async function householdsOf(db: Db, userId: string): Promise<HouseholdRow
     select h.id, h.name, h.timezone, m.role, h.created_at
     from app.household_memberships m
     join app.households h on h.id = m.household_id
-    where m.user_id = ${userId}
+    where m.user_id = ${userId} and h.deletion_requested_at is null
     order by (m.role = 'OWNER') desc, m.created_at`;
 }
 
@@ -97,6 +100,7 @@ export async function createHousehold(
     await ensureProfile(tx, userId);
     const existing = await tx`select 1 from app.household_memberships where user_id = ${userId}`;
     if (existing.length > 0) return null;
+    if (await accountDeletionPending(tx, userId)) return null;
     const [household] = await tx<{ id: string; created_at: Date }[]>`
       insert into app.households (name, timezone, created_by)
       values (${input.name}, ${input.timezone}, ${userId})
@@ -121,7 +125,18 @@ const studentColumns = (sql: Db) => sql`
   s.id, s.household_id, s.display_name, s.birth_year, s.grade, s.avatar, s.disabled_at,
   s.created_at, s.updated_at, c.child_login_id, c.failed_attempts, c.locked_until,
   (select count(*)::int from app.child_sessions cs
-     where cs.student_id = s.id and cs.revoked_at is null and cs.expires_at > now()) as active_sessions`;
+     where cs.student_id = s.id and cs.revoked_at is null and cs.expires_at > now()) as active_sessions,
+  exists (select 1 from app.consent_records cr
+     where cr.student_id = s.id and cr.household_id = s.household_id
+       and cr.consent_type = 'CORE_SERVICE' and cr.status = 'GRANTED'
+       and cr.policy_version >= app.policy_min_accepted_version('PRIVACY_POLICY')) as core_service_consent,
+  exists (select 1 from app.consent_records cr
+     where cr.student_id = s.id and cr.household_id = s.household_id
+       and cr.consent_type = 'CROSS_BORDER_TRANSFER' and cr.status = 'GRANTED'
+       and cr.policy_version >= app.policy_min_accepted_version('PRIVACY_POLICY')) as cross_border_transfer_consent,
+  (select dj.purge_after from app.data_deletion_jobs dj
+     where dj.student_id = s.id and dj.household_id = s.household_id
+       and dj.scope = 'CHILD' and dj.status = 'SCHEDULED') as deletion_scheduled_for`;
 
 export async function listStudents(sql: Db, scope: Scope): Promise<StudentRow[]> {
   return sql<StudentRow[]>`
@@ -258,4 +273,12 @@ export async function rateLimitHit(
   const [row] = await sql<{ hits: number }[]>`
     select ops.rate_limit_hit(${bucket}, ${windowSeconds}::integer) as hits`;
   return row!.hits;
+}
+
+/** The parent asked to delete their account (the account is disabled until the purge). */
+export async function accountDeletionPending(db: Db, userId: string): Promise<boolean> {
+  const rows = await db`
+    select 1 from app.data_deletion_jobs
+    where user_id = ${userId} and scope = 'ACCOUNT' and status = 'SCHEDULED'`;
+  return rows.length > 0;
 }

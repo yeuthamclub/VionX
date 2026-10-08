@@ -4,18 +4,36 @@ import { unwrap } from '../lib/api-error.ts';
 import { childToken, deviceMode } from './device.ts';
 import { parentAccessToken } from './supabase.ts';
 
-/** After a parent signs in: households → children list, otherwise create the household. */
+/** True when the parent still has to accept the current privacy policy / terms (M02). */
+async function needsPolicyAcceptance(): Promise<boolean> {
+  const policies = await unwrap(parentApi.GET('/api/v1/policies/current'));
+  return policies.needsAcceptance === true;
+}
+
+/**
+ * After a parent signs in: the onboarding consent step if the current policies are not accepted
+ * yet, then the children list, otherwise create the household.
+ */
 export async function routeSignedInParent(): Promise<void> {
-  const me = await unwrap(parentApi.GET('/api/v1/me'));
+  const [me, needsAcceptance] = await Promise.all([
+    unwrap(parentApi.GET('/api/v1/me')),
+    needsPolicyAcceptance(),
+  ]);
   await deviceMode.set('shared'); // a parent signing in on this phone leaves child-device mode
-  router.replace(me.households.length > 0 ? '/parent' : '/household-new');
+  // Account deletion pending: the Privacy Center, where the request can be cancelled, is all
+  // the account can reach.
+  if (me.pendingAccountDeletion) router.replace('/privacy');
+  else if (needsAcceptance) router.replace('/policies');
+  else router.replace(me.households.length > 0 ? '/parent' : '/household-new');
 }
 
 /**
  * Start-up route: child-device mode opens the child flow (home if the stored token is still
  * valid); otherwise a signed-in parent goes to Parent mode; everyone else sees the role chooser.
  */
-export async function startRoute(): Promise<'/child-home' | '/child' | '/parent' | '/welcome'> {
+export async function startRoute(): Promise<
+  '/child-home' | '/child' | '/parent' | '/policies' | '/privacy' | '/welcome'
+> {
   const mode = await deviceMode.get();
   const token = await childToken.get();
   if (token) {
@@ -29,7 +47,12 @@ export async function startRoute(): Promise<'/child-home' | '/child' | '/parent'
   if (mode === 'child') return '/child';
   if (await parentAccessToken()) {
     try {
-      const me = await unwrap(parentApi.GET('/api/v1/me'));
+      const [me, needsAcceptance] = await Promise.all([
+        unwrap(parentApi.GET('/api/v1/me')),
+        needsPolicyAcceptance(),
+      ]);
+      if (me.pendingAccountDeletion) return '/privacy';
+      if (me.households.length > 0 && needsAcceptance) return '/policies';
       return me.households.length > 0 ? '/parent' : '/welcome';
     } catch {
       return '/welcome';

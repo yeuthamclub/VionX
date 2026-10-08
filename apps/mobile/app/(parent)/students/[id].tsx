@@ -135,19 +135,27 @@ export default function StudentDetail() {
               onPress={() => resetPin(s)}
             />
             <Button
+              testID="open-consents"
+              label={t('student.consents')}
+              variant="secondary"
+              onPress={() => router.push({ pathname: '/consents/[id]', params: { id: s.id } })}
+            />
+            <Button
               testID="revoke-sessions"
               label={t('student.revoke')}
               variant="secondary"
               disabled={busy}
               onPress={revoke}
             />
-            <Button
-              testID="toggle-disabled"
-              label={s.status === 'disabled' ? t('student.enable') : t('student.disable')}
-              variant={s.status === 'disabled' ? 'secondary' : 'danger'}
-              disabled={busy}
-              onPress={() => toggle(s)}
-            />
+            {!s.deletionScheduledFor && (
+              <Button
+                testID="toggle-disabled"
+                label={s.status === 'disabled' ? t('student.enable') : t('student.disable')}
+                variant={s.status === 'disabled' ? 'secondary' : 'danger'}
+                disabled={busy}
+                onPress={() => toggle(s)}
+              />
+            )}
           </View>
         )}
       </StateView>

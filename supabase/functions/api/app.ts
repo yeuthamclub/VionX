@@ -8,6 +8,7 @@ import type { Actor } from '../_shared/actor.ts';
 import { ApiError, errorBody } from '../_shared/errors.ts';
 import type { ApiDeps } from './deps.ts';
 import { registerIdentityRoutes } from './identity/routes.ts';
+import { registerPrivacyRoutes } from './privacy/routes.ts';
 import { registerSystemRoutes } from './system/routes.ts';
 
 export type AppEnv = { Variables: { requestId: string; actor: Actor } };
@@ -25,6 +26,20 @@ export const OPENAPI_INFO: Parameters<OpenAPIHono['getOpenAPI31Document']>[0] = 
   },
   servers: [{ url: '/functions/v1', description: 'Supabase Edge Functions base' }],
 };
+
+/**
+ * Routes a parent can still call while their account deletion is in its grace period (DELETION_GRACE_DAYS):
+ * enough to see the pending deletion and cancel it. Everything else answers ACCOUNT_DISABLED.
+ */
+export const ACCOUNT_DELETION_PENDING_ROUTES: ReadonlySet<string> = new Set([
+  'GET /v1/health',
+  'GET /v1/openapi.json',
+  'GET /v1/me',
+  'GET /v1/policies/current',
+  'GET /v1/privacy/overview',
+  'POST /v1/account/delete-request',
+  'POST /v1/account/delete-request/cancel',
+]);
 
 export function createApp(deps: ApiDeps) {
   const app = new OpenAPIHono<AppEnv>({
@@ -48,6 +63,24 @@ export function createApp(deps: ApiDeps) {
   );
   app.use('*', async (c, next) => {
     c.set('actor', await deps.actors.resolve(c.req.raw));
+    await next();
+  });
+  // Account deletion pending: the parent may sign in (to cancel) but the account is otherwise off.
+  app.use('*', async (c, next) => {
+    const actor = c.get('actor');
+    if (actor.kind === 'parent' && deps.accountDeletions) {
+      const route = `${c.req.method} ${c.req.path.slice(BASE_PATH.length)}`;
+      if (!ACCOUNT_DELETION_PENDING_ROUTES.has(route)) {
+        const pending = await deps.accountDeletions.pending(actor.userId);
+        if (pending) {
+          throw new ApiError('ACCOUNT_DISABLED', 'Account deletion is pending', {
+            reason: 'DELETION_PENDING',
+            deletionId: pending.id,
+            purgeAfter: pending.purgeAfter.toISOString(),
+          });
+        }
+      }
+    }
     await next();
   });
   // Optional JSON bodies: an empty body sent with `content-type: application/json` reads as `{}`.
@@ -78,6 +111,7 @@ export function createApp(deps: ApiDeps) {
 
   registerSystemRoutes(app, deps);
   registerIdentityRoutes(app, deps);
+  registerPrivacyRoutes(app, deps);
 
   app.doc31('/v1/openapi.json', OPENAPI_INFO);
 

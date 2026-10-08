@@ -15,6 +15,7 @@
     "@vionx/ai": "workspace:*",
     "@vionx/contracts": "workspace:*",
     "@vionx/domain": "workspace:*",
+    "fflate": "0.8.2",
     "hash-wasm": "4.12.0",
     "hono": "^4.13.13",
     "jose": "6.2.12",
