@@ -106,6 +106,13 @@ const grant = (f: Family, type: string, studentId = f.student.id, version = poli
     },
   );
 
+/** Both consents a child needs to sign in, each its own explicit grant. */
+async function grantService(f: Family, studentId = f.student.id) {
+  for (const type of ['CORE_SERVICE', 'CROSS_BORDER_TRANSFER']) {
+    expect((await grant(f, type, studentId)).status).toBe(200);
+  }
+}
+
 const revoke = (f: Family, type: string, studentId = f.student.id) =>
   api('POST', `/students/${studentId}/consents/${type}/revoke`, { parent: f.parent });
 
@@ -224,7 +231,7 @@ describe('consents: CORE_SERVICE gate, assent, revocation', () => {
     const body = StudentConsentsResponseSchema.parse(
       (await api('GET', `/students/${f.student.id}/consents`, { parent: f.parent })).body,
     );
-    expect(body.consents.map((c) => c.type)).toHaveLength(6);
+    expect(body.consents.map((c) => c.type)).toHaveLength(7);
     expect(body.consents.every((c) => !c.effective && c.reason === 'NOT_GRANTED')).toBe(true);
     expect(body.history).toEqual([]);
     expect(body.policy.currentVersion).toBe(policyVersion);
@@ -252,6 +259,16 @@ describe('consents: CORE_SERVICE gate, assent, revocation', () => {
     const events = await sql`
       select 1 from ops.domain_events where type = 'consent.granted' and payload->>'studentId' = ${f.student.id}`;
     expect(events).toHaveLength(1);
+    // CORE_SERVICE alone is not enough: the cross-border transfer is its own explicit consent.
+    expect((await login(f)).body).toMatchObject({
+      code: 'CONSENT_REQUIRED',
+      details: { consentType: 'CROSS_BORDER_TRANSFER', reason: 'NOT_GRANTED' },
+    });
+    expect((await grant(f, 'CROSS_BORDER_TRANSFER')).status).toBe(200);
+    const student = StudentSchema.parse(
+      (await api('GET', `/students/${f.student.id}`, { parent: f.parent })).body,
+    );
+    expect(student).toMatchObject({ coreServiceConsent: true, crossBorderTransferConsent: true });
     token = await childToken(f);
   });
 
@@ -368,7 +385,7 @@ describe('consents: CORE_SERVICE gate, assent, revocation', () => {
       where action = 'consent.revoked' and target_id = ${f.student.id}
         and details->>'consentType' = 'CORE_SERVICE'`;
     expect(audit[0]!.details.revokedSessions).toBeGreaterThanOrEqual(1);
-    await grant(f, 'CORE_SERVICE');
+    await grantService(f);
     expect((await login(f)).status).toBe(200);
   });
 
@@ -393,6 +410,11 @@ describe('consents: CORE_SERVICE gate, assent, revocation', () => {
         (await grant(f, 'CORE_SERVICE', f.student.id, next)).body,
       );
       expect(regrant).toMatchObject({ effective: true, record: { policyVersion: next } });
+      expect((await login(f)).body).toMatchObject({
+        code: 'CONSENT_REQUIRED',
+        details: { consentType: 'CROSS_BORDER_TRANSFER', reason: 'RECONSENT_REQUIRED' },
+      });
+      expect((await grant(f, 'CROSS_BORDER_TRANSFER', f.student.id, next)).status).toBe(200);
       expect((await login(f)).status).toBe(200);
       const statuses = await sql<{ status: string }[]>`
         select status from app.consent_records
@@ -407,9 +429,101 @@ describe('consents: CORE_SERVICE gate, assent, revocation', () => {
           delete from app.consent_records where student_id = ${f.student.id} and policy_version = ${next}`;
         await tx`
           update app.consent_records set status = 'GRANTED', revoked_at = null, revoked_by_type = null
-          where student_id = ${f.student.id} and consent_type = 'CORE_SERVICE' and status = 'SUPERSEDED'`;
+          where student_id = ${f.student.id} and status = 'SUPERSEDED'
+            and consent_type in ('CORE_SERVICE', 'CROSS_BORDER_TRANSFER')`;
       });
     }
+  });
+});
+
+describe('cross-border transfer: its own consent, required to sign in and for AI', () => {
+  let f: Family;
+
+  beforeAll(async () => {
+    f = await newFamily('Xuyên biên giới', 2015);
+  });
+
+  it('accepting the policy and CORE_SERVICE do not imply it; login and AI wait for it', async () => {
+    const policies = PoliciesResponseSchema.parse((await api('GET', '/policies/current')).body);
+    const accept = await api(
+      'POST',
+      '/policies/accept',
+      { parent: f.parent },
+      { policies: policies.policies.map((p) => ({ type: p.type, version: p.version })) },
+    );
+    expect(accept.status).toBe(200);
+    expect((await grant(f, 'CORE_SERVICE')).status).toBe(200);
+    expect(
+      await sql`
+        select 1 from app.consent_records
+        where student_id = ${f.student.id} and consent_type = 'CROSS_BORDER_TRANSFER'`,
+    ).toHaveLength(0);
+    expect((await login(f)).body).toMatchObject({
+      code: 'CONSENT_REQUIRED',
+      details: { consentType: 'CROSS_BORDER_TRANSFER', reason: 'NOT_GRANTED' },
+    });
+    const ai = await grant(f, 'AI_PERSONALIZATION');
+    expect(ai.status).toBe(403);
+    expect(ai.body).toMatchObject({
+      code: 'CONSENT_REQUIRED',
+      details: { consentType: 'CROSS_BORDER_TRANSFER', reason: 'NOT_GRANTED' },
+    });
+  });
+
+  it('granted explicitly: the child signs in and AI works after assent', async () => {
+    const res = ConsentStateSchema.parse((await grant(f, 'CROSS_BORDER_TRANSFER')).body);
+    expect(res).toMatchObject({
+      type: 'CROSS_BORDER_TRANSFER',
+      effective: true,
+      childAssentRequiredNow: false,
+      missingPrerequisite: null,
+      record: { childAssentStatus: 'NOT_REQUIRED', grantedByParentId: f.parent.userId },
+    });
+    const token = await childToken(f);
+    expect(ConsentStateSchema.parse((await grant(f, 'AI_PERSONALIZATION')).body).reason).toBe(
+      'CHILD_ASSENT_PENDING',
+    );
+    await api(
+      'POST',
+      `/students/${f.student.id}/consents/AI_PERSONALIZATION/child-assent`,
+      { child: token },
+      { decision: 'GIVEN' },
+    );
+    expect((await api('GET', '/child/consents/AI_PERSONALIZATION', { child: token })).status).toBe(
+      200,
+    );
+  });
+
+  it('revoking it ends the service: sign-out, AI not in force, queued AI jobs dropped', async () => {
+    const token = await childToken(f);
+    await sql`select pgmq.send('ai_jobs', ${sql.json({ student_id: f.student.id, kind: 'tutor' })}::jsonb)`;
+    const res = ConsentStateSchema.parse((await revoke(f, 'CROSS_BORDER_TRANSFER')).body);
+    expect(res).toMatchObject({ effective: false, reason: 'REVOKED' });
+    expect((await api('GET', '/auth/child/session', { child: token })).status).toBe(401);
+    expect((await login(f)).body).toMatchObject({
+      code: 'CONSENT_REQUIRED',
+      details: { consentType: 'CROSS_BORDER_TRANSFER', reason: 'REVOKED' },
+    });
+    const state = StudentConsentsResponseSchema.parse(
+      (await api('GET', `/students/${f.student.id}/consents`, { parent: f.parent })).body,
+    );
+    expect(state.consents.find((c) => c.type === 'AI_PERSONALIZATION')).toMatchObject({
+      effective: false,
+      reason: 'PREREQUISITE_MISSING',
+      missingPrerequisite: 'CROSS_BORDER_TRANSFER',
+      record: { status: 'GRANTED' },
+    });
+    await tickWorker();
+    expect(
+      await sql`select 1 from pgmq.q_ai_jobs where message->>'student_id' = ${f.student.id}`,
+    ).toHaveLength(0);
+
+    // Granting it again restores login and AI (the AI grant and the child's assent still stand).
+    expect((await grant(f, 'CROSS_BORDER_TRANSFER')).status).toBe(200);
+    const again = await childToken(f);
+    expect((await api('GET', '/child/consents/AI_PERSONALIZATION', { child: again })).status).toBe(
+      200,
+    );
   });
 });
 
@@ -421,8 +535,8 @@ describe('data export', () => {
   beforeAll(async () => {
     a = await newFamily('Xuất A');
     b = await newFamily('Xuất B');
-    await grant(a, 'CORE_SERVICE');
-    await grant(b, 'CORE_SERVICE');
+    await grantService(a);
+    await grantService(b);
   });
 
   it('queues one job at a time', async () => {
@@ -522,8 +636,8 @@ describe('deletion', () => {
   beforeAll(async () => {
     a = await newFamily('Xoá A');
     b = await newFamily('Xoá B');
-    await grant(a, 'CORE_SERVICE');
-    await grant(b, 'CORE_SERVICE');
+    await grantService(a);
+    await grantService(b);
     // A stand-in ledger (M04 adds the real ones) registered for anonymisation.
     await sql.unsafe(`
       create table if not exists ${ledger} (
@@ -698,8 +812,8 @@ describe('cancelling a deletion during the 14-day grace period', () => {
   beforeAll(async () => {
     a = await newFamily('Huỷ A');
     b = await newFamily('Huỷ B');
-    await grant(a, 'CORE_SERVICE');
-    await grant(b, 'CORE_SERVICE');
+    await grantService(a);
+    await grantService(b);
     noHousehold = await signUpWithEmail(`it-${randomUUID()}@vionx.test`, `pw-${randomUUID()}`);
     createdUsers.push(noHousehold.userId);
   });
@@ -794,7 +908,7 @@ describe('cancelling a deletion during the 14-day grace period', () => {
 
   it('an account deletion is cancelled after signing in again: household, children and account work again', async () => {
     const f = await newFamily('Huỷ TK');
-    await grant(f, 'CORE_SERVICE');
+    await grantService(f);
     // A second child the parent had disabled before: it stays disabled.
     const second = StudentCreateResponseSchema.parse(
       (
@@ -865,7 +979,7 @@ describe('audit logs and events after a purge: pseudonymous for 1 year, then del
   it('scrubs personal fields at purge time and deletes the rows 365 days later', async () => {
     const f = await newFamily('Lưu giữ');
     const other = await newFamily('Lưu giữ khác');
-    await grant(f, 'CORE_SERVICE');
+    await grantService(f);
     // Rows a future module might write with personal fields in them.
     const [audit] = await sql<{ id: string }[]>`
       insert into ops.audit_logs (actor_type, actor_id, action, target_type, target_id, household_id, details)
@@ -969,8 +1083,8 @@ describe('cross-household isolation (404)', () => {
   beforeAll(async () => {
     a = await newFamily('Cách ly A');
     b = await newFamily('Cách ly B');
-    await grant(a, 'CORE_SERVICE');
-    await grant(b, 'CORE_SERVICE');
+    await grantService(a);
+    await grantService(b);
     bToken = await childToken(b);
     noHousehold = await signUpWithEmail(`it-${randomUUID()}@vionx.test`, `pw-${randomUUID()}`);
     createdUsers.push(noHousehold.userId);
@@ -1011,7 +1125,8 @@ describe('cross-household isolation (404)', () => {
       (await api('GET', `/students/${a.student.id}/consents`, { parent: a.parent })).body,
     );
     expect(state.consents.find((c) => c.type === 'CORE_SERVICE')!.effective).toBe(true);
-    expect(state.history).toHaveLength(1);
+    expect(state.consents.find((c) => c.type === 'CROSS_BORDER_TRANSFER')!.effective).toBe(true);
+    expect(state.history).toHaveLength(2);
     expect((await login(a)).status).toBe(200);
     const audits = await sql`
       select 1 from ops.audit_logs where target_id = ${a.student.id} and actor_id <> ${a.parent.userId}`;

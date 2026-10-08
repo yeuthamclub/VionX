@@ -131,12 +131,15 @@ export const vi = {
   'consent.CORE_SERVICE.title': 'Dịch vụ cốt lõi',
   'consent.CORE_SERVICE.body':
     'Tạo tài khoản cho con, lưu bài làm và tiến độ để VionX hoạt động. Bắt buộc để con đăng nhập.',
+  'consent.CROSS_BORDER_TRANSFER.title': 'Chuyển dữ liệu ra nước ngoài',
+  'consent.CROSS_BORDER_TRANSFER.body':
+    'Dữ liệu của con được lưu trên máy chủ Supabase tại Singapore. Nếu bố mẹ bật Trợ lý AI, câu hỏi được gửi tới Anthropic tại Hoa Kỳ. Bắt buộc để con đăng nhập; bố mẹ có thể từ chối, khi đó con không dùng được VionX.',
   'consent.EDUCATION_ANALYTICS.title': 'Phân tích học tập',
   'consent.EDUCATION_ANALYTICS.body':
     'Thống kê việc học của con để gợi ý bài phù hợp và gửi báo cáo cho bố mẹ.',
   'consent.AI_PERSONALIZATION.title': 'Trợ lý AI',
   'consent.AI_PERSONALIZATION.body':
-    'Gửi câu hỏi và tình trạng kỹ năng của con (không kèm tên) tới dịch vụ AI của Anthropic để giải thích và gợi ý.',
+    'Gửi câu hỏi và tình trạng kỹ năng của con (không kèm tên) tới dịch vụ AI của Anthropic tại Hoa Kỳ để giải thích và gợi ý. Cần bật Chuyển dữ liệu ra nước ngoài trước.',
   'consent.MICROPHONE_SPEAKING.title': 'Micro luyện nói',
   'consent.MICROPHONE_SPEAKING.body':
     'Dùng micro khi con tự bắt đầu bài luyện nói. Âm thanh được xử lý ngay trên máy, không tải lên.',
@@ -151,19 +154,23 @@ export const vi = {
   'consent.state.assentPending': 'Đã bật, chờ con đồng ý',
   'consent.state.assentDeclined': 'Con chưa đồng ý',
   'consent.state.reconsent': 'Cần bật lại theo chính sách mới',
+  'consent.state.prerequisite': 'Đã bật, cần bật Chuyển dữ liệu ra nước ngoài',
   'consent.record.GRANTED': 'Bật',
   'consent.record.REVOKED': 'Tắt',
   'consent.record.SUPERSEDED': 'Thay bằng lần bật mới',
   'consents.title': 'Quyền của {name}',
   'consents.onboarding':
-    'Bước cuối: cho phép {name} dùng VionX. Các quyền khác bố mẹ có thể bật sau.',
+    'Bước cuối: cho phép {name} dùng VionX. Hai quyền dưới đây được hỏi riêng; các quyền khác bố mẹ có thể bật sau.',
   'consents.turnOn': 'Bật',
   'consents.turnOff': 'Tắt',
   'consents.revokeConfirm': 'Tắt “{title}” cho {name}? Thay đổi có hiệu lực ngay.',
   'consents.revokeCoreConfirm':
     'Tắt dịch vụ cốt lõi? {name} sẽ bị đăng xuất và không đăng nhập được cho đến khi bố mẹ bật lại.',
+  'consents.revokeCrossBorderConfirm':
+    'Tắt chuyển dữ liệu ra nước ngoài? {name} sẽ bị đăng xuất, Trợ lý AI dừng, và con không đăng nhập được cho đến khi bố mẹ bật lại.',
   'consents.assentNote': 'Con từ 7 tuổi: tính năng chỉ chạy khi con cũng đồng ý trên máy của con.',
-  'consents.coreRequired': 'Cần bật Dịch vụ cốt lõi để con đăng nhập được.',
+  'consents.coreRequired':
+    'Cần bật Dịch vụ cốt lõi và Chuyển dữ liệu ra nước ngoài để con đăng nhập được.',
   'consents.continue': 'Tiếp tục',
   'consents.history': 'Lịch sử thay đổi',
   'consents.historyEmpty': 'Chưa có thay đổi nào.',

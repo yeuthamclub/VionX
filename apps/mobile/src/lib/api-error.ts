@@ -72,7 +72,8 @@ export function describeError(error: unknown, now: Date = new Date()): string {
         ? t('error.accountDeletionPending')
         : t('error.childDisabled');
     case 'CONSENT_REQUIRED':
-      return details.consentType === 'CORE_SERVICE'
+      return details.consentType === 'CORE_SERVICE' ||
+        details.consentType === 'CROSS_BORDER_TRANSFER'
         ? t('error.consentRequired')
         : t('error.featureConsent');
     default: {

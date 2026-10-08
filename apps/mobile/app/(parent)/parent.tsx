@@ -5,6 +5,7 @@ import type { HouseholdResponse, Student } from '@vionx/contracts/client';
 import { parentApi } from '../../src/api.ts';
 import { t, type MessageKey } from '../../src/i18n/index.ts';
 import { AppError, isAccountDeletionPending, unwrap } from '../../src/lib/api-error.ts';
+import { canChildSignIn } from '../../src/lib/consent.ts';
 import { childToken, deviceMode } from '../../src/state/device.ts';
 import { signOutGoogle } from '../../src/state/google.ts';
 import { signOutParent } from '../../src/state/supabase.ts';
@@ -95,7 +96,7 @@ export default function ParentHome() {
           theme.typography.caption,
           {
             color:
-              s.status === 'active' && s.coreServiceConsent
+              s.status === 'active' && canChildSignIn(s)
                 ? c.success
                 : s.status === 'disabled'
                   ? c.danger
@@ -103,7 +104,7 @@ export default function ParentHome() {
           },
         ]}
       >
-        {s.status === 'active' && !s.coreServiceConsent
+        {s.status === 'active' && !canChildSignIn(s)
           ? t('children.needsConsent')
           : t(`children.status.${s.status}` as MessageKey)}
       </Text>

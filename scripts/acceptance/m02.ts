@@ -1,7 +1,8 @@
 // M02 acceptance (TASK_PACKS/M02.md). Requires `pnpm db:start && pnpm fn:serve` (local only: signs
 // up throwaway email parents and simulates the 14-day clock in the database).
 //   pnpm acceptance m02
-// Flow: policies accepted → no child login before CORE_SERVICE consent → grant → login → AI consent
+// Flow: policies accepted → no child login before CORE_SERVICE and the separate CROSS_BORDER_TRANSFER
+// consent → grant both → login → AI consent (needs CROSS_BORDER_TRANSFER)
 // with child assent → revoke → CONSENT_REQUIRED and queued AI jobs dropped → export contains only the
 // own household → delete request blocks login at once → the parent can cancel it during the 14
 // days (login restored; another household gets 404) → pg_cron purge after 14 days anonymises
@@ -177,24 +178,44 @@ export const scenario: Scenario = {
       },
     },
     {
-      name: 'Parent grants CORE_SERVICE → child signs in',
+      name: 'Parent grants CORE_SERVICE, then the separate CROSS_BORDER_TRANSFER consent → child signs in',
       run: async () => {
         for (const f of [state.a!, state.b!]) {
           const res = await grant(f, 'CORE_SERVICE');
           assert(res.status === 200, `grant ${res.status} ${JSON.stringify(res.body)}`);
           assert(res.body.effective === true, 'not effective');
         }
+        // Accepting the policy and CORE_SERVICE do not imply the cross-border transfer.
+        const blocked = await childLogin(state.a!);
+        assert(
+          blocked.status === 403 && blocked.body.details?.consentType === 'CROSS_BORDER_TRANSFER',
+          `login without cross-border consent ${blocked.status} ${JSON.stringify(blocked.body)}`,
+        );
+        const aiFirst = await grant(state.a!, 'AI_PERSONALIZATION');
+        assert(
+          aiFirst.status === 403 && aiFirst.body.details?.consentType === 'CROSS_BORDER_TRANSFER',
+          `AI grant before cross-border consent ${aiFirst.status}`,
+        );
+        for (const f of [state.a!, state.b!]) {
+          const res = await grant(f, 'CROSS_BORDER_TRANSFER');
+          assert(res.status === 200 && res.body.effective === true, `cross-border ${res.status}`);
+        }
         const login = await childLogin(state.a!);
         assert(login.status === 200, `login ${login.status} ${JSON.stringify(login.body)}`);
         state.childToken = String(login.body.token);
         const audit = await sql`
-          select 1 from ops.audit_logs where action = 'consent.granted' and target_id = ${state.a!.child.id}`;
-        assert(audit.length === 1, `consent.granted audit rows ${audit.length}`);
-        return 'grant → 200 effective; child login → 200; audit consent.granted written';
+          select details->>'consentType' as type from ops.audit_logs
+          where action = 'consent.granted' and target_id = ${state.a!.child.id}`;
+        const types = audit.map((r) => r.type).sort();
+        assert(
+          JSON.stringify(types) === '["CORE_SERVICE","CROSS_BORDER_TRANSFER"]',
+          `consent.granted audit rows ${JSON.stringify(types)}`,
+        );
+        return 'CORE_SERVICE only → login 403 (CROSS_BORDER_TRANSFER), AI grant 403; CROSS_BORDER_TRANSFER granted separately → login 200; both audited';
       },
     },
     {
-      name: 'AI consent needs the child’s assent (age ≥ 7); revoking it returns CONSENT_REQUIRED and drops queued AI jobs',
+      name: 'AI consent (needs CROSS_BORDER_TRANSFER) needs the child’s assent (age ≥ 7); revoking it returns CONSENT_REQUIRED and drops queued AI jobs',
       run: async () => {
         const a = state.a!;
         const child = { child: state.childToken! };
@@ -469,7 +490,7 @@ export const scenario: Scenario = {
       },
     },
     {
-      name: 'Legal drafts (vi + en) marked DRAFT, disclosing Supabase Singapore and Anthropic, published as policy v1',
+      name: 'Legal drafts (vi + en) marked DRAFT, disclosing Supabase Singapore, Anthropic and the separate cross-border consent, published as policy v1',
       run: async () => {
         const out: string[] = [];
         for (const [file, type, locale] of [
@@ -493,6 +514,18 @@ export const scenario: Scenario = {
               (locale === 'vi' ? /\*\*14 ngày\*\*/ : /\*\*14 days\*\*/).test(text) &&
                 !/30 ngày|30 days/.test(text),
               `${file}: grace period must be 14 days`,
+            );
+            assert(
+              /CROSS_BORDER_TRANSFER/.test(text) &&
+                (locale === 'vi' ? /72 giờ/ : /72 hours/).test(text) &&
+                (locale === 'vi' ? /Bộ Công an/ : /Ministry of Public Security/).test(text),
+              `${file}: separate cross-border consent, 72-hour breach notice, MPS complaint`,
+            );
+          } else {
+            assert(
+              (locale === 'vi' ? /có lợi hơn cho bạn/ : /more favourable to you/).test(text) &&
+                /"AI"/.test(text),
+              `${file}: language precedence and AI labelling`,
             );
           }
           const [row] = await sql<{ content_md: string }[]>`

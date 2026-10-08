@@ -20,7 +20,7 @@ export function createHandlers(deps: HandlerDeps): EventHandlers {
     // Smoke event used by the M00 acceptance script; consuming it has no side effects.
     'system.ping': async () => {},
 
-    // CONTRACT §5: revocation cancels queued jobs of that scope (CORE_SERVICE: every scope).
+    // CONTRACT §5: revocation cancels queued jobs of that scope (CORE_SERVICE or CROSS_BORDER_TRANSFER: every scope).
     'consent.revoked': async (event, tx) => {
       const { studentId, consentType } = event.payload as {
         studentId: string;

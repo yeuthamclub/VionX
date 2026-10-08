@@ -12,6 +12,8 @@ import {
   canRecordAssent,
   ConsentRequiredError,
   evaluateConsent,
+  evaluateWithPrerequisites,
+  firstMissingConsent,
   planGrant,
   revocationEndsSessions,
   revocationScope,
@@ -38,7 +40,13 @@ import {
   stripPersonalFields,
   studentsToReenable,
 } from './privacy.ts';
-import { CONSENT_TYPES, isConsentType } from './types.ts';
+import {
+  CONSENT_TYPES,
+  isConsentType,
+  isServiceConsent,
+  REQUIRED_FOR_CHILD_LOGIN,
+  requiredConsentsFor,
+} from './types.ts';
 
 const granted = (overrides: Partial<ConsentRecordState> = {}): ConsentRecordState => ({
   status: 'GRANTED',
@@ -51,9 +59,10 @@ const granted = (overrides: Partial<ConsentRecordState> = {}): ConsentRecordStat
 const NOW = new Date('2026-10-08T03:00:00Z');
 
 describe('consent types', () => {
-  it('has the six v1 types (no camera, no heart rate)', () => {
+  it('has the seven v1 types (no camera, no heart rate)', () => {
     expect(CONSENT_TYPES).toEqual([
       'CORE_SERVICE',
+      'CROSS_BORDER_TRANSFER',
       'EDUCATION_ANALYTICS',
       'AI_PERSONALIZATION',
       'MICROPHONE_SPEAKING',
@@ -326,5 +335,62 @@ describe('retention of audit logs and events after a purge', () => {
     expect(isPersonalDataKey('deviceIdHash')).toBe(false);
     expect(isPersonalDataKey('householdId')).toBe(false);
     expect(stripPersonalFields('plain')).toBe('plain');
+  });
+});
+
+describe('cross-border transfer consent (Law 91/2025 Art. 9(4), legal review 2026-10-08)', () => {
+  it('is required with CORE_SERVICE before a child can sign in', () => {
+    expect(REQUIRED_FOR_CHILD_LOGIN).toEqual(['CORE_SERVICE', 'CROSS_BORDER_TRANSFER']);
+    expect(isServiceConsent('CROSS_BORDER_TRANSFER')).toBe(true);
+    expect(isServiceConsent('AI_PERSONALIZATION')).toBe(false);
+  });
+
+  it('is a prerequisite of AI personalisation only', () => {
+    expect(requiredConsentsFor('AI_PERSONALIZATION')).toEqual([
+      'AI_PERSONALIZATION',
+      'CROSS_BORDER_TRANSFER',
+    ]);
+    expect(requiredConsentsFor('MICROPHONE_SPEAKING')).toEqual(['MICROPHONE_SPEAKING']);
+  });
+
+  it('needs no child assent and its revocation ends the service', () => {
+    expect(childAssentRequired('CROSS_BORDER_TRANSFER', 2010, NOW)).toBe(false);
+    expect(revocationScope('CROSS_BORDER_TRANSFER')).toEqual(CONSENT_TYPES);
+    expect(revocationEndsSessions('CROSS_BORDER_TRANSFER')).toBe(true);
+  });
+
+  it('AI personalisation is not in force without the cross-border consent', () => {
+    const on = evaluateConsent(granted(), 1);
+    expect(evaluateWithPrerequisites('AI_PERSONALIZATION', { AI_PERSONALIZATION: on })).toEqual({
+      evaluation: { effective: false, reason: 'PREREQUISITE_MISSING' },
+      missingPrerequisite: 'CROSS_BORDER_TRANSFER',
+    });
+    expect(
+      evaluateWithPrerequisites('AI_PERSONALIZATION', {
+        AI_PERSONALIZATION: on,
+        CROSS_BORDER_TRANSFER: on,
+      }),
+    ).toEqual({ evaluation: on, missingPrerequisite: null });
+    // Its own state comes first; other types have no prerequisite.
+    expect(evaluateWithPrerequisites('AI_PERSONALIZATION', {}).evaluation).toEqual({
+      effective: false,
+      reason: 'NOT_GRANTED',
+    });
+    expect(evaluateWithPrerequisites('MICROPHONE_SPEAKING', { MICROPHONE_SPEAKING: on })).toEqual({
+      evaluation: on,
+      missingPrerequisite: null,
+    });
+  });
+
+  it('reports the first consent not in force', () => {
+    const on = evaluateConsent(granted(), 1);
+    const off = evaluateConsent(null, 1);
+    expect(
+      firstMissingConsent([
+        { type: 'AI_PERSONALIZATION', evaluation: on },
+        { type: 'CROSS_BORDER_TRANSFER', evaluation: off },
+      ]),
+    ).toEqual({ type: 'CROSS_BORDER_TRANSFER', reason: 'NOT_GRANTED' });
+    expect(firstMissingConsent([{ type: 'AI_PERSONALIZATION', evaluation: on }])).toBeNull();
   });
 });

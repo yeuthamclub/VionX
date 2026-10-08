@@ -20,6 +20,7 @@ export interface StudentRow {
   locked_until: Date | null;
   active_sessions: number;
   core_service_consent: boolean;
+  cross_border_transfer_consent: boolean;
   deletion_scheduled_for: Date | null;
 }
 
@@ -129,6 +130,10 @@ const studentColumns = (sql: Db) => sql`
      where cr.student_id = s.id and cr.household_id = s.household_id
        and cr.consent_type = 'CORE_SERVICE' and cr.status = 'GRANTED'
        and cr.policy_version >= app.policy_min_accepted_version('PRIVACY_POLICY')) as core_service_consent,
+  exists (select 1 from app.consent_records cr
+     where cr.student_id = s.id and cr.household_id = s.household_id
+       and cr.consent_type = 'CROSS_BORDER_TRANSFER' and cr.status = 'GRANTED'
+       and cr.policy_version >= app.policy_min_accepted_version('PRIVACY_POLICY')) as cross_border_transfer_consent,
   (select dj.purge_after from app.data_deletion_jobs dj
      where dj.student_id = s.id and dj.household_id = s.household_id
        and dj.scope = 'CHILD' and dj.status = 'SCHEDULED') as deletion_scheduled_for`;

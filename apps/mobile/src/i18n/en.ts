@@ -132,12 +132,15 @@ export const en: Record<keyof typeof vi, string> = {
   'consent.CORE_SERVICE.title': 'Core service',
   'consent.CORE_SERVICE.body':
     'Creates your child’s account and stores answers and progress so VionX works. Required to sign in.',
+  'consent.CROSS_BORDER_TRANSFER.title': 'Transfer of data abroad',
+  'consent.CROSS_BORDER_TRANSFER.body':
+    'Your child’s data is stored on Supabase servers in Singapore. If you turn on the AI assistant, questions are sent to Anthropic in the United States. Required for your child to sign in; you can decline, but your child then cannot use VionX.',
   'consent.EDUCATION_ANALYTICS.title': 'Learning analytics',
   'consent.EDUCATION_ANALYTICS.body':
     'Statistics about your child’s learning for suggestions and parent reports.',
   'consent.AI_PERSONALIZATION.title': 'AI assistant',
   'consent.AI_PERSONALIZATION.body':
-    'Sends questions and your child’s skill state (no name) to Anthropic’s AI service for explanations and hints.',
+    'Sends questions and your child’s skill state (no name) to Anthropic’s AI service in the United States for explanations and hints. Needs Transfer of data abroad first.',
   'consent.MICROPHONE_SPEAKING.title': 'Microphone for speaking practice',
   'consent.MICROPHONE_SPEAKING.body':
     'Uses the microphone when your child starts a speaking exercise. Audio stays on the phone.',
@@ -152,20 +155,24 @@ export const en: Record<keyof typeof vi, string> = {
   'consent.state.assentPending': 'On, waiting for your child to agree',
   'consent.state.assentDeclined': 'Your child has not agreed',
   'consent.state.reconsent': 'Turn on again under the new policy',
+  'consent.state.prerequisite': 'On, needs Transfer of data abroad',
   'consent.record.GRANTED': 'On',
   'consent.record.REVOKED': 'Off',
   'consent.record.SUPERSEDED': 'Replaced by a newer grant',
   'consents.title': '{name}’s permissions',
   'consents.onboarding':
-    'Last step: allow {name} to use VionX. You can turn on the other permissions later.',
+    'Last step: allow {name} to use VionX. The two permissions below are asked separately; you can turn on the others later.',
   'consents.turnOn': 'Turn on',
   'consents.turnOff': 'Turn off',
   'consents.revokeConfirm': 'Turn off “{title}” for {name}? This takes effect immediately.',
   'consents.revokeCoreConfirm':
     'Turn off the core service? {name} will be signed out and cannot sign in until you turn it back on.',
+  'consents.revokeCrossBorderConfirm':
+    'Turn off the transfer of data abroad? {name} will be signed out, the AI assistant stops, and your child cannot sign in until you turn it back on.',
   'consents.assentNote':
     'Children aged 7+: the feature runs only when your child also agrees on their phone.',
-  'consents.coreRequired': 'Turn on the core service so your child can sign in.',
+  'consents.coreRequired':
+    'Turn on the core service and the transfer of data abroad so your child can sign in.',
   'consents.continue': 'Continue',
   'consents.history': 'History',
   'consents.historyEmpty': 'No changes yet.',

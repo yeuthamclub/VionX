@@ -47,19 +47,24 @@ async function api(method: string, path: string, auth: Auth = {}, body?: unknown
 const login = (childLoginId: string, pin: string, deviceId = `it-${randomUUID()}`) =>
   api('POST', '/auth/child/login', {}, { childLoginId, pin, deviceId });
 
-/** M02: a child signs in only once CORE_SERVICE is granted on the current policy version. */
+/**
+ * M02: a child signs in only once CORE_SERVICE and CROSS_BORDER_TRANSFER are granted (each its own
+ * consent) on the current policy version.
+ */
 async function grantCoreService(parent: AuthSession, studentId: string) {
   const policies = await api('GET', '/policies/current');
   const version = (policies.body.policies as { type: string; version: number }[]).find(
     (p) => p.type === 'PRIVACY_POLICY',
   )!.version;
-  const res = await api(
-    'POST',
-    `/students/${studentId}/consents/CORE_SERVICE/grant`,
-    { parent },
-    { policyVersion: version },
-  );
-  expect(res.status).toBe(200);
+  for (const type of ['CORE_SERVICE', 'CROSS_BORDER_TRANSFER']) {
+    const res = await api(
+      'POST',
+      `/students/${studentId}/consents/${type}/grant`,
+      { parent },
+      { policyVersion: version },
+    );
+    expect(res.status).toBe(200);
+  }
 }
 
 async function newParent(): Promise<AuthSession> {
@@ -170,6 +175,7 @@ describe('household and children', () => {
         status: 'active',
         activeSessions: 0,
         coreServiceConsent: false,
+        crossBorderTransferConsent: false,
         deletionScheduledFor: null,
       });
       await grantCoreService(parent, student.id);
@@ -382,10 +388,10 @@ describe('cross-household isolation (404)', () => {
     expect(own).toMatchObject({ displayName: 'A child', status: 'active' });
     expect((await login(familyA.credentials.childLoginId, '4826')).status).toBe(200);
     expect((await login(familyA.credentials.childLoginId, '1111')).status).toBe(401);
-    // Only family A's own consent grant is on record; nothing by the other parents.
+    // Only family A's own two consent grants are on record; nothing by the other parents.
     const audits = await sql<{ action: string }[]>`
       select action from ops.audit_logs where target_id = ${familyA.student.id}`;
-    expect(audits.map((a) => a.action)).toEqual(['consent.granted']);
+    expect(audits.map((a) => a.action)).toEqual(['consent.granted', 'consent.granted']);
   });
 
   it('a household lists only its own children', async () => {

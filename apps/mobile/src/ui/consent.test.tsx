@@ -10,6 +10,7 @@ const base: ConsentState = {
   reason: 'NOT_GRANTED',
   record: null,
   childAssentRequiredNow: true,
+  missingPrerequisite: null,
 };
 
 describe('ConsentRow', () => {

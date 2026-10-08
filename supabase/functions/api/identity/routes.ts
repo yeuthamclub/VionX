@@ -16,6 +16,7 @@ import {
   sessionExpiry,
   validateHousehold,
   validateStudentProfile,
+  type ConsentType,
   type RateLimitRule,
 } from '@vionx/domain';
 import { requireActor, type Actor } from '../../_shared/actor.ts';
@@ -184,7 +185,7 @@ const childLoginRoute = createRoute({
   tags: ['identity'],
   summary: 'Child sign-in with login id + PIN',
   description:
-    'Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id. A correct PIN without CORE_SERVICE consent in force answers 403 CONSENT_REQUIRED.',
+    'Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id. A correct PIN without CORE_SERVICE and CROSS_BORDER_TRANSFER consent in force answers 403 CONSENT_REQUIRED (`details.consentType` names the missing one).',
   request: body(ChildLoginRequestSchema),
   responses: {
     200: json(ChildLoginResponseSchema, 'Signed in'),
@@ -240,6 +241,7 @@ function toStudent(row: repo.StudentRow, now: Date): Student {
     failedAttempts: row.failed_attempts,
     activeSessions: row.active_sessions,
     coreServiceConsent: row.core_service_consent,
+    crossBorderTransferConsent: row.cross_border_transfer_consent,
     deletionScheduledFor: iso(row.deletion_scheduled_for),
     createdAt: iso(row.created_at)!,
     updatedAt: iso(row.updated_at)!,
@@ -580,16 +582,18 @@ export function registerIdentityRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
           : { kind: 'wrong' as const, remaining: attemptsRemaining(next) };
       }
       if (current.disabled_at) return { kind: 'disabled' as const };
-      // CORE_SERVICE must be in force before any child can sign in (TASK_PACKS/M02).
-      const consent = await evaluateStudentConsent(
-        tx,
-        scoped(sql, [current.household_id]),
-        current.student_id,
-        REQUIRED_FOR_CHILD_LOGIN,
-        t,
-      );
-      if (!consent.evaluation.effective) {
-        return { kind: 'consent' as const, reason: consent.evaluation.reason };
+      // CORE_SERVICE and CROSS_BORDER_TRANSFER must be in force before any child can sign in.
+      for (const type of REQUIRED_FOR_CHILD_LOGIN) {
+        const consent = await evaluateStudentConsent(
+          tx,
+          scoped(sql, [current.household_id]),
+          current.student_id,
+          type,
+          t,
+        );
+        if (!consent.evaluation.effective) {
+          return { kind: 'consent' as const, type, reason: consent.evaluation.reason };
+        }
       }
       const cleared = clearedLock();
       if (state.failedAttempts !== 0 || state.lockedUntil !== null) {
@@ -607,7 +611,7 @@ export function registerIdentityRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
     })) as
       | { kind: 'invalid' }
       | { kind: 'disabled' }
-      | { kind: 'consent'; reason: string }
+      | { kind: 'consent'; type: ConsentType; reason: string }
       | { kind: 'locked'; until: Date }
       | { kind: 'wrong'; remaining: number }
       | { kind: 'ok'; token: string; expiresAt: Date; current: repo.CredentialRow };
@@ -630,7 +634,7 @@ export function registerIdentityRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
       case 'disabled':
         throw new ApiError('ACCOUNT_DISABLED', 'This login is turned off. Ask a parent.');
       case 'consent':
-        throw consentRequired(REQUIRED_FOR_CHILD_LOGIN, result.reason);
+        throw consentRequired(result.type, result.reason);
       case 'ok':
         return c.json(
           {

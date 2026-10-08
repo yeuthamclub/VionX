@@ -7,6 +7,7 @@ import {
   ConsentRequiredError,
   evaluateConsent,
   minimumAcceptedVersion,
+  requiredConsentsFor,
   type ChildAssentStatus,
   type ConsentEvaluation,
   type ConsentRecordStatus,
@@ -106,7 +107,11 @@ export async function evaluateStudentConsent(
   return { evaluation, record, minimumVersion };
 }
 
-/** Throws CONSENT_REQUIRED (403, details {consentType, reason}) unless the consent is in force. */
+/**
+ * Throws CONSENT_REQUIRED (403, details {consentType, reason}) unless the consent and its
+ * prerequisites (`requiredConsentsFor`: AI_PERSONALIZATION also needs CROSS_BORDER_TRANSFER) are
+ * in force. `consentType` names the first missing one.
+ */
 export async function requireConsent(
   db: Db,
   scope: Scope,
@@ -114,12 +119,20 @@ export async function requireConsent(
   type: ConsentType,
   now: Date,
 ): Promise<void> {
-  const { record, minimumVersion } = await evaluateStudentConsent(db, scope, studentId, type, now);
-  try {
-    assertConsent(type, record ? toRecordState(record) : null, minimumVersion);
-  } catch (error) {
-    if (error instanceof ConsentRequiredError) throw consentRequired(type, error.reason);
-    throw error;
+  for (const required of requiredConsentsFor(type)) {
+    const { record, minimumVersion } = await evaluateStudentConsent(
+      db,
+      scope,
+      studentId,
+      required,
+      now,
+    );
+    try {
+      assertConsent(required, record ? toRecordState(record) : null, minimumVersion);
+    } catch (error) {
+      if (error instanceof ConsentRequiredError) throw consentRequired(required, error.reason);
+      throw error;
+    }
   }
 }
 

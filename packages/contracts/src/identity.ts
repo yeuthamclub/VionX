@@ -81,6 +81,10 @@ export const StudentSchema = z
       description:
         'CORE_SERVICE consent is in force (granted on an accepted policy version). Without it the child cannot sign in.',
     }),
+    crossBorderTransferConsent: z.boolean().openapi({
+      description:
+        'CROSS_BORDER_TRANSFER consent is in force. Required with CORE_SERVICE before the child can sign in.',
+    }),
     deletionScheduledFor: DateTime.nullable().openapi({
       description: 'Deletion requested: the login is off and the profile is purged at this time.',
     }),

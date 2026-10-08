@@ -7,6 +7,7 @@ import { parentApi } from '../../src/api.ts';
 import { t, type MessageKey } from '../../src/i18n/index.ts';
 import { AppError, describeError, unwrap } from '../../src/lib/api-error.ts';
 import {
+  canChildSignIn,
   formatDay,
   formatDayTime,
   pendingDeletions,
@@ -269,14 +270,14 @@ export default function PrivacyCenter() {
                     <Text
                       style={[
                         theme.typography.caption,
-                        { color: s.coreServiceConsent ? c.success : c.warning },
+                        { color: canChildSignIn(s) ? c.success : c.warning },
                       ]}
                     >
                       {s.deletionScheduledFor
                         ? t('consents.deletionScheduled', {
                             date: formatDay(s.deletionScheduledFor),
                           })
-                        : s.coreServiceConsent
+                        : canChildSignIn(s)
                           ? t('privacy.childOn')
                           : t('privacy.childOff')}
                     </Text>

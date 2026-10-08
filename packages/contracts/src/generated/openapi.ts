@@ -642,7 +642,7 @@ export interface paths {
     put?: never;
     /**
      * Child sign-in with login id + PIN
-     * @description Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id. A correct PIN without CORE_SERVICE consent in force answers 403 CONSENT_REQUIRED.
+     * @description Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id. A correct PIN without CORE_SERVICE and CROSS_BORDER_TRANSFER consent in force answers 403 CONSENT_REQUIRED (`details.consentType` names the missing one).
      */
     post: {
       parameters: {
@@ -1020,7 +1020,7 @@ export interface paths {
     put?: never;
     /**
      * Grant a consent for a child
-     * @description Recorded against the current PRIVACY_POLICY version (409 if `policyVersion` is not current). Idempotent for the same version; a grant on a newer version supersedes the old record. AI, microphone and health grants for a child aged 7+ wait for the child’s assent. Audited; emits `consent.granted`.
+     * @description Recorded against the current PRIVACY_POLICY version (409 if `policyVersion` is not current). Idempotent for the same version; a grant on a newer version supersedes the old record. AI, microphone and health grants for a child aged 7+ wait for the child’s assent. CROSS_BORDER_TRANSFER is its own explicit grant (never implied by accepting the policy); AI_PERSONALIZATION needs it in force first (403 CONSENT_REQUIRED, `details.consentType` CROSS_BORDER_TRANSFER). Audited; emits `consent.granted`.
      */
     post: {
       parameters: {
@@ -1065,6 +1065,15 @@ export interface paths {
             'application/json': components['schemas']['Error'];
           };
         };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
         /** @description Not found, or not in your household (NOT_FOUND) */
         404: {
           headers: {
@@ -1102,7 +1111,7 @@ export interface paths {
     put?: never;
     /**
      * Revoke a consent
-     * @description Takes effect immediately and emits `consent.revoked`; the worker drops queued jobs of that scope. Revoking CORE_SERVICE also signs the child out everywhere. Idempotent. Audited.
+     * @description Takes effect immediately and emits `consent.revoked`; the worker drops queued jobs of that scope. Revoking CORE_SERVICE or CROSS_BORDER_TRANSFER ends the service: the child is signed out everywhere and every consent-scoped queue is cleared. Idempotent. Audited.
      */
     post: {
       parameters: {
@@ -1264,7 +1273,7 @@ export interface paths {
     };
     /**
      * Consent guard for a child feature
-     * @description The child app calls this before opening a consent-guarded feature (AI, microphone, health, competition area). 403 CONSENT_REQUIRED with `details.reason` when the consent is not in force.
+     * @description The child app calls this before opening a consent-guarded feature (AI, microphone, health, competition area). 403 CONSENT_REQUIRED with `details.consentType` and `details.reason` when the consent or a prerequisite (AI_PERSONALIZATION needs CROSS_BORDER_TRANSFER) is not in force.
      */
     get: {
       parameters: {
@@ -1922,6 +1931,8 @@ export interface components {
       activeSessions: number;
       /** @description CORE_SERVICE consent is in force (granted on an accepted policy version). Without it the child cannot sign in. */
       coreServiceConsent: boolean;
+      /** @description CROSS_BORDER_TRANSFER consent is in force. Required with CORE_SERVICE before the child can sign in. */
+      crossBorderTransferConsent: boolean;
       /**
        * Format: date-time
        * @description Deletion requested: the login is off and the profile is purged at this time.
@@ -2106,10 +2117,13 @@ export interface components {
       record: components['schemas']['ConsentRecord'] | null;
       /** @description A grant made now would need the child’s assent (age ≥ 7). */
       childAssentRequiredNow: boolean;
+      /** @description With reason PREREQUISITE_MISSING: the consent this one depends on (AI_PERSONALIZATION needs CROSS_BORDER_TRANSFER). */
+      missingPrerequisite: components['schemas']['ConsentType'] | null;
     };
     /** @enum {string} */
     ConsentType:
       | 'CORE_SERVICE'
+      | 'CROSS_BORDER_TRANSFER'
       | 'EDUCATION_ANALYTICS'
       | 'AI_PERSONALIZATION'
       | 'MICROPHONE_SPEAKING'
@@ -2121,7 +2135,8 @@ export interface components {
       | 'REVOKED'
       | 'RECONSENT_REQUIRED'
       | 'CHILD_ASSENT_PENDING'
-      | 'CHILD_ASSENT_DECLINED';
+      | 'CHILD_ASSENT_DECLINED'
+      | 'PREREQUISITE_MISSING';
     ConsentRecord: {
       /**
        * Format: uuid

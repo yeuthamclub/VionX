@@ -1,5 +1,5 @@
 import type { ChildAssentStatus, ConsentRecordStatus, ConsentType } from './types.ts';
-import { CONSENT_TYPES } from './types.ts';
+import { CONSENT_PREREQUISITES, CONSENT_TYPES, isServiceConsent } from './types.ts';
 
 /** The latest consent record of one (child, type), as stored. */
 export interface ConsentRecordState {
@@ -14,7 +14,9 @@ export type ConsentDeniedReason =
   | 'REVOKED'
   | 'RECONSENT_REQUIRED'
   | 'CHILD_ASSENT_PENDING'
-  | 'CHILD_ASSENT_DECLINED';
+  | 'CHILD_ASSENT_DECLINED'
+  /** Granted, but a consent it depends on (CONSENT_PREREQUISITES) is not in force. */
+  | 'PREREQUISITE_MISSING';
 
 export type ConsentEvaluation =
   { effective: true } | { effective: false; reason: ConsentDeniedReason };
@@ -97,13 +99,49 @@ export function canRecordAssent(active: ConsentRecordState | null | undefined): 
 }
 
 /**
- * Queued work to cancel when `type` is revoked. CORE_SERVICE ends the whole service for the child,
- * so every consent-scoped queue is cleared and the child's sessions are revoked.
+ * Queued work to cancel when `type` is revoked. CORE_SERVICE and CROSS_BORDER_TRANSFER end the
+ * whole service for the child, so every consent-scoped queue is cleared and the child's sessions
+ * are revoked. Revoking CROSS_BORDER_TRANSFER also stops AI personalisation (its prerequisite).
  */
 export function revocationScope(type: ConsentType): readonly ConsentType[] {
-  return type === 'CORE_SERVICE' ? CONSENT_TYPES : [type];
+  return isServiceConsent(type) ? CONSENT_TYPES : [type];
 }
 
 export function revocationEndsSessions(type: ConsentType): boolean {
-  return type === 'CORE_SERVICE';
+  return isServiceConsent(type);
+}
+
+/**
+ * Combines the evaluations of a feature's consents (`requiredConsentsFor`): the first one not in
+ * force is reported, or null when all are.
+ */
+export function firstMissingConsent(
+  evaluations: readonly { type: ConsentType; evaluation: ConsentEvaluation }[],
+): { type: ConsentType; reason: ConsentDeniedReason } | null {
+  for (const { type, evaluation } of evaluations) {
+    if (!evaluation.effective) return { type, reason: evaluation.reason };
+  }
+  return null;
+}
+
+/**
+ * A consent's own evaluation combined with its prerequisites (e.g. AI_PERSONALIZATION needs
+ * CROSS_BORDER_TRANSFER): in force only when it and every prerequisite are. `missingPrerequisite`
+ * names the first prerequisite not in force.
+ */
+export function evaluateWithPrerequisites(
+  type: ConsentType,
+  evaluations: Readonly<Partial<Record<ConsentType, ConsentEvaluation>>>,
+): { evaluation: ConsentEvaluation; missingPrerequisite: ConsentType | null } {
+  const own = evaluations[type] ?? { effective: false, reason: 'NOT_GRANTED' };
+  if (!own.effective) return { evaluation: own, missingPrerequisite: null };
+  for (const prerequisite of CONSENT_PREREQUISITES[type] ?? []) {
+    if (!evaluations[prerequisite]?.effective) {
+      return {
+        evaluation: { effective: false, reason: 'PREREQUISITE_MISSING' },
+        missingPrerequisite: prerequisite,
+      };
+    }
+  }
+  return { evaluation: own, missingPrerequisite: null };
 }

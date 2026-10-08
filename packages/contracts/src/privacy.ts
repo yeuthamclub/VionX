@@ -32,6 +32,7 @@ export const ConsentDeniedReasonSchema = z
     'RECONSENT_REQUIRED',
     'CHILD_ASSENT_PENDING',
     'CHILD_ASSENT_DECLINED',
+    'PREREQUISITE_MISSING',
   ])
   .openapi('ConsentDeniedReason');
 
@@ -127,6 +128,10 @@ export const ConsentStateSchema = z
     childAssentRequiredNow: z
       .boolean()
       .openapi({ description: 'A grant made now would need the child’s assent (age ≥ 7).' }),
+    missingPrerequisite: z.union([ConsentTypeSchema, z.null()]).openapi({
+      description:
+        'With reason PREREQUISITE_MISSING: the consent this one depends on (AI_PERSONALIZATION needs CROSS_BORDER_TRANSFER).',
+    }),
   })
   .openapi('ConsentState');
 export type ConsentState = z.infer<typeof ConsentStateSchema>;

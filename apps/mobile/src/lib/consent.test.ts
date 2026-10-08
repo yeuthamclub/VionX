@@ -5,6 +5,7 @@ import { vi } from '../i18n/vi.ts';
 import { CONSENT_TYPES } from '@vionx/domain';
 import { AppError, describeError, isAccountDeletionPending } from './api-error.ts';
 import {
+  canChildSignIn,
   consentBodyKey,
   consentStateKey,
   consentTitleKey,
@@ -36,6 +37,7 @@ const state = (overrides: Partial<ConsentState>): ConsentState => ({
   reason: 'NOT_GRANTED',
   record: null,
   childAssentRequiredNow: true,
+  missingPrerequisite: null,
   ...overrides,
 });
 
@@ -51,6 +53,23 @@ describe('consent helpers', () => {
     );
     expect(consentStateKey(state({ reason: 'RECONSENT_REQUIRED' }))).toBe(
       'consent.state.reconsent',
+    );
+    expect(
+      consentStateKey(
+        state({ reason: 'PREREQUISITE_MISSING', missingPrerequisite: 'CROSS_BORDER_TRANSFER' }),
+      ),
+    ).toBe('consent.state.prerequisite');
+  });
+
+  it('a child can sign in only with both service consents', () => {
+    expect(canChildSignIn({ coreServiceConsent: true, crossBorderTransferConsent: true })).toBe(
+      true,
+    );
+    expect(canChildSignIn({ coreServiceConsent: true, crossBorderTransferConsent: false })).toBe(
+      false,
+    );
+    expect(canChildSignIn({ coreServiceConsent: false, crossBorderTransferConsent: true })).toBe(
+      false,
     );
   });
 
@@ -99,6 +118,9 @@ describe('consent helpers', () => {
         details: { consentType, reason: 'NOT_GRANTED' },
       });
     expect(describeError(err('CORE_SERVICE'))).toBe(
+      'Bố mẹ cần cho phép con dùng VionX trước khi con đăng nhập.',
+    );
+    expect(describeError(err('CROSS_BORDER_TRANSFER'))).toBe(
       'Bố mẹ cần cho phép con dùng VionX trước khi con đăng nhập.',
     );
     expect(describeError(err('AI_PERSONALIZATION'))).toBe('Tính năng này cần bố mẹ cho phép.');

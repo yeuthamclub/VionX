@@ -2,8 +2,9 @@
 
 ## Summary
 Before a child can use VionX, the parent now reads and accepts the privacy policy and terms (version 1,
-DRAFT) and turns on "core service" for each child; without that consent the child's ID + PIN login
-answers `CONSENT_REQUIRED`. Each child has a consent screen with the six consent types, the full
+DRAFT), turns on "core service" for each child and then, as its own step, consents to the transfer of
+the child's data abroad (`CROSS_BORDER_TRANSFER`); without both consents the child's ID + PIN login
+answers `CONSENT_REQUIRED`. Each child has a consent screen with the seven consent types, the full
 history, and an assent card on the child's home for AI, microphone and health features when the child
 is 7 or older. Revoking a consent takes effect at once (guarded calls answer `CONSENT_REQUIRED`, queued
 jobs of that scope are dropped; revoking core service signs the child out). The Privacy Center lets a
@@ -93,17 +94,35 @@ account-deletion URL is the public admin page `/delete-account`.
     account, and pending deletions with the days left and "Hủy yêu cầu xóa". A parent whose account
     deletion is pending is routed there after sign-in and sees only that section.
   - Child assent screen and an assent card on the child's home.
+- `0006_cross_border_consent.sql` (legal review 2026-10-08): adds `CROSS_BORDER_TRANSFER` to the
+  consent type checks of `app.consent_records` and `ops.consent_job_queues`; `ops.cancel_consent_jobs`
+  treats it like CORE_SERVICE (revoking it drops every queued job of the child).
+- Cross-border consent (code): `REQUIRED_FOR_CHILD_LOGIN`, `CONSENT_PREREQUISITES`,
+  `requiredConsentsFor`, `evaluateWithPrerequisites` in `@vionx/domain`; `ConsentState.missingPrerequisite`
+  and `Student.crossBorderTransferConsent` in contracts; child login and `requireConsent` check every
+  required consent; the grant route refuses AI_PERSONALIZATION (403 `CONSENT_REQUIRED`) until
+  CROSS_BORDER_TRANSFER is granted; the mobile consent step shows both required rows and Continue
+  needs both.
 - Admin screens: the public `/delete-account` route, outside the admin shell, with phone OTP or Google
   verification. Its text says the request can be cancelled in the app within 14 days.
 - Config / env vars:
   - `VIONX_PUBLIC_SUPABASE_URL` (functions): the base URL for signed download links.
   - Test OTP `84900000004` (Maestro M02).
-  - Seed: the demo parent has accepted v1, and the demo children have CORE_SERVICE.
+  - Seed: the demo parent has accepted v1, and the demo children have CORE_SERVICE and
+    CROSS_BORDER_TRANSFER.
   - CI runs `pnpm acceptance m02`.
 - Legal: `docs/legal/{privacy-policy,terms}.{vi,en}.md`, marked DRAFT. They disclose Supabase hosting
   in Singapore and AI processing by Anthropic. Follow-up edits are limited to: cancellation during
   the grace period and 1-year retention of pseudonymous logs (privacy policy, section 6), and 30 → 14
-  days (privacy policy and terms).
+  days (privacy policy and terms). Then, per the legal review (`VionX_ra_soat_phap_ly_vi.md`, sections
+  2-3): a table of every recipient abroad (Supabase, Anthropic, Google, [SMS provider], Sentry) with
+  purpose, data, country and safeguards; the separate cross-border consent; possibly sensitive data
+  (Health Connect, learning analytics) and its separate consents; response deadlines for data-subject
+  requests; 72-hour breach notice to MPS and to parents; a DPO placeholder; the right to complain to
+  MPS; "pseudonymised" instead of "anonymous" for logs; AI-content labelling; in the terms, a liability
+  clause that does not exclude mandatory liability, notice of changes, consumer complaint channels,
+  and "the version more favourable to you applies" between vi and en. Nothing about moving data to
+  Vietnam (pending decision). Migration 0004 holds the same text.
 
 ## Evidence
 All checks ran after `supabase db reset`.
@@ -112,16 +131,16 @@ All checks ran after `supabase db reset`.
 
   | Package | Tests |
   |---|---|
-  | domain | 54 |
+  | domain | 59 |
   | functions | 64 |
   | ai | 20 |
   | admin | 8 |
-  | mobile (Vitest) | 21 |
+  | mobile (Vitest) | 22 |
   | mobile (Jest) | 7 |
   | tokens | 2 |
   | contracts | 1 |
 
-- `pnpm test:api`: 69/69 passed. Coverage:
+- `pnpm test:api`: 72/72 passed. Coverage:
   - Cross-household 404 on every new child endpoint.
   - Re-consent after a new policy version.
   - Assent rules.
@@ -134,6 +153,8 @@ All checks ran after `supabase db reset`.
     disabled before the request stays disabled, the purge skips cancelled jobs.
   - Retention: personal fields scrubbed at purge, rows kept at +364 days and deleted at +366 days
     (with their `processed_events`), unrelated rows untouched, append-only still enforced.
+  - Cross-border consent: login blocked until it is granted, AI grant refused without it
+    (403), revoking it signs the child out and marks AI `PREREQUISITE_MISSING`.
   - No client privileges.
 - Acceptance:
   - `pnpm acceptance m02`: 11 passed, 0 failed, 1 skipped (Maestro).
@@ -157,6 +178,15 @@ All checks ran after `supabase db reset`.
     asks rather than skips).
   - Until the child answers, the consent is not effective.
 - Policy acceptance is enforced by the app flow, not by the API.
+- Cross-border transfer (legal review 2026-10-08, Law 91/2025 Art. 9(4): one consent per purpose):
+  - `CROSS_BORDER_TRANSFER` is its own consent per child, granted in a separate step after
+    CORE_SERVICE and never bundled into policy acceptance.
+  - Required with CORE_SERVICE for child login (`REQUIRED_FOR_CHILD_LOGIN`): storage is in Singapore,
+    so the service cannot run without it. Revoking it ends the service like CORE_SERVICE (sessions
+    revoked, every queue scope dropped).
+  - AI_PERSONALIZATION requires it (`CONSENT_PREREQUISITES`): granting AI first answers 403; if it is
+    revoked later, AI shows as not effective with reason `PREREQUISITE_MISSING`.
+  - No child assent: it is a parent decision, like CORE_SERVICE.
 - Deletion (product owner decisions 2026-10-08, grace period changed by legal review):
   - Grace period: **14 days** (`DELETION_GRACE_DAYS` in `@vionx/domain`, the single value used by
     the api, the app, the admin page and the tests). Decree 356/2025 Art. 5(4) requires deletion
@@ -192,6 +222,17 @@ All checks ran after `supabase db reset`.
   (`consent.*`, `privacy.*`).
 - `privacy_requests` is kept after the purge as proof of fulfilment.
 
+## Owner actions
+Required before release (legal review 2026-10-08):
+- Appoint a personal data protection officer (DPO) and fill in the contact placeholder in the privacy
+  policy.
+- File the personal data processing impact assessment and the cross-border transfer impact assessment
+  with the MPS personal data protection authority within 60 days of starting processing, and update
+  them every 6 months.
+- Sign data processing agreements with the foreign processors: Supabase, Anthropic, the SMS provider
+  and Sentry (and confirm Google's terms for sign-in).
+- Get a lawyer's confirmation on data localisation (whether family data may stay in Singapore).
+
 ## Known issues / follow-ups
 - **Owner:**
   - Legal review of the drafts under Vietnamese PDP law, including the cross-border transfer impact
@@ -210,7 +251,8 @@ All checks ran after `supabase db reset`.
 
 ## What the next module can rely on
 - Consent checks:
-  - `requireConsent(db, scope, studentId, type, now)` in `_shared/consent.ts` (throws `CONSENT_REQUIRED`).
+  - `requireConsent(db, scope, studentId, type, now)` in `_shared/consent.ts` (throws `CONSENT_REQUIRED`;
+    also checks the type's prerequisites, so AI checks include CROSS_BORDER_TRANSFER).
   - `assertConsent` / `evaluateConsent` in `@vionx/domain`.
   - Call these before AI, microphone, health or competition features.
 - Queues: register consent-scoped pgmq queues in `ops.consent_job_queues`, and put `student_id` in

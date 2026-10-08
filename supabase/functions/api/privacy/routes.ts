@@ -8,6 +8,7 @@ import {
   currentPolicyVersion,
   EXPORT_RATE_LIMIT,
   evaluateConsent,
+  evaluateWithPrerequisites,
   exportRateLimitBucket,
   isOverLimit,
   minimumAcceptedVersion,
@@ -16,10 +17,12 @@ import {
   POLICY_TYPES,
   purgeAfter,
   remainingLinkSeconds,
+  requiredConsentsFor,
   retryAfterSeconds,
   revocationEndsSessions,
   revocationScope,
   studentsToReenable,
+  type ConsentEvaluation,
   type ConsentType,
   type PolicyLocale,
   type PolicyType,
@@ -128,12 +131,18 @@ const grantRoute = createRoute({
   tags: ['privacy'],
   summary: 'Grant a consent for a child',
   description:
-    'Recorded against the current PRIVACY_POLICY version (409 if `policyVersion` is not current). Idempotent for the same version; a grant on a newer version supersedes the old record. AI, microphone and health grants for a child aged 7+ wait for the child’s assent. Audited; emits `consent.granted`.',
+    'Recorded against the current PRIVACY_POLICY version (409 if `policyVersion` is not current). Idempotent for the same version; a grant on a newer version supersedes the old record. AI, microphone and health grants for a child aged 7+ wait for the child’s assent. CROSS_BORDER_TRANSFER is its own explicit grant (never implied by accepting the policy); AI_PERSONALIZATION needs it in force first (403 CONSENT_REQUIRED, `details.consentType` CROSS_BORDER_TRANSFER). Audited; emits `consent.granted`.',
   security: PARENT,
   request: { params: ConsentParamsSchema, ...body(ConsentGrantRequestSchema) },
   responses: {
     200: json(ConsentStateSchema, 'Consent state after the grant'),
-    ...errorResponses('VALIDATION_FAILED', 'UNAUTHENTICATED', 'NOT_FOUND', 'CONFLICT'),
+    ...errorResponses(
+      'VALIDATION_FAILED',
+      'UNAUTHENTICATED',
+      'CONSENT_REQUIRED',
+      'NOT_FOUND',
+      'CONFLICT',
+    ),
   },
 });
 
@@ -143,7 +152,7 @@ const revokeRoute = createRoute({
   tags: ['privacy'],
   summary: 'Revoke a consent',
   description:
-    'Takes effect immediately and emits `consent.revoked`; the worker drops queued jobs of that scope. Revoking CORE_SERVICE also signs the child out everywhere. Idempotent. Audited.',
+    'Takes effect immediately and emits `consent.revoked`; the worker drops queued jobs of that scope. Revoking CORE_SERVICE or CROSS_BORDER_TRANSFER ends the service: the child is signed out everywhere and every consent-scoped queue is cleared. Idempotent. Audited.',
   security: PARENT,
   request: { params: ConsentParamsSchema, ...body(ConsentRevokeRequestSchema, false) },
   responses: {
@@ -173,7 +182,7 @@ const childCheckRoute = createRoute({
   tags: ['privacy'],
   summary: 'Consent guard for a child feature',
   description:
-    'The child app calls this before opening a consent-guarded feature (AI, microphone, health, competition area). 403 CONSENT_REQUIRED with `details.reason` when the consent is not in force.',
+    'The child app calls this before opening a consent-guarded feature (AI, microphone, health, competition area). 403 CONSENT_REQUIRED with `details.consentType` and `details.reason` when the consent or a prerequisite (AI_PERSONALIZATION needs CROSS_BORDER_TRANSFER) is not in force.',
   security: CHILD,
   request: { params: ConsentTypeParamSchema },
   responses: {
@@ -301,20 +310,33 @@ function toRecord(row: ConsentRow): ConsentRecord {
   };
 }
 
+/** Latest records per type → each type's own evaluation (prerequisites applied in toState). */
+function evaluationsOf(
+  records: Partial<Record<ConsentType, ConsentRow | null>>,
+  minimumVersion: number,
+): Partial<Record<ConsentType, ConsentEvaluation>> {
+  const out: Partial<Record<ConsentType, ConsentEvaluation>> = {};
+  for (const [type, record] of Object.entries(records) as [ConsentType, ConsentRow | null][]) {
+    out[type] = evaluateConsent(record ? toRecordState(record) : null, minimumVersion);
+  }
+  return out;
+}
+
 function toState(
   type: ConsentType,
   record: ConsentRow | null,
-  minimumVersion: number,
+  evaluations: Partial<Record<ConsentType, ConsentEvaluation>>,
   student: repo.ConsentStudentRow,
   now: Date,
 ): ConsentState {
-  const evaluation = evaluateConsent(record ? toRecordState(record) : null, minimumVersion);
+  const { evaluation, missingPrerequisite } = evaluateWithPrerequisites(type, evaluations);
   return {
     type,
     effective: evaluation.effective,
     reason: evaluation.effective ? null : evaluation.reason,
     record: record ? toRecord(record) : null,
     childAssentRequiredNow: childAssentRequired(type, student.birth_year, now, student.timezone),
+    missingPrerequisite,
   };
 }
 
@@ -401,11 +423,13 @@ export function registerPrivacyRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps): 
 
   async function stateOf(scope: Scope, student: repo.ConsentStudentRow, type: ConsentType) {
     const t = now();
-    const [record, policy] = await Promise.all([
-      latestConsent(sql, scope, student.id, type),
+    const types = requiredConsentsFor(type);
+    const [records, policy] = await Promise.all([
+      Promise.all(types.map((ty) => latestConsent(sql, scope, student.id, ty))),
       consentPolicy(t),
     ]);
-    return toState(type, record, policy.minimum, student, t);
+    const byType = Object.fromEntries(types.map((ty, i) => [ty, records[i] ?? null]));
+    return toState(type, records[0] ?? null, evaluationsOf(byType, policy.minimum), student, t);
   }
 
   /** The household a parent's privacy requests apply to (404 without one). */
@@ -516,11 +540,16 @@ export function registerPrivacyRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps): 
     const student = await studentOr404(scope, id);
     const t = now();
     const [history, policy] = await Promise.all([consentHistory(sql, scope, id), consentPolicy(t)]);
-    const consents = CONSENT_TYPES.map((type) => {
-      const ofType = history.filter((r) => r.consent_type === type);
-      const latest = ofType.find((r) => r.status === 'GRANTED') ?? ofType[0] ?? null;
-      return toState(type, latest, policy.minimum, student, t);
-    });
+    const latestByType = Object.fromEntries(
+      CONSENT_TYPES.map((type) => {
+        const ofType = history.filter((r) => r.consent_type === type);
+        return [type, ofType.find((r) => r.status === 'GRANTED') ?? ofType[0] ?? null];
+      }),
+    ) as Record<ConsentType, ConsentRow | null>;
+    const evaluations = evaluationsOf(latestByType, policy.minimum);
+    const consents = CONSENT_TYPES.map((type) =>
+      toState(type, latestByType[type], evaluations, student, t),
+    );
     return c.json(
       {
         studentId: id,
@@ -548,6 +577,10 @@ export function registerPrivacyRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps): 
       throw new ApiError('CONFLICT', 'The privacy policy changed; show the current version', {
         currentVersion: policy.current,
       });
+    }
+    // AI personalisation sends data to the United States: the cross-border consent comes first.
+    for (const prerequisite of requiredConsentsFor(type).slice(1)) {
+      await requireConsent(sql, scope, id, prerequisite, t);
     }
     const deviceIdHash = await hashDevice(input.deviceId);
     await sql.begin(async (tx) => {

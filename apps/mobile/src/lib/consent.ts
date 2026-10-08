@@ -12,6 +12,8 @@ export function consentStateKey(state: ConsentState): MessageKey {
       return 'consent.state.assentDeclined';
     case 'RECONSENT_REQUIRED':
       return 'consent.state.reconsent';
+    case 'PREREQUISITE_MISSING':
+      return 'consent.state.prerequisite';
     default:
       return 'consent.state.off';
   }
@@ -21,6 +23,14 @@ export function consentStateKey(state: ConsentState): MessageKey {
  * Whether the parent's grant is active (the row offers "Turn off"). A grant on an outdated policy
  * version offers "Turn on" again so the parent re-consents.
  */
+/** Both consents a child needs to sign in are in force (Student flags from the api). */
+export function canChildSignIn(s: {
+  coreServiceConsent: boolean;
+  crossBorderTransferConsent: boolean;
+}): boolean {
+  return s.coreServiceConsent && s.crossBorderTransferConsent;
+}
+
 export function isGrantActive(state: ConsentState): boolean {
   return state.record?.status === 'GRANTED' && state.reason !== 'RECONSENT_REQUIRED';
 }

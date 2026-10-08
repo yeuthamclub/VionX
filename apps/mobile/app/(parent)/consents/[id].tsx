@@ -1,4 +1,4 @@
-import { DELETION_GRACE_DAYS } from '@vionx/domain';
+import { DELETION_GRACE_DAYS, REQUIRED_FOR_CHILD_LOGIN } from '@vionx/domain';
 import type { ConsentState, ConsentType } from '@vionx/contracts/client';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -18,8 +18,9 @@ import { useLoad } from '../../../src/ui/useLoad.ts';
 
 /**
  * A child's consents: one row per type with turn on / off, the history, and deletion of the
- * child's profile. `?onboarding=1` is the step right after adding a child: CORE_SERVICE must be on
- * before the credential card is shown.
+ * child's profile. `?onboarding=1` is the step right after adding a child: CORE_SERVICE and
+ * CROSS_BORDER_TRANSFER, each its own explicit switch (never pre-set), must be on before the
+ * credential card is shown.
  */
 export default function ChildConsents() {
   const theme = useTheme();
@@ -71,7 +72,9 @@ export default function ChildConsents() {
       title,
       s.type === 'CORE_SERVICE'
         ? t('consents.revokeCoreConfirm', { name })
-        : t('consents.revokeConfirm', { title, name }),
+        : s.type === 'CROSS_BORDER_TRANSFER'
+          ? t('consents.revokeCrossBorderConfirm', { name })
+          : t('consents.revokeConfirm', { title, name }),
       [
         { text: t('common.cancel'), style: 'cancel' },
         {
@@ -126,7 +129,10 @@ export default function ChildConsents() {
     >
       <StateView state={state} reload={reload}>
         {({ student, consents }) => {
-          const core = consents.consents.find((s) => s.type === 'CORE_SERVICE')!;
+          const required = consents.consents.filter((s) =>
+            (REQUIRED_FOR_CHILD_LOGIN as readonly string[]).includes(s.type),
+          );
+          const ready = required.every((s) => s.effective);
           return (
             <View style={{ gap: theme.spacing.md }}>
               {student.deletionScheduledFor && (
@@ -140,7 +146,7 @@ export default function ChildConsents() {
               <Text style={[theme.typography.caption, { color: c.textMuted }]}>
                 {t('consents.policyVersion', { v: consents.policy.currentVersion })}
               </Text>
-              {(isOnboarding ? [core] : consents.consents).map((s) => (
+              {(isOnboarding ? required : consents.consents).map((s) => (
                 <ConsentRow
                   key={s.type}
                   state={s}
@@ -151,11 +157,11 @@ export default function ChildConsents() {
               ))}
               {isOnboarding ? (
                 <>
-                  {!core.effective && <Notice tone="info" message={t('consents.coreRequired')} />}
+                  {!ready && <Notice tone="info" message={t('consents.coreRequired')} />}
                   <Button
                     testID="consent-continue"
                     label={t('consents.continue')}
-                    disabled={!core.effective}
+                    disabled={!ready}
                     onPress={() => router.replace('/credentials')}
                   />
                 </>
