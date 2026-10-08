@@ -31,6 +31,20 @@ appId: vn.vionx.app
 - tapOn:
     id: 'verify-code'
 
+# Privacy policy & terms (M02; first sign-in or after a re-consent version)
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục'
+    timeout: 20000
+- runFlow:
+    when:
+      visible:
+        id: 'policies-accept'
+    commands:
+      - tapOn:
+          id: 'policies-agree'
+      - tapOn:
+          id: 'policies-accept'
+
 # Household (first run only)
 - extendedWaitUntil:
     visible: 'Thêm con|Tạo gia đình'
