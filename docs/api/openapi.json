@@ -904,10 +904,24 @@
             "type": "boolean"
           },
           "reason": {
-            "$ref": "#/components/schemas/ConsentDeniedReason"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsentDeniedReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "record": {
-            "$ref": "#/components/schemas/ConsentRecord"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsentRecord"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "childAssentRequiredNow": {
             "type": "boolean",
@@ -934,24 +948,17 @@
         ]
       },
       "ConsentDeniedReason": {
-        "type": [
-          "string",
-          "null"
-        ],
+        "type": "string",
         "enum": [
           "NOT_GRANTED",
           "REVOKED",
           "RECONSENT_REQUIRED",
           "CHILD_ASSENT_PENDING",
-          "CHILD_ASSENT_DECLINED",
-          null
+          "CHILD_ASSENT_DECLINED"
         ]
       },
       "ConsentRecord": {
-        "type": [
-          "object",
-          "null"
-        ],
+        "type": "object",
         "properties": {
           "id": {
             "type": "string",
@@ -1029,8 +1036,7 @@
           "childAssentRequired",
           "childAssentStatus",
           "childAssentAt"
-        ],
-        "description": "The latest record of this type (any status)."
+        ]
       },
       "ChildAssentStatus": {
         "type": "string",

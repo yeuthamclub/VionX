@@ -58,6 +58,10 @@ export function describeError(error: unknown, now: Date = new Date()): string {
         : Math.max(1, Math.ceil((until - now.getTime()) / 60_000));
       return t('error.locked', { n: minutes });
     }
+    case 'CONSENT_REQUIRED':
+      return details.consentType === 'CORE_SERVICE'
+        ? t('error.consentRequired')
+        : t('error.featureConsent');
     default: {
       const key = error.code ? CODE_MESSAGES[error.code] : undefined;
       return key ? t(key) : t('error.generic');

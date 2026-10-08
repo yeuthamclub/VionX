@@ -121,10 +121,9 @@ export const ConsentStateSchema = z
   .object({
     type: ConsentTypeSchema,
     effective: z.boolean(),
-    reason: ConsentDeniedReasonSchema.nullable(),
-    record: ConsentRecordSchema.nullable().openapi({
-      description: 'The latest record of this type (any status).',
-    }),
+    reason: z.union([ConsentDeniedReasonSchema, z.null()]),
+    // The latest record of this type (any status), or null.
+    record: z.union([ConsentRecordSchema, z.null()]),
     childAssentRequiredNow: z
       .boolean()
       .openapi({ description: 'A grant made now would need the child’s assent (age ≥ 7).' }),

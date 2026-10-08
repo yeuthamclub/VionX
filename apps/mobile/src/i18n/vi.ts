@@ -108,4 +108,107 @@ export const vi = {
   'avatar.rabbit': 'Thỏ',
   'avatar.tiger': 'Hổ',
   'avatar.turtle': 'Rùa',
+  'error.consentRequired': 'Bố mẹ cần cho phép con dùng VionX trước khi con đăng nhập.',
+  'error.featureConsent': 'Tính năng này cần bố mẹ cho phép.',
+  'error.policyChanged': 'Chính sách vừa được cập nhật. Vui lòng xem lại rồi thử lại.',
+  'policyType.PRIVACY_POLICY': 'Chính sách quyền riêng tư',
+  'policyType.TERMS_OF_SERVICE': 'Điều khoản sử dụng',
+  'policies.title': 'Quyền riêng tư của gia đình',
+  'policies.subtitle':
+    'Trước khi bắt đầu, bố mẹ vui lòng đọc và đồng ý với cách VionX xử lý dữ liệu.',
+  'policies.point.storage':
+    'Dữ liệu của gia đình được lưu trên Supabase tại Singapore và luôn được mã hoá khi truyền đi.',
+  'policies.point.ai':
+    'Trợ lý AI do Anthropic cung cấp chỉ chạy khi bố mẹ bật, và chỉ nhận dữ liệu không kèm tên con.',
+  'policies.point.speech': 'Giọng nói của con được xử lý ngay trên điện thoại, không tải lên.',
+  'policies.point.control':
+    'Bố mẹ có thể tắt từng quyền, xuất dữ liệu hoặc xoá tài khoản bất kỳ lúc nào trong mục Quyền riêng tư.',
+  'policies.version': 'Phiên bản {v}',
+  'policies.read': 'Đọc toàn văn',
+  'policies.hide': 'Thu gọn',
+  'policies.agree': 'Tôi đã đọc và đồng ý với Chính sách quyền riêng tư và Điều khoản sử dụng.',
+  'policies.continue': 'Đồng ý và tiếp tục',
+  'consent.CORE_SERVICE.title': 'Dịch vụ cốt lõi',
+  'consent.CORE_SERVICE.body':
+    'Tạo tài khoản cho con, lưu bài làm và tiến độ để VionX hoạt động. Bắt buộc để con đăng nhập.',
+  'consent.EDUCATION_ANALYTICS.title': 'Phân tích học tập',
+  'consent.EDUCATION_ANALYTICS.body':
+    'Thống kê việc học của con để gợi ý bài phù hợp và gửi báo cáo cho bố mẹ.',
+  'consent.AI_PERSONALIZATION.title': 'Trợ lý AI',
+  'consent.AI_PERSONALIZATION.body':
+    'Gửi câu hỏi và tình trạng kỹ năng của con (không kèm tên) tới dịch vụ AI của Anthropic để giải thích và gợi ý.',
+  'consent.MICROPHONE_SPEAKING.title': 'Micro luyện nói',
+  'consent.MICROPHONE_SPEAKING.body':
+    'Dùng micro khi con tự bắt đầu bài luyện nói. Âm thanh được xử lý ngay trên máy, không tải lên.',
+  'consent.HEALTH_CONNECT_ACTIVITY.title': 'Vận động (Health Connect)',
+  'consent.HEALTH_CONNECT_ACTIVITY.body':
+    'Đọc số bước và thời gian vận động của con. Không đọc nhịp tim, không đọc vị trí.',
+  'consent.COMPETITION_AREA.title': 'Khu vực cuộc thi',
+  'consent.COMPETITION_AREA.body':
+    'Dùng tỉnh, thành phố do bố mẹ chọn để gợi ý các cuộc thi phù hợp.',
+  'consent.state.on': 'Đang bật',
+  'consent.state.off': 'Đang tắt',
+  'consent.state.assentPending': 'Đã bật, chờ con đồng ý',
+  'consent.state.assentDeclined': 'Con chưa đồng ý',
+  'consent.state.reconsent': 'Cần bật lại theo chính sách mới',
+  'consent.record.GRANTED': 'Bật',
+  'consent.record.REVOKED': 'Tắt',
+  'consent.record.SUPERSEDED': 'Thay bằng lần bật mới',
+  'consents.title': 'Quyền của {name}',
+  'consents.onboarding':
+    'Bước cuối: cho phép {name} dùng VionX. Các quyền khác bố mẹ có thể bật sau.',
+  'consents.turnOn': 'Bật',
+  'consents.turnOff': 'Tắt',
+  'consents.revokeConfirm': 'Tắt “{title}” cho {name}? Thay đổi có hiệu lực ngay.',
+  'consents.revokeCoreConfirm':
+    'Tắt dịch vụ cốt lõi? {name} sẽ bị đăng xuất và không đăng nhập được cho đến khi bố mẹ bật lại.',
+  'consents.assentNote': 'Con từ 7 tuổi: tính năng chỉ chạy khi con cũng đồng ý trên máy của con.',
+  'consents.coreRequired': 'Cần bật Dịch vụ cốt lõi để con đăng nhập được.',
+  'consents.continue': 'Tiếp tục',
+  'consents.history': 'Lịch sử thay đổi',
+  'consents.historyEmpty': 'Chưa có thay đổi nào.',
+  'consents.historyLine': '{date} · {title}: {status}',
+  'consents.policyVersion': 'Theo Chính sách quyền riêng tư phiên bản {v}',
+  'consents.deleteChild': 'Xoá hồ sơ của con',
+  'consents.deleteChildConfirm':
+    'Xoá hồ sơ của {name}? Con bị đăng xuất ngay và dữ liệu bị xoá vĩnh viễn sau 30 ngày.',
+  'consents.deletionScheduled': 'Hồ sơ sẽ bị xoá vĩnh viễn vào ngày {date}.',
+  'privacy.title': 'Quyền riêng tư',
+  'privacy.children': 'Quyền của từng con',
+  'privacy.childOn': 'Đang dùng VionX',
+  'privacy.childOff': 'Chưa được phép đăng nhập',
+  'privacy.policies': 'Chính sách đã đồng ý',
+  'privacy.policyLine': '{title}, phiên bản {v} · {date}',
+  'privacy.viewPolicies': 'Xem chính sách',
+  'privacy.export': 'Xuất dữ liệu',
+  'privacy.exportHint':
+    'Tạo tệp ZIP chứa dữ liệu của cả gia đình. Đường dẫn tải có hiệu lực trong 24 giờ.',
+  'privacy.exportStart': 'Tạo bản xuất',
+  'privacy.exportQueued': 'Đang chuẩn bị tệp…',
+  'privacy.exportReady': 'Tệp đã sẵn sàng, tải được đến {time}.',
+  'privacy.exportDownload': 'Tải xuống',
+  'privacy.exportFailed': 'Không tạo được tệp. Vui lòng thử lại.',
+  'privacy.exportExpired': 'Đường dẫn đã hết hạn. Hãy tạo bản xuất mới.',
+  'privacy.deleteAccount': 'Xoá tài khoản',
+  'privacy.deleteAccountHint':
+    'Khoá ngay tài khoản của bố mẹ và các con; toàn bộ dữ liệu bị xoá vĩnh viễn sau 30 ngày.',
+  'privacy.deleteAccountConfirm':
+    'Xoá tài khoản và toàn bộ dữ liệu của gia đình? Việc này không thể hoàn tác.',
+  'privacy.deleteAccountDone': 'Đã nhận yêu cầu. Dữ liệu sẽ bị xoá vĩnh viễn vào ngày {date}.',
+  'children.privacy': 'Quyền riêng tư',
+  'children.needsConsent': 'Chưa cho phép',
+  'student.consents': 'Quyền và sự đồng ý',
+  'assent.title': 'Bố mẹ hỏi ý con',
+  'assent.AI_PERSONALIZATION':
+    'Bố mẹ muốn bật trợ lý AI để giải thích bài và gợi ý khi con cần. Trợ lý không biết tên con. Con có đồng ý không?',
+  'assent.MICROPHONE_SPEAKING':
+    'Bố mẹ muốn bật micro cho bài luyện nói. Micro chỉ bật khi con bấm bắt đầu, và giọng con không được gửi đi đâu cả. Con có đồng ý không?',
+  'assent.HEALTH_CONNECT_ACTIVITY':
+    'Bố mẹ muốn VionX đếm số bước chân và thời gian con vận động. Con có đồng ý không?',
+  'assent.yes': 'Con đồng ý',
+  'assent.no': 'Con chưa muốn',
+  'assent.none': 'Hiện không có gì cần con trả lời.',
+  'assent.thanks': 'Cảm ơn con! Bố mẹ sẽ thấy câu trả lời của con.',
+  'childHome.assentPending': 'Bố mẹ đang hỏi ý con về {n} điều.',
+  'childHome.assentOpen': 'Xem và trả lời',
 } as const;

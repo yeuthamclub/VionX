@@ -93,11 +93,18 @@ export default function ParentHome() {
         style={[
           theme.typography.caption,
           {
-            color: s.status === 'active' ? c.success : s.status === 'locked' ? c.warning : c.danger,
+            color:
+              s.status === 'active' && s.coreServiceConsent
+                ? c.success
+                : s.status === 'disabled'
+                  ? c.danger
+                  : c.warning,
           },
         ]}
       >
-        {t(`children.status.${s.status}` as MessageKey)}
+        {s.status === 'active' && !s.coreServiceConsent
+          ? t('children.needsConsent')
+          : t(`children.status.${s.status}` as MessageKey)}
       </Text>
     </Pressable>
   );
@@ -126,6 +133,12 @@ export default function ParentHome() {
         label={t('children.add')}
         color={c.parent}
         onPress={() => router.push('/child-new')}
+      />
+      <Button
+        testID="privacy-center"
+        label={t('children.privacy')}
+        variant="secondary"
+        onPress={() => router.push('/privacy')}
       />
       <Button
         testID="child-device"

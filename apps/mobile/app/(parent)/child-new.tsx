@@ -48,7 +48,11 @@ export default function ChildNew() {
         }),
       );
       holdCredentials({ ...res.credentials, displayName: res.student.displayName });
-      router.replace('/credentials');
+      // Consent step (CORE_SERVICE) before the one-time credential card.
+      router.replace({
+        pathname: '/consents/[id]',
+        params: { id: res.student.id, onboarding: '1' },
+      });
     } catch (e) {
       setError(describeError(e));
     } finally {

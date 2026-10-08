@@ -1949,8 +1949,8 @@ export interface components {
     ConsentState: {
       type: components['schemas']['ConsentType'];
       effective: boolean;
-      reason: components['schemas']['ConsentDeniedReason'];
-      record: components['schemas']['ConsentRecord'];
+      reason: components['schemas']['ConsentDeniedReason'] | null;
+      record: components['schemas']['ConsentRecord'] | null;
       /** @description A grant made now would need the child’s assent (age ≥ 7). */
       childAssentRequiredNow: boolean;
     };
@@ -1962,15 +1962,13 @@ export interface components {
       | 'MICROPHONE_SPEAKING'
       | 'HEALTH_CONNECT_ACTIVITY'
       | 'COMPETITION_AREA';
-    /** @enum {string|null} */
+    /** @enum {string} */
     ConsentDeniedReason:
       | 'NOT_GRANTED'
       | 'REVOKED'
       | 'RECONSENT_REQUIRED'
       | 'CHILD_ASSENT_PENDING'
-      | 'CHILD_ASSENT_DECLINED'
-      | null;
-    /** @description The latest record of this type (any status). */
+      | 'CHILD_ASSENT_DECLINED';
     ConsentRecord: {
       /**
        * Format: uuid
@@ -1996,7 +1994,7 @@ export interface components {
       childAssentStatus: components['schemas']['ChildAssentStatus'];
       /** Format: date-time */
       childAssentAt: string | null;
-    } | null;
+    };
     /** @enum {string} */
     ChildAssentStatus: 'NOT_REQUIRED' | 'PENDING' | 'GIVEN' | 'DECLINED';
     ConsentGrantRequest: {
