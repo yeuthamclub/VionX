@@ -59,6 +59,7 @@ jobs:
       - run: pnpm acceptance m00
         env:
           SKIP_ADMIN_BUILD: '1'
+      - run: pnpm acceptance m01
       - name: Functions log
         if: failure()
         run: cat /tmp/functions.log
