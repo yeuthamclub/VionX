@@ -34,7 +34,8 @@ Edge Functions import workspace packages through the import map in `supabase/fun
 | **Cloudflare** | Pages project `vionx-admin` for the admin SPA. | M00 |
 | **Google Play Console** | Internal testing track (US$25 one-off). | M09 |
 | Sentry (optional) | Crash reporting for mobile and admin (`*_SENTRY_DSN`). | any time |
-| Google Cloud | OAuth client for parent Google sign-in. | M01 |
+| Google Cloud | OAuth clients for parent Google sign-in: a **Web** client (its id goes to Supabase Auth and `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`) and an **Android** client for package `vn.vionx.app` with the signing certificate SHA-1 (debug, EAS and Play). | M01 |
+| SMS provider | Real phone OTP on staging/production (Supabase Auth → Phone). Locally only test OTP numbers work. | M22 |
 
 ## Environment variables
 
@@ -44,9 +45,11 @@ Edge Functions import workspace packages through the import map in `supabase/fun
 | | `ANTHROPIC_API_KEY` | Optional locally (FakeAiProvider is used without it). |
 | | `ALLOWED_ORIGINS` | Comma-separated admin origins for CORS. |
 | | `APP_VERSION` | Reported by `/v1/health`. |
+| | `SUPABASE_JWT_SECRET` | Optional. Only for a project still signing user tokens with the legacy HS256 secret; otherwise parent JWTs are verified against the project JWKS. |
+| | `SUPABASE_JWKS_URL` | Optional override of `${SUPABASE_URL}/auth/v1/.well-known/jwks.json`. |
 | Supabase Vault (remote) | `vionx_worker_url`, `vionx_service_secret` | Read by the pg_cron job that calls the worker. `seed.sql` sets local values. |
-| `apps/mobile/.env.local` | `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_SENTRY_DSN` | Bundled into the app; never secrets. |
-| `apps/admin/.env.local` / Pages env | `VITE_API_URL`, `VITE_SENTRY_DSN` | |
+| `apps/mobile/.env.local` | `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, `EXPO_PUBLIC_SENTRY_DSN` | Bundled into the app; never secrets (the publishable key grants no table access). |
+| `apps/admin/.env.local` / Pages env | `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SENTRY_DSN` | |
 | Shell | `ANTHROPIC_API_KEY` | For `pnpm ai:check`. |
 
 `SUPABASE_URL`, `SUPABASE_DB_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected into Edge Functions
@@ -77,13 +80,39 @@ pnpm dev:admin         # http://localhost:5173
 
 pg_cron calls the worker every minute through pg_net (local URL from `seed.sql`).
 
+### Local accounts (seed, local only)
+
+| Who | Sign in |
+|---|---|
+| SUPER_ADMIN (admin SPA) | `admin@vionx.local` / `vionx-admin-local` |
+| Demo parent (app) | phone `0900000001` (`+84900000001`), OTP `123456` |
+| Demo children | `vx-demy22` (grade 2), `vx-demy66` (grade 6), `vx-demy99` (grade 9), PIN `2468` |
+| Test parents | `+84900000002` (acceptance), `+84900000003` (integration tests, Maestro), OTP `123456` |
+
+Test OTPs and the placeholder SMS provider live in `supabase/config.toml` and must never be configured
+on staging/production.
+
+### Parent Google sign-in (staging/production)
+
+1. Google Cloud console → OAuth consent screen, then create a **Web application** client and an
+   **Android** client (package `vn.vionx.app`, SHA-1 of each signing key: `eas credentials` / Play).
+2. Supabase dashboard → Authentication → Providers → Google: enable, paste the Web client id and
+   secret; add the Android client id to "Authorized Client IDs"; keep "Skip nonce check" on for
+   native sign-in.
+3. Set `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (Web client id) for the app build. The Android code path
+   is `apps/mobile/src/state/google.ts` (`@react-native-google-signin/google-signin` →
+   `supabase.auth.signInWithIdToken`); no `google-services.json` is needed.
+4. For local Google testing, uncomment `[auth.external.google]` in `supabase/config.toml` and export
+   `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` / `_SECRET` (never committed).
+
 ### Android emulator
 
 1. Create a Pixel emulator in Android Studio and start it.
 2. Build and install the development client once: `cd apps/mobile && npx expo run:android`
    (local Gradle), or `eas build --profile development --platform android` and install the APK.
 3. `cp apps/mobile/.env.example apps/mobile/.env.local` (the emulator reaches the host's Supabase
-   at `10.0.2.2`), then `pnpm dev:mobile` and open the app. The first screen shows
+   at `10.0.2.2`) and paste the publishable key from `pnpm exec supabase status` into
+   `EXPO_PUBLIC_SUPABASE_ANON_KEY`, then `pnpm dev:mobile` and open the app. The first screen shows
    "Phụ huynh / Con" and the API health status.
 4. On a physical phone use your machine's LAN IP in `EXPO_PUBLIC_API_URL`.
 5. e2e: `maestro test apps/mobile/.maestro`.
@@ -95,7 +124,7 @@ pg_cron calls the worker every minute through pg_net (local URL from `seed.sql`)
 | `pnpm lint` / `typecheck` / `test` | ESLint + Prettier, `tsc` (+ `deno check` for functions), Vitest |
 | `pnpm openapi` | Regenerate `docs/api/openapi.json` and the typed client types |
 | `pnpm check` | lint, typecheck, unit tests, OpenAPI diff, API integration tests (needs local Supabase) |
-| `pnpm acceptance m00` | Module acceptance scenario against local Supabase |
+| `pnpm acceptance m00` / `m01` | Module acceptance scenario against local Supabase |
 | `pnpm ai:check` | One tiny real Claude call (needs `ANTHROPIC_API_KEY`) |
 | `pnpm db:start` / `db:reset` / `db:migrate` / `db:seed` | Local database |
 | `pnpm dev:mobile` / `dev:admin` / `fn:serve` | Dev servers |

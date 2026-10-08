@@ -49,4 +49,8 @@ Scope: `TASK_PACKS/M01.md`. Refs: Master Spec §2, §6.1, §24, §27.
    `pnpm acceptance m01` and `m00`. REPORT, ROADMAP, push.
 
 ## Remaining steps
-(Updated at the end of the session.)
+All implementation steps are done and green locally (see M01_REPORT.md). Remaining items need the
+owner's devices or accounts:
+- Run `maestro test apps/mobile/.maestro/m01-identity.yaml` on an emulator with a development build.
+- Create the Google OAuth clients and enable the Google provider (README) to exercise native Google Sign-In.
+- CI run on the PR.

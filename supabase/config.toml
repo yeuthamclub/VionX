@@ -345,6 +345,14 @@ skip_nonce_check = false
 # If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
 email_optional = false
 
+# VionX parent Google sign-in (native ID token, M01). Off locally; to test it, uncomment and export
+# SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID / _SECRET (Web client). Hosted projects: dashboard (README).
+# [auth.external.google]
+# enabled = true
+# client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+# secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+# skip_nonce_check = true
+
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
 [auth.web3.solana]
