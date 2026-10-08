@@ -11,14 +11,15 @@ import {
   isOverLimit,
   normalizeLoginId,
   rateLimitBucket,
+  REQUIRED_FOR_CHILD_LOGIN,
   retryAfterSeconds,
   sessionExpiry,
   validateHousehold,
   validateStudentProfile,
   type RateLimitRule,
 } from '@vionx/domain';
-import type { ErrorCode } from '@vionx/contracts';
 import { requireActor, type Actor } from '../../_shared/actor.ts';
+import { consentRequired, evaluateStudentConsent } from '../../_shared/consent.ts';
 import {
   hashPin,
   newChildToken,
@@ -30,6 +31,7 @@ import type { Sql } from '../../_shared/db.ts';
 import { ApiError } from '../../_shared/errors.ts';
 import { scoped, scopeFor, type Scope } from '../../_shared/scope.ts';
 import type { AppEnv } from '../app.ts';
+import { body, CHILD, errorResponses, iso, json, PARENT } from '../route-helpers.ts';
 import type { ApiDeps } from '../deps.ts';
 import * as repo from './repo.ts';
 import {
@@ -38,7 +40,6 @@ import {
   ChildLogoutResponseSchema,
   ChildSessionResponseSchema,
   DisableRequestSchema,
-  ErrorBodySchema,
   HouseholdCreateRequestSchema,
   HouseholdResponseSchema,
   MeResponseSchema,
@@ -52,40 +53,6 @@ import {
   StudentSchema,
   type Student,
 } from './schemas.ts';
-
-const PARENT = [{ bearerAuth: [] }];
-const CHILD = [{ childSession: [] }];
-
-const ERROR_DESCRIPTIONS: Partial<Record<ErrorCode, [number, string]>> = {
-  VALIDATION_FAILED: [400, 'Invalid request (VALIDATION_FAILED)'],
-  UNAUTHENTICATED: [401, 'Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)'],
-  FORBIDDEN: [403, 'Not allowed (FORBIDDEN, ACCOUNT_DISABLED)'],
-  NOT_FOUND: [404, 'Not found, or not in your household (NOT_FOUND)'],
-  CONFLICT: [409, 'Conflict (CONFLICT)'],
-  ACCOUNT_LOCKED: [423, 'Too many wrong PINs; locked for 15 minutes (ACCOUNT_LOCKED)'],
-  RATE_LIMITED: [429, 'Too many attempts (RATE_LIMITED); see Retry-After'],
-};
-
-function errorResponses(...codes: ErrorCode[]) {
-  const out: Record<
-    number,
-    { content: { 'application/json': { schema: typeof ErrorBodySchema } }; description: string }
-  > = {};
-  for (const code of codes) {
-    const [status, description] = ERROR_DESCRIPTIONS[code]!;
-    out[status] = { content: { 'application/json': { schema: ErrorBodySchema } }, description };
-  }
-  return out;
-}
-
-const json = <T extends z.ZodType>(schema: T, description: string) => ({
-  content: { 'application/json': { schema } },
-  description,
-});
-
-const body = <T extends z.ZodType>(schema: T, required = true) => ({
-  body: { content: { 'application/json': { schema } }, required },
-});
 
 // --- Route definitions ----------------------------------------------------------------------------
 
@@ -110,7 +77,7 @@ const createHouseholdRoute = createRoute({
   request: body(HouseholdCreateRequestSchema),
   responses: {
     201: json(HouseholdResponseSchema, 'Created'),
-    ...errorResponses('VALIDATION_FAILED', 'UNAUTHENTICATED', 'CONFLICT'),
+    ...errorResponses('VALIDATION_FAILED', 'UNAUTHENTICATED', 'FORBIDDEN', 'CONFLICT'),
   },
 });
 
@@ -200,12 +167,13 @@ const disableRoute = createRoute({
   path: '/v1/students/{id}/disable',
   tags: ['identity'],
   summary: 'Disable (or re-enable) a child login',
-  description: 'Disabling also revokes every session. `{ "disabled": false }` re-enables. Audited.',
+  description:
+    'Disabling also revokes every session. `{ "disabled": false }` re-enables (409 while a deletion is scheduled). Audited.',
   security: PARENT,
   request: { params: StudentIdParamSchema, ...body(DisableRequestSchema, false) },
   responses: {
     200: json(StudentSchema, 'Updated'),
-    ...errorResponses('VALIDATION_FAILED', 'UNAUTHENTICATED', 'NOT_FOUND'),
+    ...errorResponses('VALIDATION_FAILED', 'UNAUTHENTICATED', 'NOT_FOUND', 'CONFLICT'),
   },
 });
 
@@ -215,7 +183,7 @@ const childLoginRoute = createRoute({
   tags: ['identity'],
   summary: 'Child sign-in with login id + PIN',
   description:
-    'Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id.',
+    'Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id. A correct PIN without CORE_SERVICE consent in force answers 403 CONSENT_REQUIRED.',
   request: body(ChildLoginRequestSchema),
   responses: {
     200: json(ChildLoginResponseSchema, 'Signed in'),
@@ -257,8 +225,6 @@ const childLogoutRoute = createRoute({
 
 // --- Helpers ---------------------------------------------------------------------------------------
 
-const iso = (d: Date | null) => (d ? new Date(d).toISOString() : null);
-
 function toStudent(row: repo.StudentRow, now: Date): Student {
   const locked = row.locked_until !== null && new Date(row.locked_until) > now;
   return {
@@ -272,6 +238,8 @@ function toStudent(row: repo.StudentRow, now: Date): Student {
     lockedUntil: locked ? iso(row.locked_until) : null,
     failedAttempts: row.failed_attempts,
     activeSessions: row.active_sessions,
+    coreServiceConsent: row.core_service_consent,
+    deletionScheduledFor: iso(row.deletion_scheduled_for),
     createdAt: iso(row.created_at)!,
     updatedAt: iso(row.updated_at)!,
   };
@@ -365,6 +333,9 @@ export function registerIdentityRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
       ...(input.timezone ? { timezone: input.timezone } : {}),
     });
     if (!valid.ok) validationError(valid.error, valid.message);
+    if (await repo.accountDeletionPending(sql, actor.userId)) {
+      throw new ApiError('FORBIDDEN', 'This account is scheduled for deletion');
+    }
     const household = await repo.createHousehold(sql, actor.userId, valid.value);
     if (!household) throw new ApiError('CONFLICT', 'This account already has a household');
     return c.json(
@@ -523,6 +494,12 @@ export function registerIdentityRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
     const { id } = c.req.valid('param');
     const disabled = (c.req.valid('json') as { disabled?: boolean } | undefined)?.disabled ?? true;
     const student = await studentRowOr404(sql, scope, id);
+    if (!disabled && student.deletion_scheduled_for) {
+      throw new ApiError(
+        'CONFLICT',
+        'This child is scheduled for deletion and cannot be re-enabled',
+      );
+    }
     await sql.begin(async (tx) => {
       await repo.setDisabled(tx, scope, id, disabled);
       const revoked = disabled ? await repo.revokeSessions(tx, scope, id) : 0;
@@ -598,6 +575,17 @@ export function registerIdentityRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
           : { kind: 'wrong' as const, remaining: attemptsRemaining(next) };
       }
       if (current.disabled_at) return { kind: 'disabled' as const };
+      // CORE_SERVICE must be in force before any child can sign in (TASK_PACKS/M02).
+      const consent = await evaluateStudentConsent(
+        tx,
+        scoped(sql, [current.household_id]),
+        current.student_id,
+        REQUIRED_FOR_CHILD_LOGIN,
+        t,
+      );
+      if (!consent.evaluation.effective) {
+        return { kind: 'consent' as const, reason: consent.evaluation.reason };
+      }
       const cleared = clearedLock();
       if (state.failedAttempts !== 0 || state.lockedUntil !== null) {
         await tx`
@@ -614,6 +602,7 @@ export function registerIdentityRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
     })) as
       | { kind: 'invalid' }
       | { kind: 'disabled' }
+      | { kind: 'consent'; reason: string }
       | { kind: 'locked'; until: Date }
       | { kind: 'wrong'; remaining: number }
       | { kind: 'ok'; token: string; expiresAt: Date; current: repo.CredentialRow };
@@ -635,6 +624,8 @@ export function registerIdentityRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
         );
       case 'disabled':
         throw new ApiError('ACCOUNT_DISABLED', 'This login is turned off. Ask a parent.');
+      case 'consent':
+        throw consentRequired(REQUIRED_FOR_CHILD_LOGIN, result.reason);
       case 'ok':
         return c.json(
           {

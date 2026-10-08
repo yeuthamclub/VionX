@@ -331,6 +331,18 @@
             "type": "integer",
             "minimum": 0
           },
+          "coreServiceConsent": {
+            "type": "boolean",
+            "description": "CORE_SERVICE consent is in force (granted on an accepted policy version). Without it the child cannot sign in."
+          },
+          "deletionScheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Deletion requested: the login is off and the profile is purged at this time."
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -351,6 +363,8 @@
           "lockedUntil",
           "failedAttempts",
           "activeSessions",
+          "coreServiceConsent",
+          "deletionScheduledFor",
           "createdAt",
           "updatedAt"
         ]
@@ -641,6 +655,726 @@
         "required": [
           "revoked"
         ]
+      },
+      "PoliciesResponse": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "$ref": "#/components/schemas/PolicyLocale"
+          },
+          "policies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Policy"
+            }
+          },
+          "minimumAcceptedVersions": {
+            "type": "object",
+            "properties": {
+              "PRIVACY_POLICY": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              "TERMS_OF_SERVICE": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "PRIVACY_POLICY",
+              "TERMS_OF_SERVICE"
+            ]
+          },
+          "acceptances": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/PolicyAcceptance"
+            },
+            "description": "The signed-in parent’s acceptances; null without a parent token."
+          },
+          "needsAcceptance": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "True when the parent must accept the current versions."
+          }
+        },
+        "required": [
+          "locale",
+          "policies",
+          "minimumAcceptedVersions",
+          "acceptances",
+          "needsAcceptance"
+        ]
+      },
+      "PolicyLocale": {
+        "type": "string",
+        "enum": [
+          "vi",
+          "en"
+        ]
+      },
+      "Policy": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/PolicyType"
+          },
+          "version": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "locale": {
+            "$ref": "#/components/schemas/PolicyLocale"
+          },
+          "title": {
+            "type": "string"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "requiresReconsent": {
+            "type": "boolean"
+          },
+          "contentMd": {
+            "type": "string",
+            "description": "Markdown. Version 1 is a DRAFT."
+          }
+        },
+        "required": [
+          "type",
+          "version",
+          "locale",
+          "title",
+          "effectiveAt",
+          "requiresReconsent",
+          "contentMd"
+        ]
+      },
+      "PolicyType": {
+        "type": "string",
+        "enum": [
+          "PRIVACY_POLICY",
+          "TERMS_OF_SERVICE"
+        ]
+      },
+      "PolicyAcceptance": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/PolicyType"
+          },
+          "version": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "locale": {
+            "$ref": "#/components/schemas/PolicyLocale"
+          },
+          "acceptedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "type",
+          "version",
+          "locale",
+          "acceptedAt"
+        ]
+      },
+      "PolicyAcceptResponse": {
+        "type": "object",
+        "properties": {
+          "acceptances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyAcceptance"
+            }
+          }
+        },
+        "required": [
+          "acceptances"
+        ]
+      },
+      "PolicyAcceptRequest": {
+        "type": "object",
+        "properties": {
+          "policies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/PolicyType"
+                },
+                "version": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0
+                }
+              },
+              "required": [
+                "type",
+                "version"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 2
+          },
+          "locale": {
+            "$ref": "#/components/schemas/PolicyLocale"
+          },
+          "deviceId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "example": "android-6f1c…",
+            "description": "Stored only as a sha-256 hash."
+          }
+        },
+        "required": [
+          "policies"
+        ]
+      },
+      "StudentConsents": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "policy": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "PRIVACY_POLICY"
+                ]
+              },
+              "currentVersion": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              "minimumAcceptedVersion": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "type",
+              "currentVersion",
+              "minimumAcceptedVersion"
+            ]
+          },
+          "consents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsentState"
+            }
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsentRecord"
+            },
+            "description": "All records, newest first."
+          }
+        },
+        "required": [
+          "studentId",
+          "policy",
+          "consents",
+          "history"
+        ]
+      },
+      "ConsentState": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ConsentType"
+          },
+          "effective": {
+            "type": "boolean"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ConsentDeniedReason"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ConsentRecord"
+          },
+          "childAssentRequiredNow": {
+            "type": "boolean",
+            "description": "A grant made now would need the child’s assent (age ≥ 7)."
+          }
+        },
+        "required": [
+          "type",
+          "effective",
+          "reason",
+          "record",
+          "childAssentRequiredNow"
+        ]
+      },
+      "ConsentType": {
+        "type": "string",
+        "enum": [
+          "CORE_SERVICE",
+          "EDUCATION_ANALYTICS",
+          "AI_PERSONALIZATION",
+          "MICROPHONE_SPEAKING",
+          "HEALTH_CONNECT_ACTIVITY",
+          "COMPETITION_AREA"
+        ]
+      },
+      "ConsentDeniedReason": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "enum": [
+          "NOT_GRANTED",
+          "REVOKED",
+          "RECONSENT_REQUIRED",
+          "CHILD_ASSENT_PENDING",
+          "CHILD_ASSENT_DECLINED",
+          null
+        ]
+      },
+      "ConsentRecord": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "consentType": {
+            "$ref": "#/components/schemas/ConsentType"
+          },
+          "policyVersion": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "GRANTED",
+              "REVOKED",
+              "SUPERSEDED"
+            ]
+          },
+          "grantedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "grantedByParentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "revokedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "revokedByType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "parent",
+              "system",
+              null
+            ]
+          },
+          "childAssentRequired": {
+            "type": "boolean"
+          },
+          "childAssentStatus": {
+            "$ref": "#/components/schemas/ChildAssentStatus"
+          },
+          "childAssentAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "consentType",
+          "policyVersion",
+          "status",
+          "grantedAt",
+          "grantedByParentId",
+          "revokedAt",
+          "revokedByType",
+          "childAssentRequired",
+          "childAssentStatus",
+          "childAssentAt"
+        ],
+        "description": "The latest record of this type (any status)."
+      },
+      "ChildAssentStatus": {
+        "type": "string",
+        "enum": [
+          "NOT_REQUIRED",
+          "PENDING",
+          "GIVEN",
+          "DECLINED"
+        ]
+      },
+      "ConsentGrantRequest": {
+        "type": "object",
+        "properties": {
+          "policyVersion": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "description": "The PRIVACY_POLICY version the parent was shown; must be the current one."
+          },
+          "deviceId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "example": "android-6f1c…",
+            "description": "Stored only as a sha-256 hash."
+          }
+        },
+        "required": [
+          "policyVersion"
+        ]
+      },
+      "ConsentRevokeRequest": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "example": "android-6f1c…",
+            "description": "Stored only as a sha-256 hash."
+          }
+        }
+      },
+      "ChildAssentRequest": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "GIVEN",
+              "DECLINED"
+            ]
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "ChildConsentCheck": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ConsentType"
+          },
+          "effective": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "effective"
+        ]
+      },
+      "ExportJobResponse": {
+        "type": "object",
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/ExportJob"
+          }
+        },
+        "required": [
+          "job"
+        ]
+      },
+      "ExportJob": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "QUEUED",
+              "RUNNING",
+              "READY",
+              "FAILED",
+              "EXPIRED"
+            ]
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "sizeBytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "downloadUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Signed URL to the zip, valid until expiresAt (24 h after completion)."
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "requestedAt",
+          "startedAt",
+          "completedAt",
+          "expiresAt",
+          "sizeBytes",
+          "downloadUrl"
+        ]
+      },
+      "PrivacyOverview": {
+        "type": "object",
+        "properties": {
+          "acceptances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyAcceptance"
+            }
+          },
+          "exports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportJob"
+            },
+            "description": "Latest 5 exports (downloadUrl is null here)."
+          },
+          "deletions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeletionJob"
+            }
+          },
+          "requests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrivacyRequest"
+            }
+          }
+        },
+        "required": [
+          "acceptances",
+          "exports",
+          "deletions",
+          "requests"
+        ]
+      },
+      "DeletionJob": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "CHILD",
+              "ACCOUNT"
+            ]
+          },
+          "studentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SCHEDULED",
+              "COMPLETED",
+              "CANCELLED",
+              "FAILED"
+            ]
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "purgeAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "scope",
+          "studentId",
+          "status",
+          "requestedAt",
+          "purgeAfter",
+          "completedAt"
+        ]
+      },
+      "PrivacyRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "EXPORT",
+              "DELETE_CHILD",
+              "DELETE_ACCOUNT"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "RECEIVED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELLED",
+              "FAILED"
+            ]
+          },
+          "studentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "app",
+              "web"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "status",
+          "studentId",
+          "source",
+          "createdAt",
+          "completedAt"
+        ]
+      },
+      "DeletionResponse": {
+        "type": "object",
+        "properties": {
+          "deletion": {
+            "$ref": "#/components/schemas/DeletionJob"
+          }
+        },
+        "required": [
+          "deletion"
+        ]
+      },
+      "DeleteRequest": {
+        "type": "object",
+        "properties": {
+          "confirm": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Must be true."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "app",
+              "web"
+            ]
+          }
+        },
+        "required": [
+          "confirm"
+        ]
       }
     },
     "parameters": {}
@@ -768,6 +1502,16 @@
           },
           "401": {
             "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1192,7 +1936,7 @@
           "identity"
         ],
         "summary": "Disable (or re-enable) a child login",
-        "description": "Disabling also revokes every session. `{ \"disabled\": false }` re-enables. Audited.",
+        "description": "Disabling also revokes every session. `{ \"disabled\": false }` re-enables (409 while a deletion is scheduled). Audited.",
         "security": [
           {
             "bearerAuth": []
@@ -1260,6 +2004,16 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -1270,7 +2024,7 @@
           "identity"
         ],
         "summary": "Child sign-in with login id + PIN",
-        "description": "Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id.",
+        "description": "Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id. A correct PIN without CORE_SERVICE consent in force answers 403 CONSENT_REQUIRED.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1313,7 +2067,7 @@
             }
           },
           "403": {
-            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED)",
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1399,6 +2153,865 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ChildLogoutResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/policies/current": {
+      "get": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Current privacy policy and terms",
+        "description": "Public. With a parent token the response also lists the parent’s acceptances and whether the current versions still need accepting (onboarding consent step).",
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PolicyLocale"
+                },
+                {
+                  "example": "vi"
+                }
+              ]
+            },
+            "required": false,
+            "name": "locale",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Policies in force",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoliciesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable (SERVICE_UNAVAILABLE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/policies/accept": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Accept policy versions (parent onboarding consent step)",
+        "description": "Versions must be the current ones (409 CONFLICT otherwise). Idempotent.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PolicyAcceptRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "All acceptances of this parent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyAcceptResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/consents": {
+      "get": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "A child’s consents and their history",
+        "description": "Parent: any child of the household. Child: only their own id (assent screen). Other ids answer 404.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentConsents"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/consents/{type}/grant": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Grant a consent for a child",
+        "description": "Recorded against the current PRIVACY_POLICY version (409 if `policyVersion` is not current). Idempotent for the same version; a grant on a newer version supersedes the old record. AI, microphone and health grants for a child aged 7+ wait for the child’s assent. Audited; emits `consent.granted`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/ConsentType"
+            },
+            "required": true,
+            "name": "type",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentGrantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consent state after the grant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentState"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/consents/{type}/revoke": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Revoke a consent",
+        "description": "Takes effect immediately and emits `consent.revoked`; the worker drops queued jobs of that scope. Revoking CORE_SERVICE also signs the child out everywhere. Idempotent. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/ConsentType"
+            },
+            "required": true,
+            "name": "type",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentRevokeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consent state after the revocation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentState"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/consents/{type}/child-assent": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "The child agrees or declines (assent)",
+        "description": "Child actor, own id only. Allowed once per grant that needs assent (409 otherwise). Audited; emits `consent.child_assent_recorded`.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/ConsentType"
+            },
+            "required": true,
+            "name": "type",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChildAssentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consent state after the answer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentState"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/child/consents/{type}": {
+      "get": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Consent guard for a child feature",
+        "description": "The child app calls this before opening a consent-guarded feature (AI, microphone, health, competition area). 403 CONSENT_REQUIRED with `details.reason` when the consent is not in force.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/ConsentType"
+            },
+            "required": true,
+            "name": "type",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consent in force",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChildConsentCheck"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/privacy/export": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Export the household’s data",
+        "description": "Queues a job: the worker zips the household’s JSON into private storage, then notifies the parent. Returns the running job if one exists. 3 requests per household per day. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Queued (or already running)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many attempts (RATE_LIMITED); see Retry-After",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/privacy/export/{jobId}": {
+      "get": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Export status and download link",
+        "description": "When READY, `downloadUrl` is a signed URL valid until `expiresAt` (24 hours after completion).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "jobId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable (SERVICE_UNAVAILABLE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/privacy/overview": {
+      "get": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Privacy Center overview",
+        "description": "Accepted policy versions, recent exports, deletions and privacy requests.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Overview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyOverview"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/delete-request": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Delete a child’s profile",
+        "description": "The child login is turned off and every session revoked at once; the profile is hard-deleted after 30 days (ledgers anonymised). Idempotent. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Deletion scheduled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/delete-request": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Delete the parent account and household data",
+        "description": "Owner: the household is hidden, every child login turned off and the parent account disabled at once; everything is hard-deleted after 30 days (ledgers anonymised). Reachable in the app and from the public web page. Idempotent. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Deletion scheduled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

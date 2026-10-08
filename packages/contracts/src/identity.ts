@@ -73,6 +73,13 @@ export const StudentSchema = z
     lockedUntil: DateTime.nullable(),
     failedAttempts: z.int().nonnegative(),
     activeSessions: z.int().nonnegative(),
+    coreServiceConsent: z.boolean().openapi({
+      description:
+        'CORE_SERVICE consent is in force (granted on an accepted policy version). Without it the child cannot sign in.',
+    }),
+    deletionScheduledFor: DateTime.nullable().openapi({
+      description: 'Deletion requested: the login is off and the profile is purged at this time.',
+    }),
     createdAt: DateTime,
     updatedAt: DateTime,
   })

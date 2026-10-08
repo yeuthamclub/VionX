@@ -16,6 +16,7 @@
     "@vionx/domain": "../../packages/domain/src/index.ts",
     "@vionx/ai": "../../packages/ai/src/index.ts",
     "@vionx/ai/anthropic": "../../packages/ai/src/providers/anthropic.ts",
-    "@vionx/contracts": "../../packages/contracts/src/index.ts"
+    "@vionx/contracts": "../../packages/contracts/src/index.ts",
+    "fflate": "npm:fflate@0.8.2"
   }
 }

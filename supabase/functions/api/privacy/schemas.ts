@@ -1,0 +1,26 @@
+// Consent & privacy module schemas. Shared shapes live in @vionx/contracts so the typed client and
+// the OpenAPI document come from one definition.
+export {
+  ChildAssentRequestSchema,
+  ChildConsentCheckResponseSchema,
+  ConsentGrantRequestSchema,
+  ConsentParamsSchema,
+  ConsentRevokeRequestSchema,
+  ConsentStateSchema,
+  ConsentTypeParamSchema,
+  DeleteRequestSchema,
+  DeletionResponseSchema,
+  ExportJobParamSchema,
+  ExportJobResponseSchema,
+  PoliciesQuerySchema,
+  PoliciesResponseSchema,
+  PolicyAcceptRequestSchema,
+  PolicyAcceptResponseSchema,
+  PrivacyOverviewResponseSchema,
+  StudentConsentsResponseSchema,
+  StudentIdParamSchema,
+  type ConsentRecord,
+  type ConsentState,
+  type DeletionJob,
+  type ExportJob,
+} from '@vionx/contracts';
