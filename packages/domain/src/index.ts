@@ -4,5 +4,6 @@
 //
 // Layout: one folder per module as modules land (identity/, consent/, calendar/, rewards/,
 // curriculum/, practice/, mastery/, planner/ ...). M00 ships the shared helpers below.
+export * from './identity/index.ts';
 export * from './shared/result.ts';
 export * from './time/local-day.ts';
