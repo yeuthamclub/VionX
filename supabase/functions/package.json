@@ -15,7 +15,9 @@
     "@vionx/ai": "workspace:*",
     "@vionx/contracts": "workspace:*",
     "@vionx/domain": "workspace:*",
+    "hash-wasm": "4.12.0",
     "hono": "^4.13.13",
+    "jose": "6.2.12",
     "postgres": "^3.4.9",
     "zod": "^4.6.5"
   },

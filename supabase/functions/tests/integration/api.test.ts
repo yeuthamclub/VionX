@@ -123,9 +123,11 @@ describe('ai-batch function (FakeAiProvider when no key is configured)', () => {
     const { batchId } = (await submit.json()) as { batchId: string };
 
     // The fake provider lives per isolate; collect may land on a fresh isolate, so only the
-    // submit row is asserted here. Real collection is exercised by X01/M10.
+    // submit row is asserted here. Real collection is exercised by X01/M10. Fake batch ids restart
+    // per isolate, so the row is matched by this run's unique prompt version as well.
     const rows = await sql<{ status: string; model: string }[]>`
-      select status, model from ops.ai_runs where batch_id = ${batchId}`;
+      select status, model from ops.ai_runs
+      where batch_id = ${batchId} and prompt_version = ${promptVersion}`;
     expect(rows).toEqual([{ status: 'batch_submitted', model: 'claude-haiku-4-5' }]);
   });
 });

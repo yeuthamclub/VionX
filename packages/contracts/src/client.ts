@@ -4,6 +4,16 @@ import type { components, paths } from './generated/openapi.ts';
 export type { paths as ApiPaths } from './generated/openapi.ts';
 export type HealthResponse = components['schemas']['HealthResponse'];
 export type ApiErrorBody = components['schemas']['Error'];
+export type MeResponse = components['schemas']['Me'];
+export type Household = components['schemas']['Household'];
+export type HouseholdResponse = components['schemas']['HouseholdResponse'];
+export type Student = components['schemas']['Student'];
+export type ChildCredentials = components['schemas']['ChildCredentials'];
+export type ChildLoginResponse = components['schemas']['ChildLoginResponse'];
+export type ChildProfile = components['schemas']['ChildProfile'];
+export type ChildSession = components['schemas']['ChildSession'];
+export type Avatar = components['schemas']['Avatar'];
+export const CHILD_SESSION_HEADER = 'x-vionx-child-session';
 
 export interface ApiClientOptions {
   /** e.g. `http://10.0.2.2:54321/functions/v1` (Android emulator → local Supabase). */

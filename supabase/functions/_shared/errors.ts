@@ -14,6 +14,9 @@ const STATUS: Record<ErrorCode, number> = {
   INTERNAL: 500,
   NOT_IMPLEMENTED: 501,
   SERVICE_UNAVAILABLE: 503,
+  INVALID_CREDENTIALS: 401,
+  ACCOUNT_LOCKED: 423,
+  ACCOUNT_DISABLED: 403,
 };
 
 /** Throw from any handler; the error handler renders `{code, message, details?, requestId}`. */
@@ -24,6 +27,8 @@ export class ApiError extends Error {
     readonly code: ErrorCode,
     message: string,
     readonly details?: unknown,
+    /** Extra response headers, e.g. `retry-after` for RATE_LIMITED. */
+    readonly headers?: Record<string, string>,
   ) {
     super(message);
     this.status = STATUS[code];

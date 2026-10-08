@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { HealthResponseSchema } from '@vionx/contracts';
 import { SkeletonActorResolver, requireActor, type Actor } from '../_shared/actor.ts';
 import { createApp } from '../api/app.ts';
-import type { ApiDeps } from '../api/deps.ts';
+import { noDatabase, type ApiDeps } from '../api/deps.ts';
 
 const SECRET = 'test-secret';
 
@@ -11,6 +11,8 @@ function deps(overrides: Partial<ApiDeps['probes']> = {}): ApiDeps {
     version: 'test',
     allowedOrigins: ['http://localhost:5173'],
     actors: new SkeletonActorResolver(SECRET),
+    sql: noDatabase,
+    admins: { permissionsOf: async () => [] },
     probeTimeoutMs: 50,
     probes: {
       db: async () => {},
@@ -105,7 +107,7 @@ describe('actor resolver skeleton', () => {
     });
   });
 
-  it('treats unverified bearer tokens as anonymous until M01', async () => {
+  it('treats bearer tokens as anonymous (tooling resolver)', async () => {
     expect(await resolver.resolve(req({ authorization: 'Bearer abc' }))).toEqual({
       kind: 'anonymous',
     });

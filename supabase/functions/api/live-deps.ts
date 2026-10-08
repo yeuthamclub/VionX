@@ -1,6 +1,11 @@
-import { SkeletonActorResolver } from '../_shared/actor.ts';
+import {
+  LiveActorResolver,
+  PgAdminPermissionStore,
+  PgChildSessionStore,
+} from '../_shared/actor.ts';
 import { getSql } from '../_shared/db.ts';
 import type { FunctionEnv } from '../_shared/env.ts';
+import { SupabaseJwtVerifier } from '../_shared/jwt.ts';
 import type { ApiDeps } from './deps.ts';
 
 /** Real dependencies for the deployed function (Deno) built from env. */
@@ -9,7 +14,16 @@ export function liveDeps(env: FunctionEnv): ApiDeps {
   return {
     version: env.appVersion,
     allowedOrigins: env.allowedOrigins,
-    actors: new SkeletonActorResolver(env.serviceSecret),
+    sql,
+    admins: new PgAdminPermissionStore(sql),
+    actors: new LiveActorResolver({
+      serviceSecret: env.serviceSecret,
+      parentTokens: new SupabaseJwtVerifier({
+        jwksUrl: env.jwksUrl,
+        ...(env.jwtSecret ? { legacySecret: env.jwtSecret } : {}),
+      }),
+      childSessions: new PgChildSessionStore(sql),
+    }),
     probes: {
       db: async () => {
         await sql`select 1`;

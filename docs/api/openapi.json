@@ -12,6 +12,20 @@
     }
   ],
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Parent: Supabase Auth access token (phone OTP or Google)."
+      },
+      "childSession": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-vionx-child-session",
+        "description": "Child: opaque session token from POST /v1/auth/child/login."
+      }
+    },
     "schemas": {
       "HealthResponse": {
         "type": "object",
@@ -112,7 +126,10 @@
               "RATE_LIMITED",
               "NOT_IMPLEMENTED",
               "SERVICE_UNAVAILABLE",
-              "INTERNAL"
+              "INTERNAL",
+              "INVALID_CREDENTIALS",
+              "ACCOUNT_LOCKED",
+              "ACCOUNT_DISABLED"
             ],
             "example": "VALIDATION_FAILED"
           },
@@ -130,6 +147,499 @@
           "code",
           "message",
           "requestId"
+        ]
+      },
+      "Me": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "displayName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "households": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "role": {
+                  "$ref": "#/components/schemas/HouseholdRole"
+                },
+                "timezone": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "role",
+                "timezone"
+              ]
+            }
+          },
+          "adminPermissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminPermission"
+            }
+          }
+        },
+        "required": [
+          "userId",
+          "phone",
+          "email",
+          "displayName",
+          "households",
+          "adminPermissions"
+        ]
+      },
+      "HouseholdRole": {
+        "type": "string",
+        "enum": [
+          "OWNER",
+          "GUARDIAN"
+        ]
+      },
+      "AdminPermission": {
+        "type": "string",
+        "enum": [
+          "SUPER_ADMIN",
+          "CONTENT_ADMIN",
+          "CURRICULUM_EDITOR",
+          "CONTENT_REVIEWER",
+          "LIBRARIAN",
+          "SUPPORT",
+          "ANALYST"
+        ]
+      },
+      "HouseholdResponse": {
+        "type": "object",
+        "properties": {
+          "household": {
+            "$ref": "#/components/schemas/Household"
+          },
+          "students": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Student"
+            }
+          }
+        },
+        "required": [
+          "household",
+          "students"
+        ]
+      },
+      "Household": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "name": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/HouseholdRole"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "timezone",
+          "role",
+          "createdAt"
+        ]
+      },
+      "Student": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "birthYear": {
+            "type": "integer"
+          },
+          "grade": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/Avatar"
+          },
+          "childLoginId": {
+            "type": "string",
+            "example": "vx-k7m2pq",
+            "description": "`vx-` + 6 characters"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StudentStatus"
+          },
+          "lockedUntil": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "failedAttempts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "activeSessions": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "birthYear",
+          "grade",
+          "avatar",
+          "childLoginId",
+          "status",
+          "lockedUntil",
+          "failedAttempts",
+          "activeSessions",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Avatar": {
+        "type": "string",
+        "enum": [
+          "owl",
+          "fox",
+          "cat",
+          "dog",
+          "panda",
+          "rabbit",
+          "tiger",
+          "turtle"
+        ]
+      },
+      "StudentStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "locked",
+          "disabled"
+        ]
+      },
+      "HouseholdCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "example": "Gia đình Minh"
+          },
+          "timezone": {
+            "type": "string",
+            "maxLength": 64,
+            "example": "Asia/Ho_Chi_Minh"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "StudentCreateResponse": {
+        "type": "object",
+        "properties": {
+          "student": {
+            "$ref": "#/components/schemas/Student"
+          },
+          "credentials": {
+            "$ref": "#/components/schemas/ChildCredentials"
+          }
+        },
+        "required": [
+          "student",
+          "credentials"
+        ]
+      },
+      "ChildCredentials": {
+        "type": "object",
+        "properties": {
+          "childLoginId": {
+            "type": "string",
+            "example": "vx-k7m2pq",
+            "description": "`vx-` + 6 characters"
+          },
+          "pin": {
+            "type": "string",
+            "pattern": "^\\d{4,8}$",
+            "example": "582913",
+            "description": "Shown once on the credential card; never stored in clear."
+          }
+        },
+        "required": [
+          "childLoginId",
+          "pin"
+        ]
+      },
+      "StudentCreateRequest": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "example": "Minh"
+          },
+          "birthYear": {
+            "type": "integer",
+            "example": 2014
+          },
+          "grade": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "example": 6
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/Avatar"
+          },
+          "pin": {
+            "type": "string",
+            "pattern": "^\\d{4,8}$",
+            "example": "582913",
+            "description": "Omit to let the server generate a 6-digit PIN."
+          }
+        },
+        "required": [
+          "displayName",
+          "birthYear",
+          "grade"
+        ]
+      },
+      "StudentPatchRequest": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "example": "Minh"
+          },
+          "birthYear": {
+            "type": "integer",
+            "example": 2014
+          },
+          "grade": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "example": 6
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/Avatar"
+          }
+        }
+      },
+      "ResetPinResponse": {
+        "type": "object",
+        "properties": {
+          "credentials": {
+            "$ref": "#/components/schemas/ChildCredentials"
+          },
+          "revokedSessions": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "credentials",
+          "revokedSessions"
+        ]
+      },
+      "ResetPinRequest": {
+        "type": "object",
+        "properties": {
+          "pin": {
+            "type": "string",
+            "pattern": "^\\d{4,8}$",
+            "example": "582913",
+            "description": "Omit to generate a new 6-digit PIN."
+          },
+          "revokeSessions": {
+            "type": "boolean",
+            "description": "Also sign the child out everywhere."
+          }
+        }
+      },
+      "RevokeSessionsResponse": {
+        "type": "object",
+        "properties": {
+          "revokedSessions": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "revokedSessions"
+        ]
+      },
+      "DisableRequest": {
+        "type": "object",
+        "properties": {
+          "disabled": {
+            "type": "boolean",
+            "description": "Default true. false re-enables the child login."
+          }
+        }
+      },
+      "ChildLoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Opaque; send as `x-vionx-child-session`."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "student": {
+            "$ref": "#/components/schemas/ChildProfile"
+          }
+        },
+        "required": [
+          "token",
+          "expiresAt",
+          "student"
+        ]
+      },
+      "ChildProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "integer"
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/Avatar"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "grade",
+          "avatar"
+        ]
+      },
+      "ChildLoginRequest": {
+        "type": "object",
+        "properties": {
+          "childLoginId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32,
+            "example": "vx-k7m2pq"
+          },
+          "pin": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16,
+            "example": "582913"
+          },
+          "deviceId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "example": "android-6f1c…"
+          }
+        },
+        "required": [
+          "childLoginId",
+          "pin",
+          "deviceId"
+        ]
+      },
+      "ChildSession": {
+        "type": "object",
+        "properties": {
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "student": {
+            "$ref": "#/components/schemas/ChildProfile"
+          }
+        },
+        "required": [
+          "expiresAt",
+          "student"
+        ]
+      },
+      "ChildLogoutResponse": {
+        "type": "object",
+        "properties": {
+          "revoked": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "revoked"
         ]
       }
     },
@@ -170,6 +680,735 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "Signed-in parent account",
+        "description": "Profile, households and admin permissions of the Supabase Auth user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/household": {
+      "post": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "Create the household",
+        "description": "Creates the parent’s household with the parent as OWNER. One household per parent in v1.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HouseholdCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HouseholdResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "The parent’s household and children",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Household",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HouseholdResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students": {
+      "post": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "Add a child",
+        "description": "Creates the child profile and login. The response carries the one-time credentials (login id + PIN); the PIN is never retrievable again.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}": {
+      "get": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "A child in the parent’s household",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Child",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Student"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "Edit a child profile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentPatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Student"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/reset-pin": {
+      "post": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "Reset a child’s PIN",
+        "description": "Sets a new PIN (given or generated), clears the lock and failed attempts. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPinRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPinResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/revoke-sessions": {
+      "post": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "Sign a child out on every device",
+        "description": "Revokes all active child sessions. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevokeSessionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/disable": {
+      "post": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "Disable (or re-enable) a child login",
+        "description": "Disabling also revokes every session. `{ \"disabled\": false }` re-enables. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Student"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/child/login": {
+      "post": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "Child sign-in with login id + PIN",
+        "description": "Returns an opaque session token (30-day sliding expiry). 5 wrong PINs lock the login for 15 minutes; attempts are rate-limited per device and per login id.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChildLoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signed in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChildLoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Too many wrong PINs; locked for 15 minutes (ACCOUNT_LOCKED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many attempts (RATE_LIMITED); see Retry-After",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/child/session": {
+      "get": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "Current child session",
+        "description": "Validates the stored token (app start) and returns the child profile. Extends the sliding expiry.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Active session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChildSession"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/child/logout": {
+      "post": {
+        "tags": [
+          "identity"
+        ],
+        "summary": "Child sign-out (revokes this session)",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChildLogoutResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

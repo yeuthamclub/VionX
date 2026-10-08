@@ -2,10 +2,12 @@
 // Vitest (Node) and the OpenAPI generator call createApp with fakes.
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
+import { HTTPException } from 'hono/http-exception';
 import { requestId } from 'hono/request-id';
 import type { Actor } from '../_shared/actor.ts';
 import { ApiError, errorBody } from '../_shared/errors.ts';
 import type { ApiDeps } from './deps.ts';
+import { registerIdentityRoutes } from './identity/routes.ts';
 import { registerSystemRoutes } from './system/routes.ts';
 
 export type AppEnv = { Variables: { requestId: string; actor: Actor } };
@@ -48,8 +50,34 @@ export function createApp(deps: ApiDeps) {
     c.set('actor', await deps.actors.resolve(c.req.raw));
     await next();
   });
+  // Optional JSON bodies: an empty body sent with `content-type: application/json` reads as `{}`.
+  app.use('*', async (c, next) => {
+    if (
+      ['POST', 'PATCH', 'PUT'].includes(c.req.method) &&
+      c.req.header('content-type')?.includes('application/json') &&
+      (await c.req.text()).trim() === ''
+    ) {
+      // Hono caches body promises per type; seed the text cache that `c.req.json()` reads.
+      (c.req.bodyCache as Record<string, unknown>).text = Promise.resolve('{}');
+    }
+    await next();
+  });
+
+  app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+    description: 'Parent: Supabase Auth access token (phone OTP or Google).',
+  });
+  app.openAPIRegistry.registerComponent('securitySchemes', 'childSession', {
+    type: 'apiKey',
+    in: 'header',
+    name: 'x-vionx-child-session',
+    description: 'Child: opaque session token from POST /v1/auth/child/login.',
+  });
 
   registerSystemRoutes(app, deps);
+  registerIdentityRoutes(app, deps);
 
   app.doc31('/v1/openapi.json', OPENAPI_INFO);
 
@@ -59,7 +87,11 @@ export function createApp(deps: ApiDeps) {
   app.onError((error, c) => {
     const id = c.get('requestId') ?? 'unknown';
     if (error instanceof ApiError) {
+      for (const [name, value] of Object.entries(error.headers ?? {})) c.header(name, value);
       return c.json(errorBody(error, id), error.status as 400);
+    }
+    if (error instanceof HTTPException && error.status === 400) {
+      return c.json(errorBody(new ApiError('VALIDATION_FAILED', error.message), id), 400);
     }
     console.error(JSON.stringify({ level: 'error', requestId: id, error: String(error) }));
     return c.json(errorBody(new ApiError('INTERNAL', 'Internal error'), id), 500);

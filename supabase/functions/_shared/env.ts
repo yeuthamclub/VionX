@@ -5,6 +5,10 @@ export interface FunctionEnv {
   dbUrl: string;
   serviceRoleKey: string;
   serviceSecret: string;
+  /** Legacy HS256 JWT secret; only for projects not yet on asymmetric signing keys. */
+  jwtSecret: string | undefined;
+  /** JWKS of Supabase Auth; defaults to `${SUPABASE_URL}/auth/v1/.well-known/jwks.json`. */
+  jwksUrl: string;
   anthropicApiKey: string | undefined;
   allowedOrigins: string[];
   appVersion: string;
@@ -18,11 +22,14 @@ export function readEnv(get: EnvGetter): FunctionEnv {
     if (!value) throw new Error(`Missing required env var ${name}`);
     return value;
   };
+  const supabaseUrl = required('SUPABASE_URL').replace(/\/+$/, '');
   return {
-    supabaseUrl: required('SUPABASE_URL'),
+    supabaseUrl,
     dbUrl: required('SUPABASE_DB_URL'),
     serviceRoleKey: get('SUPABASE_SERVICE_ROLE_KEY')?.trim() ?? '',
     serviceSecret: required('VIONX_SERVICE_SECRET'),
+    jwtSecret: get('SUPABASE_JWT_SECRET')?.trim() || undefined,
+    jwksUrl: get('SUPABASE_JWKS_URL')?.trim() || `${supabaseUrl}/auth/v1/.well-known/jwks.json`,
     anthropicApiKey: get('ANTHROPIC_API_KEY')?.trim() || undefined,
     allowedOrigins: (get('ALLOWED_ORIGINS') ?? '')
       .split(',')
