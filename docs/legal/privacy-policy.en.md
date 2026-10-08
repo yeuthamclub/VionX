@@ -54,9 +54,11 @@ We do not sell personal data and do not use children's data for advertising. Dat
 Data is kept while the family uses VionX. When a parent asks for deletion:
 
 - the account or child profile is **disabled immediately**;
-- after **30 days** the data is **permanently deleted**;
+- during these 14 days the parent can cancel the request with **Cancel deletion request** in the app's **Privacy** section, which re-enables the account or child profile;
+- after **14 days** the data is **permanently deleted**;
 - reward and transaction ledgers are **anonymised** instead of deleted, so totals stay correct but can no longer be linked to the child or family;
-- a record that the request was fulfilled (ids only, no names) is kept as proof of compliance.
+- a record that the request was fulfilled (ids only, no names) is kept as proof of compliance;
+- related audit logs and system event logs are kept for **1 year** after the deletion, holding only pseudonymous ids (no names, phone numbers, email addresses or other personal data), and are then deleted.
 
 Data export files can be downloaded for **24 hours** and are then deleted.
 

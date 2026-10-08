@@ -34,7 +34,7 @@ During the trial period VionX is free. If paid plans are introduced we will anno
 
 ## 7. Termination and account deletion
 
-You can delete your account at any time in the app (Privacy) or at [account deletion URL]. The account is disabled immediately and the data is permanently deleted after 30 days as described in the Privacy Policy. We may suspend an account that breaches these Terms after notifying you, unless immediate action is needed to stop harm.
+You can delete your account at any time in the app (Privacy) or at [account deletion URL]. The account is disabled immediately and the data is permanently deleted after 14 days as described in the Privacy Policy. We may suspend an account that breaches these Terms after notifying you, unless immediate action is needed to stop harm.
 
 ## 8. Limitation of liability
 

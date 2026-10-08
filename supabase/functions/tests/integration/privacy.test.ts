@@ -15,6 +15,7 @@ import {
   StudentCreateResponseSchema,
   StudentSchema,
 } from '@vionx/contracts';
+import { DELETION_GRACE_DAYS } from '@vionx/domain';
 import {
   signInWithPassword,
   signUpWithEmail,
@@ -564,7 +565,8 @@ describe('deletion', () => {
       studentId: a.student.id,
     });
     const days = (Date.parse(deletion.purgeAfter) - Date.parse(deletion.requestedAt)) / 86_400_000;
-    expect(days).toBe(30);
+    expect(days).toBe(DELETION_GRACE_DAYS);
+    expect(days).toBe(14);
 
     expect((await login(a)).body.code).toBe('ACCOUNT_DISABLED');
     expect((await api('GET', '/auth/child/session', { child: token })).status).toBe(401);
@@ -591,7 +593,7 @@ describe('deletion', () => {
     expect(again.body.deletion.id).toBe(deletion.id);
   });
 
-  it('pg_cron purge after 30 days deletes the child and anonymises ledgers', async () => {
+  it('pg_cron purge after the 14-day grace period deletes the child and anonymises ledgers', async () => {
     await sql`insert into ${sql(ledger)} (household_id, student_id, amount) values
       (${a.householdId}, ${a.student.id}, 10), (${a.householdId}, ${a.student.id}, 5)`;
     await expect(sql`update ${sql(ledger)} set amount = 0`).rejects.toThrow(/append-only/);
@@ -644,14 +646,34 @@ describe('deletion', () => {
     );
     expect(again.body.deletion.id).toBe(deletion.id);
 
-    expect((await api('GET', '/household', { parent: b.parent })).status).toBe(404);
-    expect((await api('GET', `/students/${b.student.id}`, { parent: b.parent })).status).toBe(404);
-    expect((await api('POST', '/household', { parent: b.parent }, { name: 'Again' })).status).toBe(
-      403,
+    // The parent is signed out everywhere and the account is off: only the deletion status and
+    // cancel routes answer. Signing in again stays possible so the request can be cancelled.
+    expect(await sql`select 1 from auth.sessions where user_id = ${b.parent.userId}`).toHaveLength(
+      0,
     );
+    for (const [method, path, body] of [
+      ['GET', '/household', undefined],
+      ['GET', `/students/${b.student.id}`, undefined],
+      ['POST', '/household', { name: 'Again' }],
+      ['POST', '/privacy/export', undefined],
+    ] as const) {
+      const denied = await api(method, path, { parent: b.parent }, body);
+      expect(denied.status, `${method} ${path}`).toBe(403);
+      expect(denied.body).toMatchObject({
+        code: 'ACCOUNT_DISABLED',
+        details: { reason: 'DELETION_PENDING', deletionId: deletion.id },
+      });
+    }
     expect((await api('GET', '/auth/child/session', { child: token })).status).toBe(401);
     expect((await login(b)).body.code).toBe('ACCOUNT_DISABLED');
-    await expect(signInWithPassword(b.email, b.password)).rejects.toThrow(/banned/i);
+    const again2 = await signInWithPassword(b.email, b.password);
+    const me = await api('GET', '/me', { parent: again2 });
+    expect(me.status).toBe(200);
+    expect(me.body.households).toEqual([]);
+    expect(me.body.pendingAccountDeletion).toEqual({
+      id: deletion.id,
+      purgeAfter: deletion.purgeAfter,
+    });
 
     await sql`update app.data_deletion_jobs set purge_after = now() - interval '1 minute' where id = ${deletion.id}`;
     await sql`select ops.purge_due_deletions()`;
@@ -661,6 +683,280 @@ describe('deletion', () => {
       select r.status, r.source from app.privacy_requests r
       join app.data_deletion_jobs j on j.privacy_request_id = r.id where j.id = ${deletion.id}`;
     expect(request).toMatchObject({ status: 'COMPLETED', source: 'web' });
+    // After the purge there is nothing left to cancel.
+    expect((await api('POST', '/account/delete-request/cancel', { parent: b.parent })).status).toBe(
+      404,
+    );
+  });
+});
+
+describe('cancelling a deletion during the 14-day grace period', () => {
+  let a: Family;
+  let b: Family;
+  let noHousehold: AuthSession;
+
+  beforeAll(async () => {
+    a = await newFamily('Huỷ A');
+    b = await newFamily('Huỷ B');
+    await grant(a, 'CORE_SERVICE');
+    await grant(b, 'CORE_SERVICE');
+    noHousehold = await signUpWithEmail(`it-${randomUUID()}@vionx.test`, `pw-${randomUUID()}`);
+    createdUsers.push(noHousehold.userId);
+  });
+
+  const requestChild = (f: Family, studentId = f.student.id) =>
+    api('POST', `/students/${studentId}/delete-request`, { parent: f.parent }, { confirm: true });
+  const cancelChild = (parent: AuthSession, studentId: string) =>
+    api('POST', `/students/${studentId}/delete-request/cancel`, { parent });
+
+  it('a child deletion is cancelled by the parent: login restored, job CANCELLED, audited, event emitted', async () => {
+    const requested = DeletionResponseSchema.parse((await requestChild(a)).body).deletion;
+    expect((await login(a)).body.code).toBe('ACCOUNT_DISABLED');
+
+    // Another household (with or without a household of its own) cannot see or cancel it.
+    for (const parent of [b.parent, noHousehold]) {
+      const res = await cancelChild(parent, a.student.id);
+      expect(res.status).toBe(404);
+      expect(ErrorBodySchema.parse(res.body).code).toBe('NOT_FOUND');
+    }
+
+    const res = await cancelChild(a.parent, a.student.id);
+    expect(res.status).toBe(200);
+    const { deletion } = DeletionResponseSchema.parse(res.body);
+    expect(deletion).toMatchObject({ id: requested.id, status: 'CANCELLED', completedAt: null });
+    expect(deletion.cancelledAt).not.toBeNull();
+    expect((await login(a)).status).toBe(200);
+    const student = StudentSchema.parse(
+      (await api('GET', `/students/${a.student.id}`, { parent: a.parent })).body,
+    );
+    expect(student).toMatchObject({ status: 'active', deletionScheduledFor: null });
+
+    const [request] = await sql`
+      select r.status from app.privacy_requests r
+      join app.data_deletion_jobs j on j.privacy_request_id = r.id where j.id = ${deletion.id}`;
+    expect(request).toMatchObject({ status: 'CANCELLED' });
+    const audit = await sql`
+      select details from ops.audit_logs
+      where action = 'privacy.child_deletion_cancelled' and target_id = ${a.student.id}`;
+    expect(audit).toHaveLength(1);
+    expect(audit[0]!.details).toMatchObject({ jobId: deletion.id, loginRestored: true });
+    const events = await sql`
+      select payload from ops.domain_events
+      where type = 'privacy.deletion_cancelled' and aggregate_id = ${deletion.id}`;
+    expect(events).toHaveLength(1);
+    expect(events[0]!.payload).toMatchObject({ scope: 'CHILD', studentId: a.student.id });
+
+    // The purge skips the cancelled job even once its date has passed.
+    await sql`update app.data_deletion_jobs set purge_after = now() - interval '1 minute' where id = ${deletion.id}`;
+    await sql`select ops.purge_due_deletions()`;
+    expect(await sql`select 1 from app.students where id = ${a.student.id}`).toHaveLength(1);
+    const [job] = await sql`select status from app.data_deletion_jobs where id = ${deletion.id}`;
+    expect(job).toMatchObject({ status: 'CANCELLED' });
+
+    // Nothing pending any more; a new request starts a new grace period.
+    expect((await cancelChild(a.parent, a.student.id)).status).toBe(404);
+    const renewed = DeletionResponseSchema.parse((await requestChild(a)).body).deletion;
+    expect(renewed.id).not.toBe(deletion.id);
+    expect((await cancelChild(a.parent, a.student.id)).status).toBe(200);
+  });
+
+  it('a child the parent had disabled before the request stays disabled after the cancel', async () => {
+    const disable = await api(
+      'POST',
+      `/students/${b.student.id}/disable`,
+      { parent: b.parent },
+      { disabled: true },
+    );
+    expect(disable.status).toBe(200);
+    expect((await requestChild(b)).status).toBe(202);
+    expect((await cancelChild(b.parent, b.student.id)).status).toBe(200);
+    const student = StudentSchema.parse(
+      (await api('GET', `/students/${b.student.id}`, { parent: b.parent })).body,
+    );
+    expect(student.status).toBe('disabled');
+    await api(
+      'POST',
+      `/students/${b.student.id}/disable`,
+      { parent: b.parent },
+      { disabled: false },
+    );
+  });
+
+  it('is refused once the purge is due (409) and after the purge has run (404)', async () => {
+    const requested = DeletionResponseSchema.parse((await requestChild(b)).body).deletion;
+    await sql`update app.data_deletion_jobs set purge_after = now() - interval '1 minute' where id = ${requested.id}`;
+    const due = await cancelChild(b.parent, b.student.id);
+    expect(due.status).toBe(409);
+    expect(due.body).toMatchObject({ code: 'CONFLICT', details: { reason: 'GRACE_PERIOD_OVER' } });
+    await sql`select ops.purge_due_deletions()`;
+    expect((await cancelChild(b.parent, b.student.id)).status).toBe(404);
+  });
+
+  it('an account deletion is cancelled after signing in again: household, children and account work again', async () => {
+    const f = await newFamily('Huỷ TK');
+    await grant(f, 'CORE_SERVICE');
+    // A second child the parent had disabled before: it stays disabled.
+    const second = StudentCreateResponseSchema.parse(
+      (
+        await api(
+          'POST',
+          '/students',
+          { parent: f.parent },
+          { displayName: 'Con thứ hai', birthYear: 2016, grade: 4, pin: '4826' },
+        )
+      ).body,
+    ).student;
+    await api('POST', `/students/${second.id}/disable`, { parent: f.parent }, { disabled: true });
+
+    const requested = DeletionResponseSchema.parse(
+      (await api('POST', '/account/delete-request', { parent: f.parent }, { confirm: true })).body,
+    ).deletion;
+    expect((await login(f)).body.code).toBe('ACCOUNT_DISABLED');
+
+    // Another parent has nothing to cancel; the other household's account is untouched.
+    expect((await api('POST', '/account/delete-request/cancel', { parent: b.parent })).status).toBe(
+      404,
+    );
+
+    const parent = await signInWithPassword(f.email, f.password);
+    expect((await api('GET', '/household', { parent })).body.code).toBe('ACCOUNT_DISABLED');
+    const overview = PrivacyOverviewResponseSchema.parse(
+      (await api('GET', '/privacy/overview', { parent })).body,
+    );
+    expect(overview.deletions.find((d) => d.id === requested.id)).toMatchObject({
+      scope: 'ACCOUNT',
+      status: 'SCHEDULED',
+    });
+
+    const res = await api('POST', '/account/delete-request/cancel', { parent });
+    expect(res.status).toBe(200);
+    expect(DeletionResponseSchema.parse(res.body).deletion).toMatchObject({
+      id: requested.id,
+      scope: 'ACCOUNT',
+      status: 'CANCELLED',
+    });
+    expect((await api('GET', '/household', { parent })).status).toBe(200);
+    expect((await api('GET', '/me', { parent })).body.pendingAccountDeletion).toBeNull();
+    expect((await login(f)).status).toBe(200);
+    const secondNow = StudentSchema.parse(
+      (await api('GET', `/students/${second.id}`, { parent })).body,
+    );
+    expect(secondNow.status).toBe('disabled');
+
+    const audit = await sql`
+      select details from ops.audit_logs
+      where action = 'privacy.account_deletion_cancelled' and actor_id = ${f.parent.userId}`;
+    expect(audit).toHaveLength(1);
+    expect(audit[0]!.details).toMatchObject({ jobId: requested.id, reenabledStudents: 1 });
+    const events = await sql`
+      select household_id from ops.domain_events
+      where type = 'privacy.deletion_cancelled' and aggregate_id = ${requested.id}`;
+    expect(events).toEqual([{ household_id: f.householdId }]);
+
+    await sql`update app.data_deletion_jobs set purge_after = now() - interval '1 minute' where id = ${requested.id}`;
+    await sql`select ops.purge_due_deletions()`;
+    expect(await sql`select 1 from app.households where id = ${f.householdId}`).toHaveLength(1);
+    expect(await sql`select 1 from auth.users where id = ${f.parent.userId}`).toHaveLength(1);
+    expect((await api('POST', '/account/delete-request/cancel', { parent })).status).toBe(404);
+  });
+});
+
+describe('audit logs and events after a purge: pseudonymous for 1 year, then deleted', () => {
+  it('scrubs personal fields at purge time and deletes the rows 365 days later', async () => {
+    const f = await newFamily('Lưu giữ');
+    const other = await newFamily('Lưu giữ khác');
+    await grant(f, 'CORE_SERVICE');
+    // Rows a future module might write with personal fields in them.
+    const [audit] = await sql<{ id: string }[]>`
+      insert into ops.audit_logs (actor_type, actor_id, action, target_type, target_id, household_id, details)
+      values ('parent', ${f.parent.userId}, 'it.test', 'student', ${f.student.id}, ${f.householdId},
+              ${sql.json({ studentId: f.student.id, displayName: 'Bé Lưu', nested: { phone: '+84900000009', n: 1 } })})
+      returning id`;
+    const [event] = await sql<{ id: string }[]>`
+      insert into ops.domain_events (type, household_id, aggregate_type, aggregate_id, payload)
+      values ('it.retention_probe', ${f.householdId}, 'student', ${f.student.id},
+              ${sql.json({ studentId: f.student.id, email: 'x@vionx.test', childLoginId: 'vx-abcdef' })})
+      returning id`;
+    await sql`insert into ops.processed_events (consumer, event_id) values ('it-retention', ${event!.id})`;
+    const [untouched] = await sql<{ id: string }[]>`
+      insert into ops.audit_logs (actor_type, action, target_type, target_id, household_id, details)
+      values ('system', 'it.test', 'student', ${other.student.id}, ${other.householdId},
+              ${sql.json({ displayName: 'Bé Khác' })})
+      returning id`;
+    await expect(
+      sql`update ops.audit_logs set details = '{}' where id = ${audit!.id}`,
+    ).rejects.toThrow(/append-only/);
+
+    const deletion = DeletionResponseSchema.parse(
+      (
+        await api(
+          'POST',
+          `/students/${f.student.id}/delete-request`,
+          { parent: f.parent },
+          { confirm: true },
+        )
+      ).body,
+    ).deletion;
+    await sql`update app.data_deletion_jobs set purge_after = now() - interval '1 minute' where id = ${deletion.id}`;
+    await sql`select ops.purge_due_deletions()`;
+
+    const [a] =
+      await sql`select details, target_id, purged_at from ops.audit_logs where id = ${audit!.id}`;
+    expect(a!.details).toEqual({ studentId: f.student.id, nested: { n: 1 } });
+    expect(a!.target_id).toBe(f.student.id);
+    expect(a!.purged_at).not.toBeNull();
+    const [e] = await sql`select payload, purged_at from ops.domain_events where id = ${event!.id}`;
+    expect(e!.payload).toEqual({ studentId: f.student.id });
+    expect(e!.purged_at).not.toBeNull();
+    const requestAudit = await sql`
+      select purged_at from ops.audit_logs
+      where action = 'privacy.child_deletion_requested' and target_id = ${f.student.id}`;
+    expect(requestAudit).toHaveLength(1);
+    expect(requestAudit[0]!.purged_at).not.toBeNull();
+    const [purgedAudit] = await sql`
+      select purged_at from ops.audit_logs where action = 'privacy.purged' and target_id = ${f.student.id}`;
+    expect(purgedAudit!.purged_at).not.toBeNull();
+    const [kept] =
+      await sql`select details, purged_at from ops.audit_logs where id = ${untouched!.id}`;
+    expect(kept).toMatchObject({ details: { displayName: 'Bé Khác' }, purged_at: null });
+    // Still append-only for everyone else after the scrub.
+    await expect(sql`delete from ops.audit_logs where id = ${audit!.id}`).rejects.toThrow(
+      /append-only/,
+    );
+
+    const cron =
+      await sql`select active from cron.job where jobname = 'vionx-purged-log-retention'`;
+    expect(cron[0]?.active).toBe(true);
+    await sql`select ops.delete_expired_purged_logs(now() + interval '364 days')`;
+    expect(await sql`select 1 from ops.audit_logs where id = ${audit!.id}`).toHaveLength(1);
+    await sql`select ops.delete_expired_purged_logs(now() + interval '366 days')`;
+    expect(await sql`select 1 from ops.audit_logs where id = ${audit!.id}`).toHaveLength(0);
+    expect(await sql`select 1 from ops.domain_events where id = ${event!.id}`).toHaveLength(0);
+    expect(
+      await sql`select 1 from ops.processed_events where event_id = ${event!.id}`,
+    ).toHaveLength(0);
+    expect(await sql`select 1 from ops.audit_logs where target_id = ${f.student.id}`).toHaveLength(
+      0,
+    );
+    expect(await sql`select 1 from ops.audit_logs where id = ${untouched!.id}`).toHaveLength(1);
+  });
+
+  it('an account purge marks every row of the household and of the deleted parent', async () => {
+    const f = await newFamily('Lưu giữ TK');
+    const deletion = DeletionResponseSchema.parse(
+      (await api('POST', '/account/delete-request', { parent: f.parent }, { confirm: true })).body,
+    ).deletion;
+    await sql`update app.data_deletion_jobs set purge_after = now() - interval '1 minute' where id = ${deletion.id}`;
+    await sql`select ops.purge_due_deletions()`;
+    const audits = await sql<{ purged: boolean }[]>`
+      select purged_at is not null as purged from ops.audit_logs
+      where household_id = ${f.householdId} or actor_id = ${f.parent.userId}`;
+    expect(audits.length).toBeGreaterThan(0);
+    expect(audits.every((r) => r.purged)).toBe(true);
+    const events = await sql<{ purged: boolean }[]>`
+      select purged_at is not null as purged from ops.domain_events where household_id = ${f.householdId}`;
+    expect(events.length).toBeGreaterThan(0);
+    expect(events.every((r) => r.purged)).toBe(true);
   });
 });
 
@@ -685,6 +981,7 @@ describe('cross-household isolation (404)', () => {
     ['POST', '/consents/CORE_SERVICE/grant', { policyVersion: 1 }],
     ['POST', '/consents/CORE_SERVICE/revoke', undefined],
     ['POST', '/delete-request', { confirm: true }],
+    ['POST', '/delete-request/cancel', undefined],
   ])(
     "%s /students/:id%s on another household's child returns 404",
     async (method, suffix, body) => {

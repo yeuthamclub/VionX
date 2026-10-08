@@ -12,6 +12,11 @@ export interface HealthProbes {
   aiKeyPresent: boolean;
 }
 
+/** Pending (grace-period) account deletions; the api gates such parents (see app.ts). */
+export interface AccountDeletionGate {
+  pending(userId: string): Promise<{ id: string; purgeAfter: Date } | null>;
+}
+
 /** Everything the api app needs from the outside world. Tests pass fakes. */
 export interface ApiDeps {
   version: string;
@@ -20,6 +25,8 @@ export interface ApiDeps {
   /** Database (role postgres via SUPABASE_DB_URL); child data only through `scoped()`. */
   sql: Sql;
   admins: AdminPermissionStore;
+  /** Optional for tooling and unit tests without a database; live deps always set it. */
+  accountDeletions?: AccountDeletionGate;
   /** Private Storage (signed export links). Optional for tooling; routes answer 503 without it. */
   storage?: ObjectStorage;
   /** Browser origins allowed by CORS (admin SPA). */

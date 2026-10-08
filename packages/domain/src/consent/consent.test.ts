@@ -24,12 +24,19 @@ import {
   type PolicyVersionInfo,
 } from './policy.ts';
 import {
+  canCancelDeletion,
   DELETION_GRACE_DAYS,
+  deletionDaysLeft,
   EXPORT_LINK_TTL_MS,
   exportExpiresAt,
   exportObjectPath,
+  isPersonalDataKey,
   purgeAfter,
+  purgedLogDeleteAfter,
+  PURGED_LOG_RETENTION_DAYS,
   remainingLinkSeconds,
+  stripPersonalFields,
+  studentsToReenable,
 } from './privacy.ts';
 import { CONSENT_TYPES, isConsentType } from './types.ts';
 
@@ -241,12 +248,83 @@ describe('export and deletion timing', () => {
     expect(remainingLinkSeconds(expires, new Date(expires.getTime() + 1))).toBeNull();
   });
 
-  it('hard delete is scheduled 30 days after the request', () => {
-    expect(DELETION_GRACE_DAYS).toBe(30);
-    expect(purgeAfter(NOW).toISOString()).toBe('2026-11-07T03:00:00.000Z');
+  it('hard delete is scheduled 14 days after the request (within the legal 20 days)', () => {
+    expect(DELETION_GRACE_DAYS).toBe(14);
+    expect(DELETION_GRACE_DAYS + 1).toBeLessThanOrEqual(20); // daily cron: worst case one day later
+    expect(purgeAfter(NOW).toISOString()).toBe('2026-10-22T03:00:00.000Z');
   });
 
   it('export objects live in one folder per household', () => {
     expect(exportObjectPath('h1', 'j1')).toBe('h1/j1.zip');
+  });
+});
+
+describe('cancelling a deletion during the grace period', () => {
+  const scheduled = { status: 'SCHEDULED' as const, purgeAfter: purgeAfter(NOW) };
+
+  it('is allowed while SCHEDULED and before the purge is due', () => {
+    expect(canCancelDeletion(scheduled, NOW)).toEqual({ ok: true });
+    const lastMinute = new Date(scheduled.purgeAfter.getTime() - 60_000);
+    expect(canCancelDeletion(scheduled, lastMinute)).toEqual({ ok: true });
+  });
+
+  it('is refused once the purge is due, has run, or was cancelled', () => {
+    expect(canCancelDeletion(scheduled, scheduled.purgeAfter)).toEqual({
+      ok: false,
+      error: 'GRACE_PERIOD_OVER',
+    });
+    for (const status of ['COMPLETED', 'CANCELLED', 'FAILED'] as const) {
+      expect(canCancelDeletion({ ...scheduled, status }, NOW)).toEqual({
+        ok: false,
+        error: 'NOT_PENDING',
+      });
+    }
+    expect(canCancelDeletion(null, NOW)).toEqual({ ok: false, error: 'NOT_PENDING' });
+  });
+
+  it('counts whole days left, rounded up, never negative', () => {
+    expect(deletionDaysLeft(scheduled.purgeAfter, NOW)).toBe(14);
+    expect(deletionDaysLeft(scheduled.purgeAfter, new Date(NOW.getTime() + 3600_000))).toBe(14);
+    expect(
+      deletionDaysLeft(scheduled.purgeAfter, new Date(NOW.getTime() + 13.5 * 86_400_000)),
+    ).toBe(1);
+    expect(deletionDaysLeft(scheduled.purgeAfter, scheduled.purgeAfter)).toBe(0);
+    fc.assert(
+      fc.property(fc.integer({ min: 0, max: 40 * 86_400_000 }), (offset) => {
+        const left = deletionDaysLeft(scheduled.purgeAfter, new Date(NOW.getTime() + offset));
+        return left >= 0 && left <= DELETION_GRACE_DAYS;
+      }),
+    );
+  });
+
+  it('an account cancel re-enables only the children the request disabled', () => {
+    expect(studentsToReenable(['a', 'b', 'c', 'd'], ['b'], ['c'])).toEqual(['a', 'd']);
+    expect(studentsToReenable(['a'], [], [])).toEqual(['a']);
+  });
+});
+
+describe('retention of audit logs and events after a purge', () => {
+  it('keeps them for 1 year after the purge', () => {
+    expect(PURGED_LOG_RETENTION_DAYS).toBe(365);
+    expect(purgedLogDeleteAfter(NOW).toISOString()).toBe('2027-10-08T03:00:00.000Z');
+  });
+
+  it('strips personal fields at any depth and keeps pseudonymous ids', () => {
+    const scrubbed = stripPersonalFields({
+      studentId: 's1',
+      displayName: 'Bé An',
+      phone_number: '+84900000001',
+      details: { email: 'a@b.vn', revokedSessions: 2, items: [{ full_name: 'X', id: 'i1' }] },
+      jobId: 'j1',
+    });
+    expect(scrubbed).toEqual({
+      studentId: 's1',
+      details: { revokedSessions: 2, items: [{ id: 'i1' }] },
+      jobId: 'j1',
+    });
+    expect(isPersonalDataKey('Child-Login-Id')).toBe(true);
+    expect(isPersonalDataKey('deviceIdHash')).toBe(false);
+    expect(isPersonalDataKey('householdId')).toBe(false);
+    expect(stripPersonalFields('plain')).toBe('plain');
   });
 });

@@ -34,7 +34,7 @@ Trong giai đoạn thử nghiệm, VionX được cung cấp miễn phí. Nếu 
 
 ## 7. Chấm dứt và xoá tài khoản
 
-Bạn có thể xoá tài khoản bất kỳ lúc nào trong ứng dụng (mục Quyền riêng tư) hoặc tại [địa chỉ trang xoá tài khoản]. Tài khoản bị khoá ngay và dữ liệu bị xoá vĩnh viễn sau 30 ngày như mô tả trong Chính sách quyền riêng tư. Chúng tôi có thể tạm ngừng tài khoản vi phạm Điều khoản này sau khi thông báo cho bạn, trừ trường hợp cần ngăn chặn ngay một hành vi gây hại.
+Bạn có thể xoá tài khoản bất kỳ lúc nào trong ứng dụng (mục Quyền riêng tư) hoặc tại [địa chỉ trang xoá tài khoản]. Tài khoản bị khoá ngay và dữ liệu bị xoá vĩnh viễn sau 14 ngày như mô tả trong Chính sách quyền riêng tư. Chúng tôi có thể tạm ngừng tài khoản vi phạm Điều khoản này sau khi thông báo cho bạn, trừ trường hợp cần ngăn chặn ngay một hành vi gây hại.
 
 ## 8. Giới hạn trách nhiệm
 

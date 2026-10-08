@@ -8,6 +8,7 @@ import type { FunctionEnv } from '../_shared/env.ts';
 import { SupabaseJwtVerifier } from '../_shared/jwt.ts';
 import { SupabaseStorage } from '../_shared/storage.ts';
 import type { ApiDeps } from './deps.ts';
+import { pendingAccountDeletion } from './privacy/repo.ts';
 
 /** Real dependencies for the deployed function (Deno) built from env. */
 export function liveDeps(env: FunctionEnv): ApiDeps {
@@ -17,6 +18,7 @@ export function liveDeps(env: FunctionEnv): ApiDeps {
     allowedOrigins: env.allowedOrigins,
     sql,
     admins: new PgAdminPermissionStore(sql),
+    accountDeletions: { pending: (userId) => pendingAccountDeletion(sql, userId) },
     storage: new SupabaseStorage({
       url: env.supabaseUrl,
       serviceRoleKey: env.serviceRoleKey,

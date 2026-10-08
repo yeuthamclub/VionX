@@ -35,6 +35,10 @@ export const MeResponseSchema = z
       z.object({ id: Uuid, name: z.string(), role: HouseholdRoleSchema, timezone: z.string() }),
     ),
     adminPermissions: z.array(AdminPermissionSchema),
+    pendingAccountDeletion: z.object({ id: Uuid, purgeAfter: DateTime }).nullable().openapi({
+      description:
+        'Set while this account’s deletion request is in its grace period (DELETION_GRACE_DAYS, 14 days): the app then shows only the Privacy Center, where the request can be cancelled.',
+    }),
   })
   .openapi('Me');
 export type MeResponse = z.infer<typeof MeResponseSchema>;

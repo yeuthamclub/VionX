@@ -208,6 +208,28 @@
             "items": {
               "$ref": "#/components/schemas/AdminPermission"
             }
+          },
+          "pendingAccountDeletion": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+              },
+              "purgeAfter": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "id",
+              "purgeAfter"
+            ],
+            "description": "Set while this account’s deletion request is in its grace period (DELETION_GRACE_DAYS, 14 days): the app then shows only the Privacy Center, where the request can be cancelled."
           }
         },
         "required": [
@@ -216,7 +238,8 @@
           "email",
           "displayName",
           "households",
-          "adminPermissions"
+          "adminPermissions",
+          "pendingAccountDeletion"
         ]
       },
       "HouseholdRole": {
@@ -1274,6 +1297,14 @@
               "null"
             ],
             "format": "date-time"
+          },
+          "cancelledAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Set when the parent cancelled the request during the grace period (14 days)."
           }
         },
         "required": [
@@ -1283,7 +1314,8 @@
           "status",
           "requestedAt",
           "purgeAfter",
-          "completedAt"
+          "completedAt",
+          "cancelledAt"
         ]
       },
       "PrivacyRequest": {
@@ -2907,7 +2939,7 @@
           "privacy"
         ],
         "summary": "Delete a child’s profile",
-        "description": "The child login is turned off and every session revoked at once; the profile is hard-deleted after 30 days (ledgers anonymised). Idempotent. Audited.",
+        "description": "The child login is turned off and every session revoked at once; the profile is hard-deleted after the 14-day grace period, during which the parent can cancel (ledgers anonymised). Idempotent. Audited.",
         "security": [
           {
             "bearerAuth": []
@@ -2985,7 +3017,7 @@
           "privacy"
         ],
         "summary": "Delete the parent account and household data",
-        "description": "Owner: the household is hidden, every child login turned off and the parent account disabled at once; everything is hard-deleted after 30 days (ledgers anonymised). Reachable in the app and from the public web page. Idempotent. Audited.",
+        "description": "Owner: the household is hidden, every child login turned off and the parent signed out everywhere at once; until the purge the parent can still sign in, but every route except this one, its cancel, `GET /v1/me`, `GET /v1/policies/current` and `GET /v1/privacy/overview` answers 403 ACCOUNT_DISABLED (`details.reason` DELETION_PENDING). Everything is hard-deleted after the 14-day grace period (ledgers anonymised). Reachable in the app and from the public web page. Idempotent. Audited.",
         "security": [
           {
             "bearerAuth": []
@@ -3024,6 +3056,140 @@
           },
           "401": {
             "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/delete-request/cancel": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Cancel a child’s pending deletion",
+        "description": "During the 14-day grace period: the job becomes CANCELLED (the purge skips it) and the child can sign in again (unless the parent had disabled the child before the request; sessions revoked by the request stay revoked). 404 when there is no pending deletion (including after the purge) or for another household’s child; 409 once the purge is due. Audited; emits `privacy.deletion_cancelled`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deletion cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/delete-request/cancel": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Cancel the pending account deletion",
+        "description": "During the 14-day grace period: the job becomes CANCELLED (the purge skips it), the account works again, the household is visible again and its children can sign in (except those disabled before the request or with their own pending deletion). 404 when there is no pending account deletion; 409 once the purge is due. Audited; emits `privacy.deletion_cancelled`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deletion cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
             "content": {
               "application/json": {
                 "schema": {

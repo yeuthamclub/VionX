@@ -215,30 +215,123 @@ export interface DeletionJobRow {
   requested_at: Date;
   purge_after: Date;
   completed_at: Date | null;
+  cancelled_at: Date | null;
+  restore_state: DeletionRestoreState;
+}
+
+/** What a request changed, so a cancel during the grace period restores exactly that. */
+export interface DeletionRestoreState {
+  /** CHILD: the parent had already disabled the child before asking for deletion. */
+  studentWasDisabled?: boolean;
+  /** ACCOUNT: children that were already disabled before the request. */
+  disabledStudentIds?: string[];
 }
 
 const deletionColumns = (db: Db) => db`
-  id, scope, household_id, student_id, user_id, status, requested_at, purge_after, completed_at`;
+  id, scope, household_id, student_id, user_id, status, requested_at, purge_after, completed_at,
+  cancelled_at, restore_state`;
 
+/** `lock`: row lock for a cancel, so it cannot interleave with the purge (which skips locked rows). */
 export async function scheduledChildDeletion(
   db: Db,
   scope: Scope,
   studentId: string,
+  lock = false,
 ): Promise<DeletionJobRow | null> {
   const rows = await db<DeletionJobRow[]>`
     select ${deletionColumns(db)} from app.data_deletion_jobs
-    where student_id = ${studentId} and scope = 'CHILD' and status = 'SCHEDULED' and ${scope.where()}`;
+    where student_id = ${studentId} and scope = 'CHILD' and status = 'SCHEDULED' and ${scope.where()}
+    ${lock ? db`for update` : db``}`;
   return rows[0] ?? null;
 }
 
 export async function scheduledAccountDeletion(
   db: Db,
   userId: string,
+  lock = false,
 ): Promise<DeletionJobRow | null> {
   const rows = await db<DeletionJobRow[]>`
     select ${deletionColumns(db)} from app.data_deletion_jobs
-    where user_id = ${userId} and scope = 'ACCOUNT' and status = 'SCHEDULED'`;
+    where user_id = ${userId} and scope = 'ACCOUNT' and status = 'SCHEDULED'
+    ${lock ? db`for update` : db``}`;
   return rows[0] ?? null;
+}
+
+/** The pending (grace-period) account deletion of a parent, if any. */
+export async function pendingAccountDeletion(
+  db: Db,
+  userId: string,
+): Promise<{ id: string; purgeAfter: Date } | null> {
+  const rows = await db<{ id: string; purge_after: Date }[]>`
+    select id, purge_after from app.data_deletion_jobs
+    where user_id = ${userId} and scope = 'ACCOUNT' and status = 'SCHEDULED'`;
+  const row = rows[0];
+  return row ? { id: row.id, purgeAfter: row.purge_after } : null;
+}
+
+/** Marks a SCHEDULED job CANCELLED (the purge only takes SCHEDULED jobs) and closes its request. */
+export async function cancelDeletionJob(
+  tx: TxSql,
+  job: DeletionJobRow,
+  cancelledBy: string,
+  at: Date,
+): Promise<DeletionJobRow> {
+  const [row] = await tx<DeletionJobRow[]>`
+    update app.data_deletion_jobs
+    set status = 'CANCELLED', cancelled_at = ${at}, cancelled_by = ${cancelledBy}
+    where id = ${job.id} and status = 'SCHEDULED'
+    returning ${deletionColumns(tx)}`;
+  await tx`
+    update app.privacy_requests set status = 'CANCELLED', completed_at = ${at}
+    where id = (select privacy_request_id from app.data_deletion_jobs where id = ${job.id})`;
+  return row!;
+}
+
+/** Whether a child is disabled right now (recorded before a deletion request). */
+export async function studentDisabled(
+  tx: TxSql,
+  scope: Scope,
+  studentId: string,
+): Promise<boolean> {
+  const rows = await tx<{ disabled: boolean }[]>`
+    select disabled_at is not null as disabled from app.students
+    where id = ${studentId} and ${scope.where()}`;
+  return rows[0]?.disabled ?? false;
+}
+
+/** Children of a household that are disabled right now (recorded before an account deletion). */
+export async function disabledStudentsOf(tx: TxSql, householdId: string): Promise<string[]> {
+  const rows = await tx<{ id: string }[]>`
+    select id from app.students where household_id = ${householdId} and disabled_at is not null`;
+  return rows.map((r) => r.id);
+}
+
+export async function studentIdsOf(tx: TxSql, householdId: string): Promise<string[]> {
+  const rows = await tx<{ id: string }[]>`
+    select id from app.students where household_id = ${householdId}`;
+  return rows.map((r) => r.id);
+}
+
+/** Children of a household with their own pending child deletion (they stay disabled). */
+export async function pendingChildDeletionsOf(tx: TxSql, householdId: string): Promise<string[]> {
+  const rows = await tx<{ student_id: string }[]>`
+    select student_id from app.data_deletion_jobs
+    where household_id = ${householdId} and scope = 'CHILD' and status = 'SCHEDULED'`;
+  return rows.map((r) => r.student_id);
+}
+
+/** Account-deletion cancel: the household is visible again and the given children can sign in. */
+export async function restoreHousehold(
+  tx: TxSql,
+  householdId: string,
+  reenableStudentIds: readonly string[],
+): Promise<void> {
+  await tx`update app.households set deletion_requested_at = null where id = ${householdId}`;
+  if (reenableStudentIds.length > 0) {
+    await tx`
+      update app.students set disabled_at = null
+      where household_id = ${householdId} and id = any(${[...reenableStudentIds]}::uuid[])`;
+  }
 }
 
 export async function insertDeletionJob(
@@ -251,11 +344,12 @@ export async function insertDeletionJob(
     privacyRequestId: string;
     requestedAt: Date;
     purgeAfter: Date;
+    restoreState: DeletionRestoreState;
   },
 ): Promise<DeletionJobRow> {
   const [row] = await tx<DeletionJobRow[]>`
-    insert into app.data_deletion_jobs (scope, household_id, student_id, user_id, privacy_request_id, status, requested_at, purge_after)
-    values (${j.scope}, ${j.householdId}, ${j.studentId}, ${j.userId}, ${j.privacyRequestId}, 'SCHEDULED', ${j.requestedAt}, ${j.purgeAfter})
+    insert into app.data_deletion_jobs (scope, household_id, student_id, user_id, privacy_request_id, status, requested_at, purge_after, restore_state)
+    values (${j.scope}, ${j.householdId}, ${j.studentId}, ${j.userId}, ${j.privacyRequestId}, 'SCHEDULED', ${j.requestedAt}, ${j.purgeAfter}, ${tx.json(j.restoreState as never)})
     returning ${deletionColumns(tx)}`;
   return row!;
 }
@@ -306,11 +400,11 @@ export async function disableHousehold(tx: TxSql, householdId: string): Promise<
 }
 
 /**
- * Disables the parent's Supabase Auth account until the purge: banned (no new sign-in or token
- * refresh) and existing refresh sessions removed. Access tokens already issued expire within the
- * hour and no longer reach the household (it is hidden from the api).
+ * Account deletion signs the parent out everywhere (refresh sessions removed). The account is not
+ * banned in Supabase Auth, so the parent can still sign in during the grace period to
+ * cancel; until then the api answers ACCOUNT_DISABLED to everything except the deletion status and
+ * cancel routes (see `ACCOUNT_DELETION_PENDING_ROUTES` in app.ts).
  */
-export async function disableParentAccount(tx: TxSql, userId: string): Promise<void> {
-  await tx`update auth.users set banned_until = now() + interval '100 years' where id = ${userId}`;
+export async function signOutParentEverywhere(tx: TxSql, userId: string): Promise<void> {
   await tx`delete from auth.sessions where user_id = ${userId}`;
 }

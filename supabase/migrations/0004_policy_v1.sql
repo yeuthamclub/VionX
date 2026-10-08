@@ -58,9 +58,11 @@ Chúng tôi không bán dữ liệu cá nhân và không dùng dữ liệu của
 Dữ liệu được lưu trong thời gian gia đình sử dụng VionX. Khi phụ huynh yêu cầu xoá:
 
 - tài khoản hoặc hồ sơ của con bị **khoá ngay lập tức**;
-- sau **30 ngày**, dữ liệu bị **xoá vĩnh viễn**;
+- trong 14 ngày này, phụ huynh có thể hủy yêu cầu bằng nút **Hủy yêu cầu xóa** trong mục **Quyền riêng tư** của ứng dụng; tài khoản hoặc hồ sơ của con được mở lại;
+- sau **14 ngày**, dữ liệu bị **xoá vĩnh viễn**;
 - các sổ ghi điểm thưởng và giao dịch được **ẩn danh hoá** thay vì xoá, để số liệu tổng hợp vẫn đúng nhưng không còn liên kết được với con hay gia đình;
-- hồ sơ ghi nhận rằng yêu cầu đã được thực hiện (chỉ gồm mã định danh, không có tên) được giữ lại để chứng minh việc tuân thủ.
+- hồ sơ ghi nhận rằng yêu cầu đã được thực hiện (chỉ gồm mã định danh, không có tên) được giữ lại để chứng minh việc tuân thủ;
+- nhật ký kiểm tra và nhật ký sự kiện hệ thống liên quan được giữ thêm **1 năm** sau khi xoá, chỉ gồm mã định danh ẩn danh (không có tên, số điện thoại, email hay dữ liệu cá nhân khác), rồi bị xoá.
 
 Tệp xuất dữ liệu chỉ tải được trong **24 giờ** rồi bị xoá.
 
@@ -145,9 +147,11 @@ We do not sell personal data and do not use children's data for advertising. Dat
 Data is kept while the family uses VionX. When a parent asks for deletion:
 
 - the account or child profile is **disabled immediately**;
-- after **30 days** the data is **permanently deleted**;
+- during these 14 days the parent can cancel the request with **Cancel deletion request** in the app's **Privacy** section, which re-enables the account or child profile;
+- after **14 days** the data is **permanently deleted**;
 - reward and transaction ledgers are **anonymised** instead of deleted, so totals stay correct but can no longer be linked to the child or family;
-- a record that the request was fulfilled (ids only, no names) is kept as proof of compliance.
+- a record that the request was fulfilled (ids only, no names) is kept as proof of compliance;
+- related audit logs and system event logs are kept for **1 year** after the deletion, holding only pseudonymous ids (no names, phone numbers, email addresses or other personal data), and are then deleted.
 
 Data export files can be downloaded for **24 hours** and are then deleted.
 
@@ -212,7 +216,7 @@ Trong giai đoạn thử nghiệm, VionX được cung cấp miễn phí. Nếu 
 
 ## 7. Chấm dứt và xoá tài khoản
 
-Bạn có thể xoá tài khoản bất kỳ lúc nào trong ứng dụng (mục Quyền riêng tư) hoặc tại [địa chỉ trang xoá tài khoản]. Tài khoản bị khoá ngay và dữ liệu bị xoá vĩnh viễn sau 30 ngày như mô tả trong Chính sách quyền riêng tư. Chúng tôi có thể tạm ngừng tài khoản vi phạm Điều khoản này sau khi thông báo cho bạn, trừ trường hợp cần ngăn chặn ngay một hành vi gây hại.
+Bạn có thể xoá tài khoản bất kỳ lúc nào trong ứng dụng (mục Quyền riêng tư) hoặc tại [địa chỉ trang xoá tài khoản]. Tài khoản bị khoá ngay và dữ liệu bị xoá vĩnh viễn sau 14 ngày như mô tả trong Chính sách quyền riêng tư. Chúng tôi có thể tạm ngừng tài khoản vi phạm Điều khoản này sau khi thông báo cho bạn, trừ trường hợp cần ngăn chặn ngay một hành vi gây hại.
 
 ## 8. Giới hạn trách nhiệm
 
@@ -263,7 +267,7 @@ During the trial period VionX is free. If paid plans are introduced we will anno
 
 ## 7. Termination and account deletion
 
-You can delete your account at any time in the app (Privacy) or at [account deletion URL]. The account is disabled immediately and the data is permanently deleted after 30 days as described in the Privacy Policy. We may suspend an account that breaches these Terms after notifying you, unless immediate action is needed to stop harm.
+You can delete your account at any time in the app (Privacy) or at [account deletion URL]. The account is disabled immediately and the data is permanently deleted after 14 days as described in the Privacy Policy. We may suspend an account that breaches these Terms after notifying you, unless immediate action is needed to stop harm.
 
 ## 8. Limitation of liability
 

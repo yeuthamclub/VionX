@@ -216,6 +216,9 @@ export const DeletionJobSchema = z
     requestedAt: DateTime,
     purgeAfter: DateTime,
     completedAt: DateTime.nullable(),
+    cancelledAt: DateTime.nullable().openapi({
+      description: 'Set when the parent cancelled the request during the grace period (14 days).',
+    }),
   })
   .openapi('DeletionJob');
 export type DeletionJob = z.infer<typeof DeletionJobSchema>;

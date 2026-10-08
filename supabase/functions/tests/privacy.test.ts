@@ -4,7 +4,9 @@ import { unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 import { SkeletonActorResolver } from '../_shared/actor.ts';
 import { MemoryStorage, SupabaseStorage } from '../_shared/storage.ts';
-import { createApp } from '../api/app.ts';
+import { PERSONAL_DATA_KEYS, PURGED_LOG_RETENTION_DAYS } from '@vionx/domain';
+import type { Actor } from '../_shared/actor.ts';
+import { ACCOUNT_DELETION_PENDING_ROUTES, createApp } from '../api/app.ts';
 import { noDatabase } from '../api/deps.ts';
 import { createWorkerHandler } from '../worker/app.ts';
 import { createHandlers } from '../worker/handlers.ts';
@@ -157,6 +159,8 @@ describe('api without a database', () => {
     ['POST', '/v1/privacy/export'],
     ['GET', '/v1/privacy/overview'],
     ['GET', '/v1/child/consents/AI_PERSONALIZATION'],
+    ['POST', '/v1/students/3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c/delete-request/cancel'],
+    ['POST', '/v1/account/delete-request/cancel'],
   ])('%s %s requires a signed-in actor', async (method, path) => {
     expect((await call(method, path)).status).toBe(401);
   });
@@ -184,5 +188,94 @@ describe('policy version 1 migration', () => {
       expect(doc).toMatch(/Singapore/);
       expect(doc).toMatch(/Anthropic/);
     }
+  });
+});
+
+describe('account deletion pending: the parent may only see and cancel it', () => {
+  const USER = '0b6f3c1e-2a4d-4e5f-8a9b-1c2d3e4f5a6b';
+  const purgeAfter = new Date('2026-11-07T03:00:00Z');
+  const parent: Actor = { kind: 'parent', userId: USER, phone: null, email: null };
+  const app = createApp({
+    version: 'test',
+    allowedOrigins: [],
+    actors: { resolve: async () => parent },
+    sql: noDatabase,
+    admins: { permissionsOf: async () => [] },
+    accountDeletions: {
+      pending: async (userId) => (userId === USER ? { id: 'job-1', purgeAfter } : null),
+    },
+    probes: {
+      db: async () => {},
+      storage: async () => {},
+      queue: async () => {},
+      aiKeyPresent: false,
+    },
+  });
+  const call = (method: string, path: string, body?: unknown) =>
+    app.request(`http://local/api${path}`, {
+      method,
+      headers: { 'content-type': 'application/json' },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+
+  it.each([
+    ['GET', '/v1/household'],
+    ['POST', '/v1/household'],
+    ['POST', '/v1/privacy/export'],
+    ['POST', '/v1/policies/accept'],
+    ['GET', '/v1/students/3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c/consents'],
+  ])('%s %s answers ACCOUNT_DISABLED with the purge date', async (method, path) => {
+    const res = await call(method, path, method === 'POST' ? {} : undefined);
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({
+      code: 'ACCOUNT_DISABLED',
+      details: {
+        reason: 'DELETION_PENDING',
+        deletionId: 'job-1',
+        purgeAfter: purgeAfter.toISOString(),
+      },
+    });
+  });
+
+  it('lets the status and cancel routes through', () => {
+    expect([...ACCOUNT_DELETION_PENDING_ROUTES].sort()).toEqual([
+      'GET /v1/health',
+      'GET /v1/me',
+      'GET /v1/openapi.json',
+      'GET /v1/policies/current',
+      'GET /v1/privacy/overview',
+      'POST /v1/account/delete-request',
+      'POST /v1/account/delete-request/cancel',
+    ]);
+  });
+
+  it('documents both cancel routes in OpenAPI', async () => {
+    const doc = (await (await call('GET', '/v1/openapi.json')).json()) as {
+      paths: Record<string, unknown>;
+    };
+    expect(doc.paths).toHaveProperty(['/api/v1/students/{id}/delete-request/cancel']);
+    expect(doc.paths).toHaveProperty(['/api/v1/account/delete-request/cancel']);
+  });
+});
+
+describe('purged log retention migration', () => {
+  const migration = readFileSync(
+    resolve(root, 'supabase/migrations/0005_deletion_cancel_retention.sql'),
+    'utf8',
+  );
+
+  it('scrubs the same personal keys as @vionx/domain', () => {
+    const list = migration.match(/personal constant text\[\] := array\[([\s\S]*?)\];/)?.[1];
+    const keys = [...(list ?? '').matchAll(/'([a-z]+)'/g)].map((m) => m[1]);
+    expect(keys).toEqual([...PERSONAL_DATA_KEYS]);
+  });
+
+  it('deletes retained rows after the same number of days and runs daily', () => {
+    expect(migration).toContain(
+      `p_retention interval default interval '${PURGED_LOG_RETENTION_DAYS} days'`,
+    );
+    expect(migration).toMatch(
+      /cron\.schedule\('vionx-purged-log-retention', '\d+ \d+ \* \* \*', \$\$select ops\.delete_expired_purged_logs\(\)\$\$\)/,
+    );
   });
 });

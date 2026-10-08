@@ -2,6 +2,8 @@ import createClient, { type Middleware } from 'openapi-fetch';
 import type { components, paths } from './generated/openapi.ts';
 
 export type { paths as ApiPaths } from './generated/openapi.ts';
+/** Days a deletion request can be cancelled before the purge (admin deletion page copy). */
+export { DELETION_GRACE_DAYS } from '@vionx/domain';
 export type HealthResponse = components['schemas']['HealthResponse'];
 export type ApiErrorBody = components['schemas']['Error'];
 export type MeResponse = components['schemas']['Me'];

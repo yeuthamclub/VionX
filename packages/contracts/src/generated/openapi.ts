@@ -1525,7 +1525,7 @@ export interface paths {
     put?: never;
     /**
      * Delete a child’s profile
-     * @description The child login is turned off and every session revoked at once; the profile is hard-deleted after 30 days (ledgers anonymised). Idempotent. Audited.
+     * @description The child login is turned off and every session revoked at once; the profile is hard-deleted after the 14-day grace period, during which the parent can cancel (ledgers anonymised). Idempotent. Audited.
      */
     post: {
       parameters: {
@@ -1597,7 +1597,7 @@ export interface paths {
     put?: never;
     /**
      * Delete the parent account and household data
-     * @description Owner: the household is hidden, every child login turned off and the parent account disabled at once; everything is hard-deleted after 30 days (ledgers anonymised). Reachable in the app and from the public web page. Idempotent. Audited.
+     * @description Owner: the household is hidden, every child login turned off and the parent signed out everywhere at once; until the purge the parent can still sign in, but every route except this one, its cancel, `GET /v1/me`, `GET /v1/policies/current` and `GET /v1/privacy/overview` answers 403 ACCOUNT_DISABLED (`details.reason` DELETION_PENDING). Everything is hard-deleted after the 14-day grace period (ledgers anonymised). Reachable in the app and from the public web page. Idempotent. Audited.
      */
     post: {
       parameters: {
@@ -1632,6 +1632,149 @@ export interface paths {
         };
         /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
         401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/delete-request/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel a child’s pending deletion
+     * @description During the 14-day grace period: the job becomes CANCELLED (the purge skips it) and the child can sign in again (unless the parent had disabled the child before the request; sessions revoked by the request stay revoked). 404 when there is no pending deletion (including after the purge) or for another household’s child; 409 once the purge is due. Audited; emits `privacy.deletion_cancelled`.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Deletion cancelled */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['DeletionResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/account/delete-request/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel the pending account deletion
+     * @description During the 14-day grace period: the job becomes CANCELLED (the purge skips it), the account works again, the household is visible again and its children can sign in (except those disabled before the request or with their own pending deletion). 404 when there is no pending account deletion; 409 once the purge is due. Audited; emits `privacy.deletion_cancelled`.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Deletion cancelled */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['DeletionResponse'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
           headers: {
             [name: string]: unknown;
           };
@@ -1719,6 +1862,16 @@ export interface components {
         timezone: string;
       }[];
       adminPermissions: components['schemas']['AdminPermission'][];
+      /** @description Set while this account’s deletion request is in its grace period (DELETION_GRACE_DAYS, 14 days): the app then shows only the Privacy Center, where the request can be cancelled. */
+      pendingAccountDeletion: {
+        /**
+         * Format: uuid
+         * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+         */
+        id: string;
+        /** Format: date-time */
+        purgeAfter: string;
+      } | null;
     };
     /** @enum {string} */
     HouseholdRole: 'OWNER' | 'GUARDIAN';
@@ -2073,6 +2226,11 @@ export interface components {
       purgeAfter: string;
       /** Format: date-time */
       completedAt: string | null;
+      /**
+       * Format: date-time
+       * @description Set when the parent cancelled the request during the grace period (14 days).
+       */
+      cancelledAt: string | null;
     };
     PrivacyRequest: {
       /**

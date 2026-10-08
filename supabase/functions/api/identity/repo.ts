@@ -37,7 +37,7 @@ export interface AuditEntry {
   action: string;
   targetType: string;
   targetId: string;
-  householdId: string;
+  householdId: string | null;
   requestId: string;
   details?: Record<string, unknown>;
 }
@@ -53,7 +53,7 @@ export async function writeEvent(
   db: Db,
   e: {
     type: string;
-    householdId: string;
+    householdId: string | null;
     aggregateType: string;
     aggregateId: string;
     payload: Record<string, unknown>;

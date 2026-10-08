@@ -1,5 +1,6 @@
 import { createRoute, type OpenAPIHono, type z } from '@hono/zod-openapi';
 import {
+  canCancelDeletion,
   canRecordAssent,
   childAssentRequired,
   CONSENT_POLICY_TYPE,
@@ -18,6 +19,7 @@ import {
   retryAfterSeconds,
   revocationEndsSessions,
   revocationScope,
+  studentsToReenable,
   type ConsentType,
   type PolicyLocale,
   type PolicyType,
@@ -228,7 +230,7 @@ const deleteChildRoute = createRoute({
   tags: ['privacy'],
   summary: 'Delete a child’s profile',
   description:
-    'The child login is turned off and every session revoked at once; the profile is hard-deleted after 30 days (ledgers anonymised). Idempotent. Audited.',
+    'The child login is turned off and every session revoked at once; the profile is hard-deleted after the 14-day grace period, during which the parent can cancel (ledgers anonymised). Idempotent. Audited.',
   security: PARENT,
   request: { params: StudentIdParamSchema, ...body(DeleteRequestSchema) },
   responses: {
@@ -243,12 +245,41 @@ const deleteAccountRoute = createRoute({
   tags: ['privacy'],
   summary: 'Delete the parent account and household data',
   description:
-    'Owner: the household is hidden, every child login turned off and the parent account disabled at once; everything is hard-deleted after 30 days (ledgers anonymised). Reachable in the app and from the public web page. Idempotent. Audited.',
+    'Owner: the household is hidden, every child login turned off and the parent signed out everywhere at once; until the purge the parent can still sign in, but every route except this one, its cancel, `GET /v1/me`, `GET /v1/policies/current` and `GET /v1/privacy/overview` answers 403 ACCOUNT_DISABLED (`details.reason` DELETION_PENDING). Everything is hard-deleted after the 14-day grace period (ledgers anonymised). Reachable in the app and from the public web page. Idempotent. Audited.',
   security: PARENT,
   request: body(DeleteRequestSchema),
   responses: {
     202: json(DeletionResponseSchema, 'Deletion scheduled'),
     ...errorResponses('VALIDATION_FAILED', 'UNAUTHENTICATED'),
+  },
+});
+
+const cancelChildDeletionRoute = createRoute({
+  method: 'post',
+  path: '/v1/students/{id}/delete-request/cancel',
+  tags: ['privacy'],
+  summary: 'Cancel a child’s pending deletion',
+  description:
+    'During the 14-day grace period: the job becomes CANCELLED (the purge skips it) and the child can sign in again (unless the parent had disabled the child before the request; sessions revoked by the request stay revoked). 404 when there is no pending deletion (including after the purge) or for another household’s child; 409 once the purge is due. Audited; emits `privacy.deletion_cancelled`.',
+  security: PARENT,
+  request: { params: StudentIdParamSchema },
+  responses: {
+    200: json(DeletionResponseSchema, 'Deletion cancelled'),
+    ...errorResponses('VALIDATION_FAILED', 'UNAUTHENTICATED', 'NOT_FOUND', 'CONFLICT'),
+  },
+});
+
+const cancelAccountDeletionRoute = createRoute({
+  method: 'post',
+  path: '/v1/account/delete-request/cancel',
+  tags: ['privacy'],
+  summary: 'Cancel the pending account deletion',
+  description:
+    'During the 14-day grace period: the job becomes CANCELLED (the purge skips it), the account works again, the household is visible again and its children can sign in (except those disabled before the request or with their own pending deletion). 404 when there is no pending account deletion; 409 once the purge is due. Audited; emits `privacy.deletion_cancelled`.',
+  security: PARENT,
+  responses: {
+    200: json(DeletionResponseSchema, 'Deletion cancelled'),
+    ...errorResponses('UNAUTHENTICATED', 'NOT_FOUND', 'CONFLICT'),
   },
 });
 
@@ -311,7 +342,29 @@ function toDeletion(row: repo.DeletionJobRow): DeletionJob {
     requestedAt: iso(row.requested_at)!,
     purgeAfter: iso(row.purge_after)!,
     completedAt: iso(row.completed_at),
+    cancelledAt: iso(row.cancelled_at),
   };
+}
+
+/** Throws the API error for a deletion that cannot be cancelled (domain rule canCancelDeletion). */
+function assertCancellable(job: repo.DeletionJobRow | null, t: Date): repo.DeletionJobRow {
+  const check = canCancelDeletion(
+    job ? { status: job.status, purgeAfter: new Date(job.purge_after) } : null,
+    t,
+  );
+  if (!check.ok) {
+    if (check.error === 'GRACE_PERIOD_OVER') {
+      throw new ApiError(
+        'CONFLICT',
+        'The grace period is over; the deletion can no longer be cancelled',
+        {
+          reason: check.error,
+        },
+      );
+    }
+    throw new ApiError('NOT_FOUND', 'No pending deletion');
+  }
+  return job!;
 }
 
 const hashDevice = async (deviceId: string | undefined) =>
@@ -762,6 +815,7 @@ export function registerPrivacyRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps): 
       await tx`select pg_advisory_xact_lock(hashtext(${`delete-child:${id}`}))`;
       const existing = await repo.scheduledChildDeletion(tx, scope, id);
       if (existing) return existing;
+      const studentWasDisabled = await repo.studentDisabled(tx, scope, id);
       const privacyRequestId = await repo.insertPrivacyRequest(tx, {
         householdId: student.household_id,
         studentId: id,
@@ -778,6 +832,7 @@ export function registerPrivacyRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps): 
         privacyRequestId,
         requestedAt: t,
         purgeAfter: purgeAfter(t),
+        restoreState: { studentWasDisabled },
       });
       await setDisabled(tx, scope, id, true);
       const revokedSessions = await revokeSessions(tx, scope, id);
@@ -815,6 +870,7 @@ export function registerPrivacyRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps): 
       await tx`select pg_advisory_xact_lock(hashtext(${`delete-account:${actor.userId}`}))`;
       const existing = await repo.scheduledAccountDeletion(tx, actor.userId);
       if (existing) return existing;
+      const disabledStudentIds = owned ? await repo.disabledStudentsOf(tx, owned) : [];
       const privacyRequestId = await repo.insertPrivacyRequest(tx, {
         householdId: owned,
         studentId: null,
@@ -831,9 +887,10 @@ export function registerPrivacyRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps): 
         privacyRequestId,
         requestedAt: t,
         purgeAfter: purgeAfter(t),
+        restoreState: { disabledStudentIds },
       });
       const revokedSessions = owned ? await repo.disableHousehold(tx, owned) : 0;
-      await repo.disableParentAccount(tx, actor.userId);
+      await repo.signOutParentEverywhere(tx, actor.userId);
       if (owned) {
         await writeEvent(tx, {
           type: 'privacy.deletion_requested',
@@ -852,5 +909,82 @@ export function registerPrivacyRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps): 
       return created;
     })) as repo.DeletionJobRow;
     return c.json({ deletion: toDeletion(job) }, 202);
+  });
+  app.openapi(cancelChildDeletionRoute, async (c) => {
+    const actor = requireActor(c.get('actor'), 'parent');
+    const { id } = c.req.valid('param');
+    const scope = await scopeFor(sql, actor);
+    const student = await studentOr404(scope, id);
+    const t = now();
+    const job = (await sql.begin(async (tx) => {
+      await tx`select pg_advisory_xact_lock(hashtext(${`delete-child:${id}`}))`;
+      const pending = assertCancellable(await repo.scheduledChildDeletion(tx, scope, id, true), t);
+      const cancelled = await repo.cancelDeletionJob(tx, pending, actor.userId, t);
+      const reenabled = !pending.restore_state.studentWasDisabled;
+      if (reenabled) await setDisabled(tx, scope, id, false);
+      await writeEvent(tx, {
+        type: 'privacy.deletion_cancelled',
+        householdId: student.household_id,
+        aggregateType: 'data_deletion_job',
+        aggregateId: pending.id,
+        payload: { scope: 'CHILD', studentId: id, jobId: pending.id },
+        idempotencyKey: pending.id,
+      });
+      await writeAudit(tx, {
+        actorType: 'parent',
+        actorId: actor.userId,
+        action: 'privacy.child_deletion_cancelled',
+        targetType: 'student',
+        targetId: id,
+        householdId: student.household_id,
+        requestId: c.get('requestId'),
+        details: { jobId: pending.id, loginRestored: reenabled },
+      });
+      return cancelled;
+    })) as repo.DeletionJobRow;
+    return c.json({ deletion: toDeletion(job) }, 200);
+  });
+
+  app.openapi(cancelAccountDeletionRoute, async (c) => {
+    const actor = requireActor(c.get('actor'), 'parent');
+    const t = now();
+    const job = (await sql.begin(async (tx) => {
+      await tx`select pg_advisory_xact_lock(hashtext(${`delete-account:${actor.userId}`}))`;
+      const pending = assertCancellable(
+        await repo.scheduledAccountDeletion(tx, actor.userId, true),
+        t,
+      );
+      const cancelled = await repo.cancelDeletionJob(tx, pending, actor.userId, t);
+      const householdId = pending.household_id;
+      let reenabled: string[] = [];
+      if (householdId) {
+        reenabled = studentsToReenable(
+          await repo.studentIdsOf(tx, householdId),
+          pending.restore_state.disabledStudentIds ?? [],
+          await repo.pendingChildDeletionsOf(tx, householdId),
+        );
+        await repo.restoreHousehold(tx, householdId, reenabled);
+      }
+      await writeEvent(tx, {
+        type: 'privacy.deletion_cancelled',
+        householdId,
+        aggregateType: 'data_deletion_job',
+        aggregateId: pending.id,
+        payload: { scope: 'ACCOUNT', userId: actor.userId, jobId: pending.id },
+        idempotencyKey: pending.id,
+      });
+      await writeAudit(tx, {
+        actorType: 'parent',
+        actorId: actor.userId,
+        action: 'privacy.account_deletion_cancelled',
+        targetType: 'account',
+        targetId: actor.userId,
+        householdId,
+        requestId: c.get('requestId'),
+        details: { jobId: pending.id, reenabledStudents: reenabled.length },
+      });
+      return cancelled;
+    })) as repo.DeletionJobRow;
+    return c.json({ deletion: toDeletion(job) }, 200);
   });
 }

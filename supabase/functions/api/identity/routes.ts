@@ -33,6 +33,7 @@ import { scoped, scopeFor, type Scope } from '../../_shared/scope.ts';
 import type { AppEnv } from '../app.ts';
 import { body, CHILD, errorResponses, iso, json, PARENT } from '../route-helpers.ts';
 import type { ApiDeps } from '../deps.ts';
+import { pendingAccountDeletion } from '../privacy/repo.ts';
 import * as repo from './repo.ts';
 import {
   ChildLoginRequestSchema,
@@ -302,10 +303,11 @@ export function registerIdentityRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
 
   app.openapi(meRoute, async (c) => {
     const actor = requireActor(c.get('actor'), 'parent');
-    const [profile, households, adminPermissions] = await Promise.all([
+    const [profile, households, adminPermissions, pendingDeletion] = await Promise.all([
       repo.ensureProfile(sql, actor.userId),
       repo.householdsOf(sql, actor.userId),
       deps.admins.permissionsOf(actor.userId),
+      pendingAccountDeletion(sql, actor.userId),
     ]);
     return c.json(
       {
@@ -320,6 +322,9 @@ export function registerIdentityRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
           timezone: h.timezone,
         })),
         adminPermissions: adminPermissions as z.infer<typeof MeResponseSchema>['adminPermissions'],
+        pendingAccountDeletion: pendingDeletion
+          ? { id: pendingDeletion.id, purgeAfter: iso(pendingDeletion.purgeAfter)! }
+          : null,
       },
       200,
     );

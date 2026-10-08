@@ -54,9 +54,11 @@ Chúng tôi không bán dữ liệu cá nhân và không dùng dữ liệu của
 Dữ liệu được lưu trong thời gian gia đình sử dụng VionX. Khi phụ huynh yêu cầu xoá:
 
 - tài khoản hoặc hồ sơ của con bị **khoá ngay lập tức**;
-- sau **30 ngày**, dữ liệu bị **xoá vĩnh viễn**;
+- trong 14 ngày này, phụ huynh có thể hủy yêu cầu bằng nút **Hủy yêu cầu xóa** trong mục **Quyền riêng tư** của ứng dụng; tài khoản hoặc hồ sơ của con được mở lại;
+- sau **14 ngày**, dữ liệu bị **xoá vĩnh viễn**;
 - các sổ ghi điểm thưởng và giao dịch được **ẩn danh hoá** thay vì xoá, để số liệu tổng hợp vẫn đúng nhưng không còn liên kết được với con hay gia đình;
-- hồ sơ ghi nhận rằng yêu cầu đã được thực hiện (chỉ gồm mã định danh, không có tên) được giữ lại để chứng minh việc tuân thủ.
+- hồ sơ ghi nhận rằng yêu cầu đã được thực hiện (chỉ gồm mã định danh, không có tên) được giữ lại để chứng minh việc tuân thủ;
+- nhật ký kiểm tra và nhật ký sự kiện hệ thống liên quan được giữ thêm **1 năm** sau khi xoá, chỉ gồm mã định danh ẩn danh (không có tên, số điện thoại, email hay dữ liệu cá nhân khác), rồi bị xoá.
 
 Tệp xuất dữ liệu chỉ tải được trong **24 giờ** rồi bị xoá.
 
