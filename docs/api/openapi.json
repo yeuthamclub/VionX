@@ -1434,6 +1434,1374 @@
           "confirm"
         ]
       },
+      "SubjectsResponse": {
+        "type": "object",
+        "properties": {
+          "subjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SchoolSubject"
+            }
+          }
+        },
+        "required": [
+          "subjects"
+        ]
+      },
+      "SchoolSubject": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "nameVi": {
+            "type": "string"
+          },
+          "nameEn": {
+            "type": "string"
+          },
+          "gradeFrom": {
+            "type": "integer"
+          },
+          "gradeTo": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "code",
+          "nameVi",
+          "nameEn",
+          "gradeFrom",
+          "gradeTo"
+        ]
+      },
+      "TaskTemplatesResponse": {
+        "type": "object",
+        "properties": {
+          "templates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskTemplate"
+            }
+          }
+        },
+        "required": [
+          "templates"
+        ]
+      },
+      "TaskTemplate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "builtIn": {
+            "type": "boolean",
+            "description": "A VionX starter template (not the household’s)."
+          },
+          "type": {
+            "$ref": "#/components/schemas/TaskType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "durationMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "priority": {
+            "$ref": "#/components/schemas/TaskPriority"
+          },
+          "verificationMode": {
+            "$ref": "#/components/schemas/VerificationMode"
+          },
+          "rewardXp": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "builtIn",
+          "type",
+          "title",
+          "description",
+          "durationMinutes",
+          "priority",
+          "verificationMode",
+          "rewardXp"
+        ]
+      },
+      "TaskType": {
+        "type": "string",
+        "enum": [
+          "HOMEWORK",
+          "LEARNING",
+          "READING",
+          "ENGLISH",
+          "SPORT",
+          "HOUSEHOLD",
+          "CREATIVE",
+          "CUSTOM"
+        ]
+      },
+      "TaskPriority": {
+        "type": "string",
+        "enum": [
+          "LOW",
+          "NORMAL",
+          "HIGH"
+        ]
+      },
+      "VerificationMode": {
+        "type": "string",
+        "enum": [
+          "SELF_CHECK",
+          "PHOTO_PROOF",
+          "PARENT_APPROVAL",
+          "SYSTEM_VERIFIED"
+        ]
+      },
+      "CalendarResponse": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "today": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "timetable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimetableSlot"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CalendarEvent"
+            }
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskOccurrence"
+            }
+          }
+        },
+        "required": [
+          "studentId",
+          "timezone",
+          "today",
+          "from",
+          "to",
+          "timetable",
+          "events",
+          "tasks"
+        ]
+      },
+      "TimetableSlot": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "startTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "endTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "room": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "entryId",
+          "startTime",
+          "endTime",
+          "subjectCode",
+          "room",
+          "note"
+        ]
+      },
+      "CalendarEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CalendarEventType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subjectCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "allDay": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "studentId",
+          "type",
+          "title",
+          "note",
+          "location",
+          "subjectCode",
+          "startsAt",
+          "endsAt",
+          "allDay"
+        ]
+      },
+      "CalendarEventType": {
+        "type": "string",
+        "enum": [
+          "SCHOOL_CLASS",
+          "TUTORING",
+          "EXAM",
+          "LEARNING_BLOCK",
+          "ENGLISH",
+          "READING",
+          "SPORT",
+          "HOUSEHOLD_TASK",
+          "CREATIVE",
+          "FAMILY_EVENT",
+          "CUSTOM"
+        ]
+      },
+      "TaskOccurrence": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "taskId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "status": {
+            "$ref": "#/components/schemas/OccurrenceStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TaskType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subjectCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "windowStart": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "windowEnd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "durationMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "priority": {
+            "$ref": "#/components/schemas/TaskPriority"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "rewardXp": {
+            "type": "integer"
+          },
+          "verificationMode": {
+            "$ref": "#/components/schemas/VerificationMode"
+          },
+          "recurring": {
+            "type": "boolean"
+          },
+          "completion": {
+            "$ref": "#/components/schemas/TaskCompletion"
+          }
+        },
+        "required": [
+          "id",
+          "taskId",
+          "studentId",
+          "date",
+          "status",
+          "type",
+          "title",
+          "description",
+          "subjectCode",
+          "windowStart",
+          "windowEnd",
+          "durationMinutes",
+          "priority",
+          "required",
+          "rewardXp",
+          "verificationMode",
+          "recurring",
+          "completion"
+        ]
+      },
+      "OccurrenceStatus": {
+        "type": "string",
+        "enum": [
+          "ASSIGNED",
+          "PENDING_APPROVAL",
+          "COMPLETED",
+          "REJECTED"
+        ]
+      },
+      "TaskCompletion": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "clientUuid": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CompletionStatus"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decidedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "decidedByType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "parent",
+              "system",
+              null
+            ]
+          },
+          "decisionNote": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasProof": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "clientUuid",
+          "status",
+          "completedAt",
+          "decidedAt",
+          "decidedByType",
+          "decisionNote",
+          "hasProof"
+        ],
+        "description": "The latest completion."
+      },
+      "CompletionStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING_APPROVAL",
+          "APPROVED",
+          "REJECTED"
+        ]
+      },
+      "TimetableResponse": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimetableEntry"
+            }
+          }
+        },
+        "required": [
+          "studentId",
+          "entries"
+        ]
+      },
+      "TimetableEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "weekday": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7,
+            "description": "ISO weekday: 1 = Monday … 7 = Sunday."
+          },
+          "startTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "endTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "room": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "validFrom": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "validTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          }
+        },
+        "required": [
+          "id",
+          "studentId",
+          "weekday",
+          "startTime",
+          "endTime",
+          "subjectCode",
+          "room",
+          "note",
+          "validFrom",
+          "validTo"
+        ]
+      },
+      "TimetableEntryResponse": {
+        "type": "object",
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/TimetableEntry"
+          }
+        },
+        "required": [
+          "entry"
+        ]
+      },
+      "TimetableEntryCreate": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+          },
+          "startTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "endTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "subjectCode": {
+            "type": "string",
+            "example": "TOAN",
+            "description": "GDPT 2018 subject code (GET /v1/subjects)."
+          },
+          "room": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "validFrom": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "validTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          }
+        },
+        "required": [
+          "weekday",
+          "startTime",
+          "endTime",
+          "subjectCode"
+        ]
+      },
+      "TimetableEntryUpdate": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+          },
+          "startTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "endTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "subjectCode": {
+            "type": "string",
+            "example": "TOAN",
+            "description": "GDPT 2018 subject code (GET /v1/subjects)."
+          },
+          "room": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "validFrom": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "validTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          }
+        }
+      },
+      "CalendarEventResponse": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/CalendarEvent"
+          }
+        },
+        "required": [
+          "event"
+        ]
+      },
+      "CalendarEventCreate": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/CalendarEventType"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 80
+          },
+          "subjectCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "TOAN",
+            "description": "GDPT 2018 subject code (GET /v1/subjects)."
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "allDay": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "startsAt",
+          "endsAt"
+        ]
+      },
+      "CalendarEventUpdate": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/CalendarEventType"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 80
+          },
+          "subjectCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "TOAN",
+            "description": "GDPT 2018 subject code (GET /v1/subjects)."
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "allDay": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TaskResponse": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/Task"
+          },
+          "upcoming": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "example": "2026-10-13",
+              "description": "Household-local day (YYYY-MM-DD)."
+            },
+            "description": "Materialised days from today."
+          }
+        },
+        "required": [
+          "task",
+          "upcoming"
+        ]
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "templateId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TaskType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subjectCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "startsOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "windowStart": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "windowEnd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "durationMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "rrule": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Repeat rule (RRULE subset); null = once on startsOn."
+          },
+          "priority": {
+            "$ref": "#/components/schemas/TaskPriority"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "rewardXp": {
+            "type": "integer"
+          },
+          "verificationMode": {
+            "$ref": "#/components/schemas/VerificationMode"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "ARCHIVED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "studentId",
+          "templateId",
+          "type",
+          "title",
+          "description",
+          "subjectCode",
+          "startsOn",
+          "windowStart",
+          "windowEnd",
+          "durationMinutes",
+          "rrule",
+          "priority",
+          "required",
+          "rewardXp",
+          "verificationMode",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "TaskCreate": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TaskType"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "subjectCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "TOAN",
+            "description": "GDPT 2018 subject code (GET /v1/subjects)."
+          },
+          "startsOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Defaults to today (household-local)."
+          },
+          "windowStart": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "windowEnd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "durationMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 600
+          },
+          "rrule": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 200,
+            "example": "FREQ=WEEKLY;BYDAY=MO,WE,FR",
+            "description": "RFC 5545 subset: FREQ=DAILY|WEEKLY, INTERVAL=1..30, BYDAY=MO..SU, COUNT=1..366 or UNTIL=YYYYMMDD."
+          },
+          "priority": {
+            "$ref": "#/components/schemas/TaskPriority"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "rewardXp": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "verificationMode": {
+            "$ref": "#/components/schemas/VerificationMode"
+          },
+          "templateId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "saveAsTemplate": {
+            "type": "boolean",
+            "description": "Also save these settings as a household template."
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "verificationMode"
+        ]
+      },
+      "TaskUpdate": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TaskType"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "subjectCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "TOAN",
+            "description": "GDPT 2018 subject code (GET /v1/subjects)."
+          },
+          "startsOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "Defaults to today (household-local)."
+          },
+          "windowStart": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "windowEnd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "example": "07:30",
+            "description": "Household-local wall-clock time (HH:MM)."
+          },
+          "durationMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 600
+          },
+          "rrule": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 200,
+            "example": "FREQ=WEEKLY;BYDAY=MO,WE,FR",
+            "description": "RFC 5545 subset: FREQ=DAILY|WEEKLY, INTERVAL=1..30, BYDAY=MO..SU, COUNT=1..366 or UNTIL=YYYYMMDD."
+          },
+          "priority": {
+            "$ref": "#/components/schemas/TaskPriority"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "rewardXp": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "verificationMode": {
+            "$ref": "#/components/schemas/VerificationMode"
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "true archives the task (future open days are removed); false restores it."
+          }
+        }
+      },
+      "TaskCompleteResponse": {
+        "type": "object",
+        "properties": {
+          "occurrence": {
+            "$ref": "#/components/schemas/TaskOccurrence"
+          },
+          "replayed": {
+            "type": "boolean",
+            "description": "True when this clientUuid was already stored (nothing changed)."
+          }
+        },
+        "required": [
+          "occurrence",
+          "replayed"
+        ]
+      },
+      "TaskCompleteRequest": {
+        "type": "object",
+        "properties": {
+          "clientUuid": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+            "description": "Generated by the app per completion; a retry with the same value is a no-op."
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "The day completed; defaults to today."
+          },
+          "proofPath": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "Path returned by POST /v1/uploads/sign (required for PHOTO_PROOF)."
+          }
+        },
+        "required": [
+          "clientUuid"
+        ]
+      },
+      "TaskDecisionResponse": {
+        "type": "object",
+        "properties": {
+          "occurrence": {
+            "$ref": "#/components/schemas/TaskOccurrence"
+          }
+        },
+        "required": [
+          "occurrence"
+        ]
+      },
+      "TaskDecisionRequest": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-13",
+            "description": "The day whose pending completion is decided."
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "date"
+        ]
+      },
+      "ApprovalsResponse": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalItem"
+            }
+          }
+        },
+        "required": [
+          "count",
+          "items"
+        ]
+      },
+      "ApprovalItem": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "studentName": {
+            "type": "string"
+          },
+          "occurrence": {
+            "$ref": "#/components/schemas/TaskOccurrence"
+          },
+          "proofUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Signed link to the proof photo, valid for 15 minutes."
+          }
+        },
+        "required": [
+          "studentId",
+          "studentName",
+          "occurrence",
+          "proofUrl"
+        ]
+      },
+      "UploadSignResponse": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Pass as `proofPath` when completing the task."
+          },
+          "uploadUrl": {
+            "type": "string",
+            "description": "PUT the file here with the same Content-Type (no auth header)."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "maxBytes": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "uploadUrl",
+          "expiresAt",
+          "maxBytes"
+        ]
+      },
+      "UploadSignRequest": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "TASK_PROOF"
+            ]
+          },
+          "taskId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/webp"
+            ]
+          }
+        },
+        "required": [
+          "purpose",
+          "taskId",
+          "contentType"
+        ]
+      },
       "LibraryImportResult": {
         "type": "object",
         "properties": {
@@ -5556,6 +6924,1414 @@
           },
           "409": {
             "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subjects": {
+      "get": {
+        "tags": [
+          "calendar"
+        ],
+        "summary": "School subjects (GDPT 2018)",
+        "description": "Public reference list with the grades each subject is taught in.",
+        "security": [
+          {}
+        ],
+        "responses": {
+          "200": {
+            "description": "Subjects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/task-templates": {
+      "get": {
+        "tags": [
+          "calendar"
+        ],
+        "summary": "Task templates for the task form",
+        "description": "Built-in starter templates and the household’s own (saved with `saveAsTemplate`).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Templates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskTemplatesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/calendar": {
+      "get": {
+        "tags": [
+          "calendar"
+        ],
+        "summary": "A child’s calendar between two days",
+        "description": "Household-local days `from`..`to` (at most 62). School periods expanded from the weekly timetable, calendar events, and task days with their latest completion. Recurring tasks are materialised 14 days ahead. Parent: any child of the household; child: only their own id (today’s tasks). Other ids answer 404.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "example": "2026-10-13",
+              "description": "Household-local day (YYYY-MM-DD)."
+            },
+            "required": true,
+            "description": "Household-local day (YYYY-MM-DD).",
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "example": "2026-10-13",
+              "description": "Inclusive; at most 62 days after `from`."
+            },
+            "required": true,
+            "description": "Inclusive; at most 62 days after `from`.",
+            "name": "to",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Calendar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/timetable": {
+      "get": {
+        "tags": [
+          "calendar"
+        ],
+        "summary": "A child’s weekly school timetable",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Timetable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimetableResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "calendar"
+        ],
+        "summary": "Add a school period",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimetableEntryCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimetableEntryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/timetable/{entryId}": {
+      "patch": {
+        "tags": [
+          "calendar"
+        ],
+        "summary": "Change a school period",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "entryId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimetableEntryUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimetableEntryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "calendar"
+        ],
+        "summary": "Remove a school period",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "entryId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/events": {
+      "post": {
+        "tags": [
+          "calendar"
+        ],
+        "summary": "Add a calendar event (Master Spec §13.1 types)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarEventCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}": {
+      "patch": {
+        "tags": [
+          "calendar"
+        ],
+        "summary": "Change a calendar event",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarEventUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "calendar"
+        ],
+        "summary": "Remove a calendar event",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "eventId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/tasks": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Assign a task to a child",
+        "description": "Master Spec §13.2 fields. `rrule` repeats it (RRULE subset); without it the task happens once on `startsOn`. Days are materialised at once (recurring: the next 14 days, then daily). Emits `task.assigned` (TaskAssigned). Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/{id}": {
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "One task (edit form)",
+        "description": "Parent: tasks of the household; child: tasks assigned to them. Others answer 404.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Edit or archive a task (parent only)",
+        "description": "Children can never edit tasks (403). When the schedule changes or the task is archived, open days from today on are removed and the new schedule is materialised; days with a completion stay. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/{id}/complete": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "The child completes a task day",
+        "description": "Child actor, own tasks only. Idempotent by `clientUuid`: a retry returns the stored result with `replayed: true` and emits nothing (409 if the UUID was used for another task). SELF_CHECK is done at once (also emits `task.approved`); PHOTO_PROOF (needs `proofPath`) and PARENT_APPROVAL wait for the parent (push request to the parents); SYSTEM_VERIFIED cannot be completed by hand (409). Only days up to today. Emits `task.completed` (TaskCompleted).",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskCompleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Completed (or replayed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskCompleteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/{id}/approve": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Approve a completed task day",
+        "description": "Parent only. The day’s pending completion becomes APPROVED; 409 when nothing is pending (e.g. already decided). Emits `task.approved` (TaskApproved) once per completion. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Approved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDecisionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/{id}/reject": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Reject a completed task day",
+        "description": "Parent only, with an optional note for the child. The day becomes REJECTED and the child may complete it again (with a new `clientUuid`). Emits `task.rejected` (TaskRejected). Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDecisionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/approvals": {
+      "get": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Approvals inbox",
+        "description": "Task days waiting for the parent, oldest first (up to 100), with a 15-minute link to the proof photo. `count` drives the badge.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending approvals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable (SERVICE_UNAVAILABLE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/sign": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Signed upload URL for a task proof photo",
+        "description": "Child actor, own active tasks only. PUT the image to `uploadUrl` (valid 2 hours, max 10 MB, JPEG/PNG/WebP) into the private bucket, then send `path` as `proofPath` when completing. Files never attached are removed after a day. 60 per hour per child.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadSignRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadSignResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many attempts (RATE_LIMITED); see Retry-After",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable (SERVICE_UNAVAILABLE)",
             "content": {
               "application/json": {
                 "schema": {

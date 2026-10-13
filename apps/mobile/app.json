@@ -11,7 +11,18 @@
       "package": "vn.vionx.app",
       "edgeToEdgeEnabled": true
     },
-    "plugins": ["expo-router", "expo-secure-store", "@sentry/react-native/expo"],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "VionX dùng camera để con chụp ảnh khi hoàn thành nhiệm vụ.",
+          "microphonePermission": false
+        }
+      ],
+      "@sentry/react-native/expo"
+    ],
     "experiments": {
       "typedRoutes": false
     },

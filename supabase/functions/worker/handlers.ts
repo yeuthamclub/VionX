@@ -1,5 +1,6 @@
 import type { TxSql } from '../_shared/db.ts';
 import type { EventHandlers } from '../_shared/queue.ts';
+import { materialiseAll } from '../_shared/tasks.ts';
 import { runExportJob, type ExportDeps } from './privacy-export.ts';
 
 export type HandlerDeps = ExportDeps;
@@ -44,6 +45,15 @@ export function createHandlers(deps: HandlerDeps): EventHandlers {
                 select id from app.students where household_id = ${event.householdId}`
             ).map((r) => r.id);
       for (const id of students) await cancelConsentJobs(tx, id, 'CORE_SERVICE');
+    },
+
+    // M03: daily request from pg_cron (vionx-task-materialise) → next 14 days of recurring tasks.
+    'task.materialise_requested': async (event, tx) => {
+      const result = await materialiseAll(tx, deps.now?.() ?? new Date());
+      await tx`
+        insert into ops.audit_logs (actor_type, action, target_type, target_id, details)
+        values ('system', 'task.materialised', 'domain_event', ${event.id},
+                ${tx.json({ tasks: result.tasks, created: result.created })})`;
     },
 
     'privacy.export_requested': async (event, tx) => {

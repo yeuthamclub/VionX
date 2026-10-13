@@ -1,0 +1,179 @@
+# M03 main path: parent adds a daily PARENT_APPROVAL task for a child → the child completes it on a
+# child device → the parent approves it from the approvals inbox.
+# Prereqs: as m01-identity.yaml (development build on an emulator, local Supabase + functions,
+# `pnpm dev:mobile`). Uses the LOCAL test OTP number 0900000004 / 123456 (supabase/config.toml).
+# Run: maestro test apps/mobile/.maestro/m03-tasks.yaml
+appId: vn.vionx.app
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Phụ huynh'
+    timeout: 60000
+- tapOn:
+    id: 'role-parent'
+- tapOn:
+    id: 'phone-input'
+- inputText: '0900000004'
+- tapOn:
+    id: 'send-code'
+- extendedWaitUntil:
+    visible:
+      id: 'otp-input'
+    timeout: 15000
+- tapOn:
+    id: 'otp-input'
+- inputText: '123456'
+- tapOn:
+    id: 'verify-code'
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục'
+    timeout: 20000
+- runFlow:
+    when:
+      visible:
+        id: 'policies-accept'
+    commands:
+      - tapOn:
+          id: 'policies-agree'
+      - tapOn:
+          id: 'policies-accept'
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình'
+    timeout: 20000
+- runFlow:
+    when:
+      visible: 'Tạo gia đình'
+    commands:
+      - tapOn:
+          id: 'household-name'
+      - inputText: 'Gia đình Nhiệm vụ'
+      - tapOn:
+          id: 'household-create'
+- extendedWaitUntil:
+    visible:
+      id: 'add-child'
+    timeout: 15000
+
+# A grade-2 child for this run
+- runFlow:
+    file: subflows/m01-add-child.yaml
+    env:
+      NAME: 'Lan'
+      YEAR: '2018'
+      GRADE: '2'
+      PIN: '1470'
+- evalScript: ${output.loginId = maestro.copiedText}
+
+# Parent: calendar → new daily task that needs approval
+- tapOn:
+    id: 'student-${output.loginId}'
+- tapOn:
+    id: 'open-calendar'
+- extendedWaitUntil:
+    visible:
+      id: 'add-task'
+    timeout: 15000
+- tapOn:
+    id: 'add-task'
+- extendedWaitUntil:
+    visible:
+      id: 'task-title'
+    timeout: 15000
+- tapOn:
+    id: 'task-title'
+- inputText: 'Đọc sách 15 phút'
+- hideKeyboard
+- tapOn:
+    id: 'repeat-DAILY'
+- scrollUntilVisible:
+    element:
+      id: 'verification-PARENT_APPROVAL'
+- tapOn:
+    id: 'verification-PARENT_APPROVAL'
+- scrollUntilVisible:
+    element:
+      id: 'task-save'
+- tapOn:
+    id: 'task-save'
+- extendedWaitUntil:
+    visible: 'Đọc sách 15 phút'
+    timeout: 15000
+- takeScreenshot: m03-calendar
+- back
+- back
+
+# Child device: complete today's task
+- tapOn:
+    id: 'child-device'
+- tapOn: 'Tiếp tục'
+- extendedWaitUntil:
+    visible:
+      id: 'child-login-id'
+    timeout: 15000
+- tapOn:
+    id: 'child-login-id'
+- inputText: ${output.loginId}
+- runFlow:
+    file: subflows/m01-enter-pin.yaml
+    env:
+      DIGITS: '1,4,7,0'
+- tapOn:
+    id: 'child-login-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'open-child-tasks'
+    timeout: 15000
+- tapOn:
+    id: 'open-child-tasks'
+- extendedWaitUntil:
+    visible: 'Đọc sách 15 phút'
+    timeout: 15000
+- tapOn:
+    id: 'complete-.*'
+- extendedWaitUntil:
+    visible:
+      id: 'child-tasks-message'
+    timeout: 15000
+- takeScreenshot: m03-child-sent
+- back
+- tapOn:
+    id: 'child-sign-out'
+
+# Parent signs back in and approves
+- extendedWaitUntil:
+    visible:
+      id: 'child-login-parent'
+    timeout: 15000
+- tapOn:
+    id: 'child-login-parent'
+- tapOn:
+    id: 'phone-input'
+- inputText: '0900000004'
+- tapOn:
+    id: 'send-code'
+- extendedWaitUntil:
+    visible:
+      id: 'otp-input'
+    timeout: 20000
+- tapOn:
+    id: 'otp-input'
+- inputText: '123456'
+- tapOn:
+    id: 'verify-code'
+- extendedWaitUntil:
+    visible:
+      id: 'open-approvals'
+    timeout: 20000
+- tapOn:
+    id: 'open-approvals'
+- extendedWaitUntil:
+    visible: 'Đọc sách 15 phút'
+    timeout: 15000
+- takeScreenshot: m03-approvals
+- tapOn:
+    id: 'approve-.*'
+- extendedWaitUntil:
+    visible:
+      id: 'approvals-message'
+    timeout: 15000

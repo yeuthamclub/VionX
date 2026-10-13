@@ -5,10 +5,13 @@ export interface ObjectStorage {
   upload(bucket: string, path: string, body: Uint8Array, contentType: string): Promise<void>;
   /** Absolute URL that downloads `path` until it expires. */
   createSignedUrl(bucket: string, path: string, expiresInSeconds: number): Promise<string>;
+  /** Absolute URL the client PUTs one file to (Supabase signed upload URLs live 2 hours). */
+  createSignedUploadUrl(bucket: string, path: string): Promise<string>;
   remove(bucket: string, paths: string[]): Promise<void>;
 }
 
 export const PRIVACY_EXPORT_BUCKET = 'privacy-exports';
+export const TASK_PROOF_BUCKET = 'task-proofs';
 
 const encodePath = (path: string) => path.split('/').map(encodeURIComponent).join('/');
 
@@ -72,6 +75,17 @@ export class SupabaseStorage implements ObjectStorage {
     return `${this.options.publicUrl.replace(/\/+$/, '')}/storage/v1${json.signedURL}`;
   }
 
+  async createSignedUploadUrl(bucket: string, path: string) {
+    const res = await this.fetch(
+      `${this.options.url}/storage/v1/object/upload/sign/${bucket}/${encodePath(path)}`,
+      { method: 'POST', headers: this.headers({ 'content-type': 'application/json' }), body: '{}' },
+    );
+    if (!res.ok) await this.check(res, 'sign upload');
+    const json = (await res.json()) as { url?: string };
+    if (!json.url) throw new Error('storage sign upload returned no URL');
+    return `${this.options.publicUrl.replace(/\/+$/, '')}/storage/v1${json.url}`;
+  }
+
   async remove(bucket: string, paths: string[]) {
     if (paths.length === 0) return;
     const res = await this.fetch(`${this.options.url}/storage/v1/object/${bucket}`, {
@@ -94,6 +108,10 @@ export class MemoryStorage implements ObjectStorage {
   async createSignedUrl(bucket: string, path: string, expiresInSeconds: number) {
     if (!this.objects.has(`${bucket}/${path}`)) throw new Error('object not found');
     return `memory://${bucket}/${path}?expiresIn=${expiresInSeconds}`;
+  }
+
+  async createSignedUploadUrl(bucket: string, path: string) {
+    return `memory://upload/${bucket}/${path}?token=test`;
   }
 
   async remove(bucket: string, paths: string[]) {

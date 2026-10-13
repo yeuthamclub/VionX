@@ -135,6 +135,17 @@ export default function StudentDetail() {
               onPress={() => resetPin(s)}
             />
             <Button
+              testID="open-calendar"
+              label={t('student.calendar')}
+              color={c.parent}
+              onPress={() =>
+                router.push({
+                  pathname: '/calendar/[id]',
+                  params: { id: s.id, name: s.displayName },
+                })
+              }
+            />
+            <Button
               testID="open-consents"
               label={t('student.consents')}
               variant="secondary"

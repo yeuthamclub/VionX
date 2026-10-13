@@ -1799,6 +1799,1295 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/subjects': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * School subjects (GDPT 2018)
+     * @description Public reference list with the grades each subject is taught in.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Subjects */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SubjectsResponse'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/task-templates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Task templates for the task form
+     * @description Built-in starter templates and the household’s own (saved with `saveAsTemplate`).
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Templates */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TaskTemplatesResponse'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/calendar': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A child’s calendar between two days
+     * @description Household-local days `from`..`to` (at most 62). School periods expanded from the weekly timetable, calendar events, and task days with their latest completion. Recurring tasks are materialised 14 days ahead. Parent: any child of the household; child: only their own id (today’s tasks). Other ids answer 404.
+     */
+    get: {
+      parameters: {
+        query: {
+          /** @description Household-local day (YYYY-MM-DD). */
+          from: string;
+          /** @description Inclusive; at most 62 days after `from`. */
+          to: string;
+        };
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Calendar */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['CalendarResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/timetable': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** A child’s weekly school timetable */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Timetable */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TimetableResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Add a school period */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['TimetableEntryCreate'];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TimetableEntryResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/timetable/{entryId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Remove a school period */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          entryId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Deleted */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /** Change a school period */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          entryId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['TimetableEntryUpdate'];
+        };
+      };
+      responses: {
+        /** @description Updated */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TimetableEntryResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/api/v1/students/{id}/events': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Add a calendar event (Master Spec §13.1 types) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['CalendarEventCreate'];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['CalendarEventResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/events/{eventId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Remove a calendar event */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Deleted */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /** Change a calendar event */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['CalendarEventUpdate'];
+        };
+      };
+      responses: {
+        /** @description Updated */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['CalendarEventResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/api/v1/students/{id}/tasks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Assign a task to a child
+     * @description Master Spec §13.2 fields. `rrule` repeats it (RRULE subset); without it the task happens once on `startsOn`. Days are materialised at once (recurring: the next 14 days, then daily). Emits `task.assigned` (TaskAssigned). Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['TaskCreate'];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TaskResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/tasks/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * One task (edit form)
+     * @description Parent: tasks of the household; child: tasks assigned to them. Others answer 404.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Task */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TaskResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Edit or archive a task (parent only)
+     * @description Children can never edit tasks (403). When the schedule changes or the task is archived, open days from today on are removed and the new schedule is materialised; days with a completion stay. Audited.
+     */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['TaskUpdate'];
+        };
+      };
+      responses: {
+        /** @description Updated */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TaskResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/api/v1/tasks/{id}/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * The child completes a task day
+     * @description Child actor, own tasks only. Idempotent by `clientUuid`: a retry returns the stored result with `replayed: true` and emits nothing (409 if the UUID was used for another task). SELF_CHECK is done at once (also emits `task.approved`); PHOTO_PROOF (needs `proofPath`) and PARENT_APPROVAL wait for the parent (push request to the parents); SYSTEM_VERIFIED cannot be completed by hand (409). Only days up to today. Emits `task.completed` (TaskCompleted).
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['TaskCompleteRequest'];
+        };
+      };
+      responses: {
+        /** @description Completed (or replayed) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TaskCompleteResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/tasks/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a completed task day
+     * @description Parent only. The day’s pending completion becomes APPROVED; 409 when nothing is pending (e.g. already decided). Emits `task.approved` (TaskApproved) once per completion. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['TaskDecisionRequest'];
+        };
+      };
+      responses: {
+        /** @description Approved */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TaskDecisionResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/tasks/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a completed task day
+     * @description Parent only, with an optional note for the child. The day becomes REJECTED and the child may complete it again (with a new `clientUuid`). Emits `task.rejected` (TaskRejected). Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['TaskDecisionRequest'];
+        };
+      };
+      responses: {
+        /** @description Rejected */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TaskDecisionResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/approvals': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Approvals inbox
+     * @description Task days waiting for the parent, oldest first (up to 100), with a 15-minute link to the proof photo. `count` drives the badge.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Pending approvals */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ApprovalsResponse'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description A dependency is unavailable (SERVICE_UNAVAILABLE) */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/uploads/sign': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Signed upload URL for a task proof photo
+     * @description Child actor, own active tasks only. PUT the image to `uploadUrl` (valid 2 hours, max 10 MB, JPEG/PNG/WebP) into the private bucket, then send `path` as `proofPath` when completing. Files never attached are removed after a day. 60 per hour per child.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['UploadSignRequest'];
+        };
+      };
+      responses: {
+        /** @description Signed */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['UploadSignResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Too many attempts (RATE_LIMITED); see Retry-After */
+        429: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description A dependency is unavailable (SERVICE_UNAVAILABLE) */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/admin/library/import': {
     parameters: {
       query?: never;
@@ -3181,6 +4470,547 @@ export interface components {
       confirm: true;
       /** @enum {string} */
       source?: 'app' | 'web';
+    };
+    SubjectsResponse: {
+      subjects: components['schemas']['SchoolSubject'][];
+    };
+    SchoolSubject: {
+      code: string;
+      nameVi: string;
+      nameEn: string;
+      gradeFrom: number;
+      gradeTo: number;
+    };
+    TaskTemplatesResponse: {
+      templates: components['schemas']['TaskTemplate'][];
+    };
+    TaskTemplate: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** @description A VionX starter template (not the household’s). */
+      builtIn: boolean;
+      type: components['schemas']['TaskType'];
+      title: string;
+      description: string | null;
+      durationMinutes: number | null;
+      priority: components['schemas']['TaskPriority'];
+      verificationMode: components['schemas']['VerificationMode'];
+      rewardXp: number;
+    };
+    /** @enum {string} */
+    TaskType:
+      | 'HOMEWORK'
+      | 'LEARNING'
+      | 'READING'
+      | 'ENGLISH'
+      | 'SPORT'
+      | 'HOUSEHOLD'
+      | 'CREATIVE'
+      | 'CUSTOM';
+    /** @enum {string} */
+    TaskPriority: 'LOW' | 'NORMAL' | 'HIGH';
+    /** @enum {string} */
+    VerificationMode: 'SELF_CHECK' | 'PHOTO_PROOF' | 'PARENT_APPROVAL' | 'SYSTEM_VERIFIED';
+    CalendarResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      timezone: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      today: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      from: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      to: string;
+      timetable: components['schemas']['TimetableSlot'][];
+      events: components['schemas']['CalendarEvent'][];
+      tasks: components['schemas']['TaskOccurrence'][];
+    };
+    TimetableSlot: {
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      date: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      entryId: string;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      startTime: string;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      endTime: string;
+      subjectCode: string;
+      room: string | null;
+      note: string | null;
+    };
+    CalendarEvent: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      type: components['schemas']['CalendarEventType'];
+      title: string;
+      note: string | null;
+      location: string | null;
+      subjectCode: string | null;
+      /** Format: date-time */
+      startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
+      allDay: boolean;
+    };
+    /** @enum {string} */
+    CalendarEventType:
+      | 'SCHOOL_CLASS'
+      | 'TUTORING'
+      | 'EXAM'
+      | 'LEARNING_BLOCK'
+      | 'ENGLISH'
+      | 'READING'
+      | 'SPORT'
+      | 'HOUSEHOLD_TASK'
+      | 'CREATIVE'
+      | 'FAMILY_EVENT'
+      | 'CUSTOM';
+    TaskOccurrence: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      taskId: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      date: string;
+      status: components['schemas']['OccurrenceStatus'];
+      type: components['schemas']['TaskType'];
+      title: string;
+      description: string | null;
+      subjectCode: string | null;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      windowStart: string | null;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      windowEnd: string | null;
+      durationMinutes: number | null;
+      priority: components['schemas']['TaskPriority'];
+      required: boolean;
+      rewardXp: number;
+      verificationMode: components['schemas']['VerificationMode'];
+      recurring: boolean;
+      completion: components['schemas']['TaskCompletion'];
+    };
+    /** @enum {string} */
+    OccurrenceStatus: 'ASSIGNED' | 'PENDING_APPROVAL' | 'COMPLETED' | 'REJECTED';
+    /** @description The latest completion. */
+    TaskCompletion: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      clientUuid: string;
+      status: components['schemas']['CompletionStatus'];
+      /** Format: date-time */
+      completedAt: string;
+      /** Format: date-time */
+      decidedAt: string | null;
+      /** @enum {string|null} */
+      decidedByType: 'parent' | 'system' | null;
+      decisionNote: string | null;
+      hasProof: boolean;
+    } | null;
+    /** @enum {string} */
+    CompletionStatus: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
+    TimetableResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      entries: components['schemas']['TimetableEntry'][];
+    };
+    TimetableEntry: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      /** @description ISO weekday: 1 = Monday … 7 = Sunday. */
+      weekday: number;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      startTime: string;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      endTime: string;
+      subjectCode: string;
+      room: string | null;
+      note: string | null;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      validFrom: string | null;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      validTo: string | null;
+    };
+    TimetableEntryResponse: {
+      entry: components['schemas']['TimetableEntry'];
+    };
+    TimetableEntryCreate: {
+      weekday: number;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      startTime: string;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      endTime: string;
+      /**
+       * @description GDPT 2018 subject code (GET /v1/subjects).
+       * @example TOAN
+       */
+      subjectCode: string;
+      room?: string | null;
+      note?: string | null;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      validFrom?: string | null;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      validTo?: string | null;
+    };
+    TimetableEntryUpdate: {
+      weekday?: number;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      startTime?: string;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      endTime?: string;
+      /**
+       * @description GDPT 2018 subject code (GET /v1/subjects).
+       * @example TOAN
+       */
+      subjectCode?: string;
+      room?: string | null;
+      note?: string | null;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      validFrom?: string | null;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      validTo?: string | null;
+    };
+    CalendarEventResponse: {
+      event: components['schemas']['CalendarEvent'];
+    };
+    CalendarEventCreate: {
+      type: components['schemas']['CalendarEventType'];
+      title: string;
+      note?: string | null;
+      location?: string | null;
+      /**
+       * @description GDPT 2018 subject code (GET /v1/subjects).
+       * @example TOAN
+       */
+      subjectCode?: string | null;
+      /** Format: date-time */
+      startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
+      allDay?: boolean;
+    };
+    CalendarEventUpdate: {
+      type?: components['schemas']['CalendarEventType'];
+      title?: string;
+      note?: string | null;
+      location?: string | null;
+      /**
+       * @description GDPT 2018 subject code (GET /v1/subjects).
+       * @example TOAN
+       */
+      subjectCode?: string | null;
+      /** Format: date-time */
+      startsAt?: string;
+      /** Format: date-time */
+      endsAt?: string;
+      allDay?: boolean;
+    };
+    TaskResponse: {
+      task: components['schemas']['Task'];
+      /** @description Materialised days from today. */
+      upcoming: string[];
+    };
+    Task: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      templateId: string | null;
+      type: components['schemas']['TaskType'];
+      title: string;
+      description: string | null;
+      subjectCode: string | null;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-13
+       */
+      startsOn: string;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      windowStart: string | null;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      windowEnd: string | null;
+      durationMinutes: number | null;
+      /** @description Repeat rule (RRULE subset); null = once on startsOn. */
+      rrule: string | null;
+      priority: components['schemas']['TaskPriority'];
+      required: boolean;
+      rewardXp: number;
+      verificationMode: components['schemas']['VerificationMode'];
+      /** @enum {string} */
+      status: 'ACTIVE' | 'ARCHIVED';
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    TaskCreate: {
+      type: components['schemas']['TaskType'];
+      title: string;
+      description?: string | null;
+      /**
+       * @description GDPT 2018 subject code (GET /v1/subjects).
+       * @example TOAN
+       */
+      subjectCode?: string | null;
+      /**
+       * @description Defaults to today (household-local).
+       * @example 2026-10-13
+       */
+      startsOn?: string;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      windowStart?: string | null;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      windowEnd?: string | null;
+      durationMinutes?: number | null;
+      /**
+       * @description RFC 5545 subset: FREQ=DAILY|WEEKLY, INTERVAL=1..30, BYDAY=MO..SU, COUNT=1..366 or UNTIL=YYYYMMDD.
+       * @example FREQ=WEEKLY;BYDAY=MO,WE,FR
+       */
+      rrule?: string | null;
+      priority?: components['schemas']['TaskPriority'];
+      required?: boolean;
+      rewardXp?: number;
+      verificationMode: components['schemas']['VerificationMode'];
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      templateId?: string | null;
+      /** @description Also save these settings as a household template. */
+      saveAsTemplate?: boolean;
+    };
+    TaskUpdate: {
+      type?: components['schemas']['TaskType'];
+      title?: string;
+      description?: string | null;
+      /**
+       * @description GDPT 2018 subject code (GET /v1/subjects).
+       * @example TOAN
+       */
+      subjectCode?: string | null;
+      /**
+       * @description Defaults to today (household-local).
+       * @example 2026-10-13
+       */
+      startsOn?: string;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      windowStart?: string | null;
+      /**
+       * @description Household-local wall-clock time (HH:MM).
+       * @example 07:30
+       */
+      windowEnd?: string | null;
+      durationMinutes?: number | null;
+      /**
+       * @description RFC 5545 subset: FREQ=DAILY|WEEKLY, INTERVAL=1..30, BYDAY=MO..SU, COUNT=1..366 or UNTIL=YYYYMMDD.
+       * @example FREQ=WEEKLY;BYDAY=MO,WE,FR
+       */
+      rrule?: string | null;
+      priority?: components['schemas']['TaskPriority'];
+      required?: boolean;
+      rewardXp?: number;
+      verificationMode?: components['schemas']['VerificationMode'];
+      /** @description true archives the task (future open days are removed); false restores it. */
+      archived?: boolean;
+    };
+    TaskCompleteResponse: {
+      occurrence: components['schemas']['TaskOccurrence'];
+      /** @description True when this clientUuid was already stored (nothing changed). */
+      replayed: boolean;
+    };
+    TaskCompleteRequest: {
+      /**
+       * Format: uuid
+       * @description Generated by the app per completion; a retry with the same value is a no-op.
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      clientUuid: string;
+      /**
+       * @description The day completed; defaults to today.
+       * @example 2026-10-13
+       */
+      date?: string;
+      /** @description Path returned by POST /v1/uploads/sign (required for PHOTO_PROOF). */
+      proofPath?: string;
+    };
+    TaskDecisionResponse: {
+      occurrence: components['schemas']['TaskOccurrence'];
+    };
+    TaskDecisionRequest: {
+      /**
+       * @description The day whose pending completion is decided.
+       * @example 2026-10-13
+       */
+      date: string;
+      note?: string;
+    };
+    ApprovalsResponse: {
+      count: number;
+      items: components['schemas']['ApprovalItem'][];
+    };
+    ApprovalItem: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      studentName: string;
+      occurrence: components['schemas']['TaskOccurrence'];
+      /** @description Signed link to the proof photo, valid for 15 minutes. */
+      proofUrl: string | null;
+    };
+    UploadSignResponse: {
+      /** @description Pass as `proofPath` when completing the task. */
+      path: string;
+      /** @description PUT the file here with the same Content-Type (no auth header). */
+      uploadUrl: string;
+      /** Format: date-time */
+      expiresAt: string;
+      maxBytes: number;
+    };
+    UploadSignRequest: {
+      /** @enum {string} */
+      purpose: 'TASK_PROOF';
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      taskId: string;
+      /** @enum {string} */
+      contentType: 'image/jpeg' | 'image/png' | 'image/webp';
     };
     LibraryImportResult: {
       /**

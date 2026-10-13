@@ -7,6 +7,7 @@ import { SupabaseStorage } from '../_shared/storage.ts';
 import { createWorkerHandler } from './app.ts';
 import { createHandlers } from './handlers.ts';
 import { expireExports } from './privacy-export.ts';
+import { removeOrphanProofs } from './task-proofs.ts';
 
 const env = readEnv((name) => Deno.env.get(name));
 const sql = getSql(env.dbUrl);
@@ -21,6 +22,9 @@ Deno.serve(
     serviceSecret: env.serviceSecret,
     queue: new PgEventQueue(sql),
     handlers: createHandlers({ storage, notifier: new OutboxPushNotifier() }),
-    maintenance: async () => ({ expiredExports: await expireExports(sql, storage) }),
+    maintenance: async () => ({
+      expiredExports: await expireExports(sql, storage),
+      removedOrphanProofs: await removeOrphanProofs(sql, storage),
+    }),
   }),
 );
