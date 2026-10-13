@@ -978,9 +978,9 @@ describe('privacy', () => {
   it('a purge anonymises the reward ledgers instead of deleting them', async () => {
     const before = await ledgerTotals(c);
     expect(before.xp_rows).toBeGreaterThan(0);
-    const [{ n }] = await sql<{ n: number }[]>`
+    const [anonymised] = await sql<{ n: number }[]>`
       select ops.anonymise_ledgers(${c.householdId}::uuid, ${c.studentId}::uuid) as n`;
-    expect(n).toBe(before.xp_rows + before.coin_rows);
+    expect(anonymised!.n).toBe(before.xp_rows + before.coin_rows);
     const after = await ledgerTotals(c);
     expect([after.xp_rows, after.coin_rows]).toEqual([0, 0]);
     const [kept] = await sql<{ n: number }[]>`

@@ -3168,24 +3168,10 @@
           },
           "weekendTierCaps": {
             "type": "array",
-            "prefixItems": [
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "integer",
-                "minimum": 0
-              }
-            ],
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
             "description": "Weekend tier caps 0-3 in Coin (Master Spec §14.2).",
             "example": [
               20,
@@ -3258,24 +3244,10 @@
           },
           "weekendTierCaps": {
             "type": "array",
-            "prefixItems": [
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "integer",
-                "minimum": 0
-              }
-            ],
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
             "description": "Weekend tier caps 0-3 in Coin (Master Spec §14.2).",
             "example": [
               20,
@@ -3314,24 +3286,10 @@
           },
           "weekendTierCaps": {
             "type": "array",
-            "prefixItems": [
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "integer",
-                "minimum": 0
-              }
-            ],
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
             "description": "Weekend tier caps 0-3 in Coin (Master Spec §14.2).",
             "example": [
               20,

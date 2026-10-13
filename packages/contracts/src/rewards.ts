@@ -19,10 +19,13 @@ const Day = z
   .refine(isValidDay, 'Not a calendar date')
   .openapi({ example: '2026-10-14', description: 'Household-local day (YYYY-MM-DD).' });
 const Coins = z.int().min(0);
-const TierCaps = z.tuple([Coins, Coins, Coins, Coins]).openapi({
-  description: 'Weekend tier caps 0-3 in Coin (Master Spec §14.2).',
-  example: [20, 30, 40, 50],
-});
+const TierCaps = z
+  .array(Coins)
+  .length(4)
+  .openapi({
+    description: 'Weekend tier caps 0-3 in Coin (Master Spec §14.2).',
+    example: [20, 30, 40, 50],
+  });
 
 export const RedemptionStatusSchema = z.enum(REDEMPTION_STATUSES).openapi('RedemptionStatus');
 export const CatalogItemStatusSchema = z.enum(CATALOG_ITEM_STATUSES).openapi('CatalogItemStatus');

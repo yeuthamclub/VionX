@@ -5087,7 +5087,7 @@ export interface components {
        *       50
        *     ]
        */
-      weekendTierCaps: [number, number, number, number];
+      weekendTierCaps: number[];
       weekendGoals: {
         /** @description Completed READING tasks needed for weekend Tier 2. */
         readingTasks: number;
@@ -5115,7 +5115,7 @@ export interface components {
        *       50
        *     ]
        */
-      weekendTierCaps: [number, number, number, number];
+      weekendTierCaps: number[];
       weekendMaxCoins: number;
       maxGrantsPerRulePerDay: number;
       lateGrantDays: number;
@@ -5131,7 +5131,7 @@ export interface components {
        *       50
        *     ]
        */
-      weekendTierCaps?: [number, number, number, number];
+      weekendTierCaps?: number[];
       weekendGoals?: {
         readingTasks?: number;
         activityTasks?: number;

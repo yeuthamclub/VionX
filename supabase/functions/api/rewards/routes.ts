@@ -434,7 +434,10 @@ export function registerRewardRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps): v
     const patch = c.req.valid('json');
     const caps = await loadSystemCaps(sql);
     const current = await loadRules(sql, householdId, caps);
-    const next = mergeRewardRules(current.rules, patch);
+    const next = mergeRewardRules(current.rules, {
+      ...patch,
+      weekendTierCaps: patch.weekendTierCaps as [number, number, number, number] | undefined,
+    });
     const violations = validateRewardRules(next, caps);
     if (violations.length > 0) {
       throw new ApiError(
