@@ -262,6 +262,19 @@ export const LIBRARY_JSON_SCHEMAS = {
   'template.schema.json': ItemTemplateSchema,
 } as const;
 
+/** JSON Schema (draft 2020-12) per package file, keyed by output file name. */
+export function libraryJsonSchemas(): Record<string, Record<string, unknown>> {
+  return Object.fromEntries(
+    Object.entries(LIBRARY_JSON_SCHEMAS).map(([file, schema]) => [
+      file,
+      {
+        $id: `https://vionx.app/schemas/library/${file}`,
+        ...z.toJSONSchema(schema, { io: 'input', target: 'draft-2020-12' }),
+      },
+    ]),
+  );
+}
+
 // --- Reading a package ----------------------------------------------------------------------------
 
 export const PACKAGE_FILES = {

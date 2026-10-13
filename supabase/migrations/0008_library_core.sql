@@ -73,6 +73,7 @@ create table library.book_series (
   grade smallint not null check (grade between 1 and 12),
   subject text not null check (subject ~ '^[a-z]+$'),
   academic_year text,
+  status text not null default 'ACTIVE' check (status in ('ACTIVE', 'ARCHIVED')),
   content_hash text not null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -142,6 +143,9 @@ values
 create table library.media_assets (
   id uuid primary key default gen_random_uuid(),
   code text not null unique,
+  -- Package (grade-subject) that owns the code; archived when that package no longer lists it.
+  grade smallint not null check (grade between 1 and 12),
+  subject text not null check (subject ~ '^[a-z]+$'),
   kind text not null check (kind in ('ICON', 'SVG', 'IMAGE')),
   storage_path text,
   inline_svg text,

@@ -6,6 +6,9 @@ dist
 docs/reference
 docs/api/openapi.json
 packages/contracts/src/generated
+packages/contracts/library
+# Library packages carry sha256 checksums of their exact bytes.
+scripts/acceptance/fixtures
 supabase/.temp
 supabase/.branches
 apps/mobile/android

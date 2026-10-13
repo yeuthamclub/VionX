@@ -17,6 +17,7 @@
     "@vionx/ai": "../../packages/ai/src/index.ts",
     "@vionx/ai/anthropic": "../../packages/ai/src/providers/anthropic.ts",
     "@vionx/contracts": "../../packages/contracts/src/index.ts",
-    "fflate": "npm:fflate@0.8.2"
+    "fflate": "npm:fflate@0.8.2",
+    "mathjs": "npm:mathjs@15.2.0"
   }
 }

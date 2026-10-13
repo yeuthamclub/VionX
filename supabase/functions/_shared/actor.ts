@@ -152,3 +152,17 @@ export async function requirePermission(
   }
   return { kind: 'admin', userId: parent.userId, permissions };
 }
+
+/** Admin guard for routes several roles may use: any one of `permissions` (or SUPER_ADMIN). */
+export async function requireAnyPermission(
+  actor: Actor,
+  store: AdminPermissionStore,
+  permissions: readonly AdminPermission[],
+): Promise<Extract<Actor, { kind: 'admin' }>> {
+  const parent = requireActor(actor, 'parent');
+  const granted = await store.permissionsOf(parent.userId);
+  if (!permissions.some((p) => hasPermission(granted, p))) {
+    throw new ApiError('FORBIDDEN', `One of ${permissions.join(', ')} required`);
+  }
+  return { kind: 'admin', userId: parent.userId, permissions: granted };
+}
