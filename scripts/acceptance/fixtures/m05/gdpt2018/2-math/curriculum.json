@@ -1,0 +1,64 @@
+{
+  "version": {
+    "code": "gdpt2018",
+    "title": "Chương trình GDPT 2018",
+    "academicYear": "2026-2027",
+    "source": "Thông tư 32/2018/TT-BGDĐT"
+  },
+  "nodes": [
+    {
+      "code": "GRADE.2",
+      "parent": null,
+      "level": "GRADE",
+      "title": "Lớp 2"
+    },
+    {
+      "code": "MATH.2",
+      "parent": "GRADE.2",
+      "level": "SUBJECT",
+      "title": "Toán 2"
+    },
+    {
+      "code": "MATH.2.NUM",
+      "parent": "MATH.2",
+      "level": "DOMAIN",
+      "title": "Số và phép tính"
+    },
+    {
+      "code": "MATH.2.NUM.COUNT",
+      "parent": "MATH.2.NUM",
+      "level": "TOPIC",
+      "title": "Đếm và so sánh số"
+    },
+    {
+      "code": "MATH.2.NUM.COUNT.OBJ",
+      "parent": "MATH.2.NUM.COUNT",
+      "level": "SKILL",
+      "title": "Đếm số đồ vật trong hình (đến 20)"
+    },
+    {
+      "code": "MATH.2.NUM.COUNT.ORDER",
+      "parent": "MATH.2.NUM.COUNT",
+      "level": "SKILL",
+      "title": "Sắp xếp các số theo thứ tự"
+    },
+    {
+      "code": "MATH.2.NUM.ADD100",
+      "parent": "MATH.2.NUM",
+      "level": "TOPIC",
+      "title": "Phép cộng trong phạm vi 100"
+    },
+    {
+      "code": "MATH.2.NUM.ADD100.NOCARRY",
+      "parent": "MATH.2.NUM.ADD100",
+      "level": "SKILL",
+      "title": "Cộng không nhớ trong phạm vi 100"
+    },
+    {
+      "code": "MATH.2.NUM.ADD100.CARRY",
+      "parent": "MATH.2.NUM.ADD100",
+      "level": "SKILL",
+      "title": "Cộng có nhớ trong phạm vi 100"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "version": {
+    "code": "gdpt2018",
+    "title": "Chương trình GDPT 2018",
+    "academicYear": "2026-2027",
+    "source": "Thông tư 32/2018/TT-BGDĐT"
+  },
+  "nodes": [
+    {
+      "code": "GRADE.2",
+      "parent": null,
+      "level": "GRADE",
+      "title": "Lớp 2"
+    },
+    {
+      "code": "VIET.2",
+      "parent": "GRADE.2",
+      "level": "SUBJECT",
+      "title": "Tiếng Việt 2"
+    },
+    {
+      "code": "VIET.2.READ",
+      "parent": "VIET.2",
+      "level": "DOMAIN",
+      "title": "Đọc"
+    },
+    {
+      "code": "VIET.2.READ.COMP",
+      "parent": "VIET.2.READ",
+      "level": "TOPIC",
+      "title": "Đọc hiểu văn bản"
+    },
+    {
+      "code": "VIET.2.READ.COMP.DETAIL",
+      "parent": "VIET.2.READ.COMP",
+      "level": "SKILL",
+      "title": "Tìm chi tiết, nhân vật trong bài đọc"
+    },
+    {
+      "code": "VIET.2.READ.COMP.MEANING",
+      "parent": "VIET.2.READ.COMP",
+      "level": "SKILL",
+      "title": "Hiểu ý nghĩa của câu ca dao, bài thơ ngắn"
+    },
+    {
+      "code": "VIET.2.WRITE",
+      "parent": "VIET.2",
+      "level": "DOMAIN",
+      "title": "Viết"
+    },
+    {
+      "code": "VIET.2.WRITE.SPELL",
+      "parent": "VIET.2.WRITE",
+      "level": "TOPIC",
+      "title": "Chính tả"
+    },
+    {
+      "code": "VIET.2.WRITE.SPELL.SX",
+      "parent": "VIET.2.WRITE.SPELL",
+      "level": "SKILL",
+      "title": "Phân biệt s/x"
+    },
+    {
+      "code": "VIET.2.WRITE.SENT",
+      "parent": "VIET.2.WRITE",
+      "level": "TOPIC",
+      "title": "Viết đoạn văn ngắn"
+    },
+    {
+      "code": "VIET.2.WRITE.SENT.PET",
+      "parent": "VIET.2.WRITE.SENT",
+      "level": "SKILL",
+      "title": "Viết 3–5 câu kể về con vật"
+    },
+    {
+      "code": "VIET.2.VOCAB",
+      "parent": "VIET.2",
+      "level": "DOMAIN",
+      "title": "Luyện từ và câu"
+    },
+    {
+      "code": "VIET.2.VOCAB.THING",
+      "parent": "VIET.2.VOCAB",
+      "level": "TOPIC",
+      "title": "Từ chỉ sự vật"
+    },
+    {
+      "code": "VIET.2.VOCAB.THING.PIC",
+      "parent": "VIET.2.VOCAB.THING",
+      "level": "SKILL",
+      "title": "Nhận biết từ chỉ sự vật qua tranh"
+    }
+  ]
+}

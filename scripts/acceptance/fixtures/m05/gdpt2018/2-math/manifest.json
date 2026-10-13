@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "curriculumVersion": "gdpt2018",
+  "grade": 2,
+  "subject": "math",
+  "title": "Toán 2 (fixture M05)",
+  "counts": {
+    "nodes": 9,
+    "edges": 2,
+    "groups": 0,
+    "items": 6,
+    "templates": 2,
+    "media": 3
+  },
+  "checksums": {
+    "curriculum.json": "32caa2185a4633ff3c27860efee1afaa847d505b350fd5bbb01aabad0cefe9e0",
+    "edges.json": "155a7c4ae864d60134988388969071b0e66f0a488fd28055d3a2ab2b91567fd0",
+    "groups.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "items.jsonl": "d5102ce567d61f87a3ac94832b339aea4ae878c263d52845e998ab5ec1a38db4",
+    "mappings.json": "822dd2d9339ec29864f421dee18a3ab23d68de2428b77aaa535592bad259e969",
+    "media/apples-5.svg": "38ca010eab06b687704d32dac18da7bd8b3e94e4e61b9427f0ef020b40ee16f7",
+    "media/apples-7.svg": "352f46c2749fbf4fa27adece271d61d54f400d8da011b9837c4f38c71720638b",
+    "media/apples-8.svg": "2dfdb505259fb094262492da5907367b09db3e6b3cae9cf946365e28565f78cd",
+    "media/media.jsonl": "6d09fa252319f3055823f3be808aa0df5993de0b4a2ac910424d3689f4e754be",
+    "templates.jsonl": "b41ab256ccb380d31b4b715a2063756c38dba4774ff73c9480d2f62e6c1f0648"
+  },
+  "models": [
+    "fixture"
+  ],
+  "reviewer": "M05 fixture",
+  "createdAt": "2026-10-13T00:00:00Z"
+}

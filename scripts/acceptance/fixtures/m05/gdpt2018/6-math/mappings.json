@@ -1,0 +1,32 @@
+{
+  "series": [
+    {
+      "code": "KNTT-TOAN6-2026",
+      "title": "Toán 6 – Kết nối tri thức với cuộc sống",
+      "publisher": "NXB Giáo dục Việt Nam",
+      "academicYear": "2026-2027"
+    }
+  ],
+  "mappings": [
+    {
+      "series": "KNTT-TOAN6-2026",
+      "lessonRef": "Bài 12",
+      "title": "Bội chung. Bội chung nhỏ nhất",
+      "pageStart": 46,
+      "pageEnd": 50,
+      "node": "MATH.6.NUM.NAT.GCD"
+    },
+    {
+      "series": "KNTT-TOAN6-2026",
+      "lessonRef": "Bài 24",
+      "title": "So sánh phân số. Hỗn số dương",
+      "node": "MATH.6.NUM.FRAC.SIMP"
+    },
+    {
+      "series": "KNTT-TOAN6-2026",
+      "lessonRef": "Bài 25",
+      "title": "Phép cộng và phép trừ phân số",
+      "node": "MATH.6.NUM.FRAC.ADD"
+    }
+  ]
+}

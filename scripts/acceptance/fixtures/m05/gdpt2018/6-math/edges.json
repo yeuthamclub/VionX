@@ -1,0 +1,19 @@
+[
+  {
+    "from": "MATH.6.NUM.NAT.GCD",
+    "to": "MATH.6.NUM.FRAC.SIMP",
+    "type": "PREREQUISITE_OF",
+    "reason": "Rút gọn phân số chia cả tử và mẫu cho ƯCLN."
+  },
+  {
+    "from": "MATH.6.NUM.FRAC.SIMP",
+    "to": "MATH.6.NUM.FRAC.ADD",
+    "type": "PREREQUISITE_OF",
+    "reason": "Kết quả phép cộng phải viết dưới dạng tối giản."
+  },
+  {
+    "from": "MATH.6.NUM.FRAC.ADD",
+    "to": "MATH.6.NUM.DEC.MUL",
+    "type": "NEXT_RECOMMENDED"
+  }
+]

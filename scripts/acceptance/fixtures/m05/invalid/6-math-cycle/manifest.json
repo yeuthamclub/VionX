@@ -1,0 +1,26 @@
+{
+  "format": 1,
+  "curriculumVersion": "gdpt2018",
+  "grade": 6,
+  "subject": "math",
+  "title": "Toán 6 with a prerequisite cycle (fixture M05)",
+  "counts": {
+    "nodes": 6,
+    "edges": 3,
+    "groups": 0,
+    "items": 1,
+    "templates": 0,
+    "media": 0
+  },
+  "checksums": {
+    "curriculum.json": "358b9899ce7a1741b5be80370f3e32352ba07bd0a159d2cb3ea97d3847ae90b7",
+    "edges.json": "eed5c1b9cb6ebdae0c50fe6a3fb0a25595342382d5ce1f705ea6d8a47d8e3adb",
+    "items.jsonl": "5e5c496beac3ce5493ad77d328f6d077302b81c25af4df1e4f070b1a60fa5e12",
+    "mappings.json": "822dd2d9339ec29864f421dee18a3ab23d68de2428b77aaa535592bad259e969"
+  },
+  "models": [
+    "fixture"
+  ],
+  "reviewer": "M05 fixture",
+  "createdAt": "2026-10-13T00:00:00Z"
+}
