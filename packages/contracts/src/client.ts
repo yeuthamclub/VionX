@@ -40,6 +40,20 @@ export type TaskCompletion = components['schemas']['TaskCompletion'];
 export type VerificationMode = components['schemas']['VerificationMode'];
 export type ApprovalItem = components['schemas']['ApprovalItem'];
 export type ApprovalsResponse = components['schemas']['ApprovalsResponse'];
+export type Wallet = components['schemas']['Wallet'];
+export type CapView = components['schemas']['CapView'];
+export type LevelInfo = components['schemas']['LevelInfo'];
+export type LedgerEntry = components['schemas']['LedgerEntry'];
+export type LedgerResponse = components['schemas']['LedgerResponse'];
+export type RewardRulesConfig = components['schemas']['RewardRulesConfig'];
+export type RewardRulesResponse = components['schemas']['RewardRulesResponse'];
+export type SystemCaps = components['schemas']['SystemCaps'];
+export type CatalogItem = components['schemas']['CatalogItem'];
+export type CatalogIcon = components['schemas']['CatalogIcon'];
+export type CatalogResponse = components['schemas']['CatalogResponse'];
+export type Redemption = components['schemas']['Redemption'];
+export type RedemptionStatus = components['schemas']['RedemptionStatus'];
+export type RedemptionsResponse = components['schemas']['RedemptionsResponse'];
 export const CHILD_SESSION_HEADER = 'x-vionx-child-session';
 
 export interface ApiClientOptions {
