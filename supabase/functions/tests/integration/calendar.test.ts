@@ -360,7 +360,7 @@ describe('tasks', () => {
     );
     expect(second.replayed).toBe(true);
     expect(second.occurrence.completion!.id).toBe(one.occurrence.completion!.id);
-    const [{ n }] = await sql<{ n: number }[]>`
+    const [{ n }] = await sql<[{ n: number }]>`
       select count(*)::int as n from app.task_completions where client_uuid = ${clientUuid}`;
     expect(n).toBe(1);
     expect(await eventsOf('task.completed', one.occurrence.completion!.id)).toHaveLength(1);
@@ -694,7 +694,7 @@ describe('cross-household isolation (404)', () => {
     expect(inboxB.items.some((i) => i.studentId === a.studentId)).toBe(false);
     const after = await api('GET', `/tasks/${task.id}`, { parent: a.parent });
     expect(after.body.task.title).toBe('Bài tập');
-    const [{ status }] = await sql<{ status: string }[]>`
+    const [{ status }] = await sql<[{ status: string }]>`
       select status from app.task_occurrences where assignment_id = ${task.id} and occurs_on = ${t}::date`;
     expect(status).toBe('PENDING_APPROVAL');
   });

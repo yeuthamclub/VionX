@@ -25,6 +25,21 @@ export type PoliciesResponse = components['schemas']['PoliciesResponse'];
 export type ExportJob = components['schemas']['ExportJob'];
 export type DeletionJob = components['schemas']['DeletionJob'];
 export type PrivacyOverview = components['schemas']['PrivacyOverview'];
+export type SchoolSubject = components['schemas']['SchoolSubject'];
+export type TaskTemplate = components['schemas']['TaskTemplate'];
+export type TimetableEntry = components['schemas']['TimetableEntry'];
+export type TimetableSlot = components['schemas']['TimetableSlot'];
+export type CalendarEvent = components['schemas']['CalendarEvent'];
+export type CalendarEventType = components['schemas']['CalendarEventType'];
+export type CalendarResponse = components['schemas']['CalendarResponse'];
+export type Task = components['schemas']['Task'];
+export type TaskType = components['schemas']['TaskType'];
+export type TaskPriority = components['schemas']['TaskPriority'];
+export type TaskOccurrence = components['schemas']['TaskOccurrence'];
+export type TaskCompletion = components['schemas']['TaskCompletion'];
+export type VerificationMode = components['schemas']['VerificationMode'];
+export type ApprovalItem = components['schemas']['ApprovalItem'];
+export type ApprovalsResponse = components['schemas']['ApprovalsResponse'];
 export const CHILD_SESSION_HEADER = 'x-vionx-child-session';
 
 export interface ApiClientOptions {
