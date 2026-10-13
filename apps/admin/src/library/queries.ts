@@ -74,9 +74,7 @@ export interface GroupFilters {
 }
 
 export const fetchGroups = async (filters: GroupFilters) =>
-  unwrap(
-    await api.GET('/api/v1/admin/library/groups', { params: { query: filters } }),
-  ).groups;
+  unwrap(await api.GET('/api/v1/admin/library/groups', { params: { query: filters } })).groups;
 
 export const fetchGroup = async (id: string) =>
   unwrap(await api.GET('/api/v1/admin/library/groups/{id}', { params: { path: { id } } }));
