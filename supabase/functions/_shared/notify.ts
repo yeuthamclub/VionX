@@ -1,4 +1,4 @@
-// Parent notifications. Real FCM push arrives in M09; until then the notifier records a
+// Parent notifications (export ready, task waiting for approval). Real FCM push arrives in M09; until then the notifier records a
 // `notification.push_requested` event in the outbox (same transaction as the state change), which
 // the M09 push sender will consume.
 import type { TxSql } from './db.ts';
@@ -6,7 +6,7 @@ import type { TxSql } from './db.ts';
 export interface ParentNotification {
   userId: string;
   householdId: string;
-  kind: 'privacy.export_ready';
+  kind: 'privacy.export_ready' | 'task.approval_requested';
   /** Small, non-sensitive payload for the app to route the tap (ids only). */
   data: Record<string, string>;
   /** One notification per key (e.g. per export job), however often the caller retries. */
