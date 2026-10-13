@@ -32,3 +32,11 @@ If the module does not fit in one session, commit what is green, list remaining 
 
 ## Commands
 `pnpm dev:mobile | dev:admin | db:start | db:reset | db:migrate | db:seed | fn:serve | lint | typecheck | test | check | openapi | acceptance <m> | e2e:mobile | ai:check | library:build <grade-subject> <step> | library:validate <path>`
+
+## Coding behavior (Karpathy-inspired guidelines)
+Adapted from [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (MIT). If anything here conflicts with the rules above or `docs/CONTRACT.md`, those win. For trivial tasks, use judgment.
+
+1. **Think before coding.** State assumptions explicitly. If a request has several readings, name them instead of picking silently. If a simpler approach exists, say so. If something is unclear, stop, name what is confusing, and ask.
+2. **Simplicity first.** Minimum code that solves the problem: no features beyond the ask, no abstractions for single-use code, no unrequested configurability, no error handling for impossible cases. If 200 lines could be 50, rewrite it.
+3. **Surgical changes.** Touch only what the task needs. Don't reformat or refactor adjacent code; match existing style. Mention unrelated dead code, don't delete it. Remove only the imports/variables/functions your own change orphaned. Every changed line should trace to the request.
+4. **Goal-driven execution.** Turn the task into checks: "add validation" means tests for invalid inputs that then pass; "fix the bug" means a failing test that reproduces it, then passes. For multi-step work, write the plan as `step → verify: check` and loop until each check (and `pnpm check`) is green.
