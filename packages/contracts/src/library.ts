@@ -108,12 +108,9 @@ export const CoverageReportSchema = z
 // --- Import ---------------------------------------------------------------------------------------
 
 export const ImportQuerySchema = z.object({
-  mode: z
-    .enum(['dry-run', 'apply'])
-    .default('dry-run')
-    .openapi({
-      description: '`dry-run` validates and diffs only; `apply` writes in one transaction.',
-    }),
+  mode: z.enum(['dry-run', 'apply']).default('dry-run').openapi({
+    description: '`dry-run` validates and diffs only; `apply` writes in one transaction.',
+  }),
 });
 
 export const ImportResultSchema = z

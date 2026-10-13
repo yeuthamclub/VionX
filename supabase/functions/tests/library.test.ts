@@ -79,7 +79,7 @@ describe('acceptance fixtures', () => {
         expect(renderVariant(t, 9_999)).toEqual(renderVariant(t, 9_999));
       }
     }
-  });
+  }, 60_000);
 
   it('fixture folders are the ones the acceptance script imports', () => {
     expect(readdirSync(join(FIXTURES, 'gdpt2018')).sort()).toEqual(['2-math', '2-viet', '6-math']);

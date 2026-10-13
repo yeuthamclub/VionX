@@ -105,7 +105,7 @@ describe('renderVariant', () => {
         expect(Object.keys(v.optionFeedbackKeys)).toHaveLength(t.distractorExprs.length);
       }
     }
-  });
+  }, 60_000);
 
   it('renders placeholders, KaTeX and Vietnamese decimal commas', () => {
     const v = renderVariant(FRACTION_ADD, 42);

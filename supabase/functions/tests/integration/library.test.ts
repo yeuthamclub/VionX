@@ -46,7 +46,11 @@ async function api(
   const res = await fetch(`${API}${path}`, {
     method,
     headers,
-    ...(zip ? { body: zip } : body === undefined ? {} : { body: JSON.stringify(body) }),
+    ...(zip
+      ? { body: zip as Uint8Array<ArrayBuffer> }
+      : body === undefined
+        ? {}
+        : { body: JSON.stringify(body) }),
   });
   const text = await res.text();
   return { status: res.status, body: text ? JSON.parse(text) : null };
@@ -126,10 +130,10 @@ describe('package import', () => {
     expect(d.diff.nodes.added).toContain('MATH.6.NUM.FRAC.ADD');
     expect(d.coverage.totalItems).toBe(10);
     // Nothing written by the dry-run.
-    const [{ n }] = await sql<
+    const [row] = await sql<
       { n: number }[]
     >`select count(*)::int as n from library.items where grade = 6 and subject = 'math'`;
-    expect(n).toBe(0);
+    expect(row!.n).toBe(0);
 
     const applied = ImportResultSchema.parse((await importZip(admin, math6(), 'apply')).body);
     expect(applied).toMatchObject({ mode: 'APPLY', applied: true, noop: false });

@@ -369,7 +369,7 @@ export async function parseLibraryPackage(rawFiles: PackageFiles): Promise<Parse
     const bytes = files[name];
     if (bytes === undefined) return undefined;
     try {
-      return decoder.decode(bytes).replace(/^﻿/, '');
+      return decoder.decode(bytes).replace(/^\uFEFF/, '');
     } catch {
       errors.push({ code: 'ENCODING', message: `${name} is not valid UTF-8`, ref: name });
       return undefined;
