@@ -7,6 +7,7 @@ import { requestId } from 'hono/request-id';
 import type { Actor } from '../_shared/actor.ts';
 import { ApiError, errorBody } from '../_shared/errors.ts';
 import type { ApiDeps } from './deps.ts';
+import { registerCalendarRoutes } from './calendar/routes.ts';
 import { registerIdentityRoutes } from './identity/routes.ts';
 import { registerPrivacyRoutes } from './privacy/routes.ts';
 import { registerSystemRoutes } from './system/routes.ts';
@@ -112,6 +113,7 @@ export function createApp(deps: ApiDeps) {
   registerSystemRoutes(app, deps);
   registerIdentityRoutes(app, deps);
   registerPrivacyRoutes(app, deps);
+  registerCalendarRoutes(app, deps);
 
   app.doc31('/v1/openapi.json', OPENAPI_INFO);
 

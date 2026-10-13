@@ -58,6 +58,50 @@ export const EXPORT_SECTIONS: ExportSection[] = [
       from app.consent_records where household_id = ${h} order by granted_at`,
   },
   {
+    file: 'timetable.json',
+    query: (db, h) => db`
+      select id, student_id, weekday, start_time, end_time, subject_code, room, note, valid_from,
+             valid_to, created_at, updated_at
+      from app.school_timetable_entries where household_id = ${h} order by student_id, weekday, start_time`,
+  },
+  {
+    file: 'calendar_events.json',
+    query: (db, h) => db`
+      select id, student_id, type, title, note, location, subject_code, starts_at, ends_at, all_day,
+             created_at, updated_at
+      from app.calendar_events where household_id = ${h} order by starts_at`,
+  },
+  {
+    file: 'task_templates.json',
+    query: (db, h) => db`
+      select id, type, title, description, duration_minutes, priority, verification_mode, reward_xp,
+             created_at
+      from app.task_templates where household_id = ${h} order by created_at`,
+  },
+  {
+    file: 'tasks.json',
+    query: (db, h) => db`
+      select id, assigned_student_id, created_by, type, title, description, subject_code, starts_on,
+             window_start, window_end, duration_minutes, rrule, priority, required, reward_xp,
+             verification_mode, status, archived_at, created_at, updated_at
+      from app.task_assignments where household_id = ${h} order by created_at`,
+  },
+  {
+    file: 'task_days.json',
+    query: (db, h) => db`
+      select id, assignment_id, student_id, occurs_on, status, created_at, updated_at
+      from app.task_occurrences where household_id = ${h} order by occurs_on, assignment_id`,
+  },
+  {
+    file: 'task_completions.json',
+    query: (db, h) => db`
+      select c.id, c.assignment_id, c.occurrence_id, c.student_id, c.status, c.completed_at,
+             c.decided_at, c.decided_by_type, c.decided_by, c.decision_note,
+             (select json_agg(json_build_object('contentType', p.content_type, 'uploadedAt', p.created_at))
+                from app.task_proofs p where p.completion_id = c.id) as proof_photos
+      from app.task_completions c where c.household_id = ${h} order by c.completed_at`,
+  },
+  {
     file: 'policy_acceptances.json',
     query: (db, h) => db`
       select a.user_id, a.policy_type, a.policy_version, a.locale, a.accepted_at
