@@ -87,4 +87,4 @@ Migration number: **0009** (0008 is reserved for M05, built in parallel).
    REPORT, ROADMAP, push.
 
 ## Remaining steps
-(Filled in only if the module does not fit in one session.)
+None. All steps are done (see M04_REPORT).
