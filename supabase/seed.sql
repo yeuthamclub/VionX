@@ -95,3 +95,47 @@ where s.household_id = '00000000-0000-4000-b000-00000000de01'
     select 1 from app.consent_records c
     where c.student_id = s.id and c.consent_type = t.consent_type and c.status = 'GRANTED'
   );
+
+-- ---------------------------------------------------------------------------
+-- M03 calendar & task seed (LOCAL ONLY): Minh (grade 6) has a Mon-Fri timetable, a weekday
+-- homework task that needs the parent's approval and a one-off photo task today; Bé An (grade 2)
+-- reads every day (self-check). Days are materialised for the next 14 days here; afterwards the
+-- daily job (vionx-task-materialise) keeps them filled.
+-- ---------------------------------------------------------------------------
+insert into app.school_timetable_entries (id, household_id, student_id, weekday, start_time, end_time, subject_code, room)
+select ('00000000-0000-4000-d000-0000000006' || lpad((w * 10 + p)::text, 2, '0'))::uuid,
+       '00000000-0000-4000-b000-00000000de01', '00000000-0000-4000-c000-000000000006', w,
+       (time '07:00' + (p - 1) * interval '50 minutes'),
+       (time '07:45' + (p - 1) * interval '50 minutes'),
+       (array['TOAN', 'NGU_VAN', 'TIENG_ANH', 'KHTN'])[1 + (w + p) % 4], '6A1'
+from generate_series(1, 5) as w, generate_series(1, 4) as p
+on conflict do nothing;
+
+insert into app.task_assignments (id, household_id, assigned_student_id, created_by, type, title, description,
+                                  subject_code, starts_on, window_start, window_end, duration_minutes, rrule,
+                                  priority, required, reward_xp, verification_mode) values
+  ('00000000-0000-4000-e000-000000000601', '00000000-0000-4000-b000-00000000de01',
+   '00000000-0000-4000-c000-000000000006', '00000000-0000-4000-a000-00000000de01', 'HOMEWORK',
+   'Làm bài tập về nhà', 'Hoàn thành bài tập cô giao hôm nay.', 'TOAN', current_date, '19:30', '20:30', 45,
+   'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR', 'HIGH', true, 20, 'PARENT_APPROVAL'),
+  ('00000000-0000-4000-e000-000000000602', '00000000-0000-4000-b000-00000000de01',
+   '00000000-0000-4000-c000-000000000006', '00000000-0000-4000-a000-00000000de01', 'HOUSEHOLD',
+   'Dọn góc học tập', 'Chụp ảnh góc học tập sau khi dọn.', null, current_date, null, null, 15,
+   null, 'NORMAL', false, 10, 'PHOTO_PROOF'),
+  ('00000000-0000-4000-e000-000000000201', '00000000-0000-4000-b000-00000000de01',
+   '00000000-0000-4000-c000-000000000002', '00000000-0000-4000-a000-00000000de01', 'READING',
+   'Đọc sách 20 phút', null, 'TIENG_VIET', current_date, '20:00', '20:20', 20,
+   'FREQ=DAILY', 'NORMAL', true, 10, 'SELF_CHECK')
+on conflict do nothing;
+
+insert into app.task_occurrences (household_id, student_id, assignment_id, occurs_on)
+select a.household_id, a.assigned_student_id, a.id, d::date
+from app.task_assignments a
+cross join generate_series(current_date, current_date + 13, interval '1 day') as d
+where a.id in ('00000000-0000-4000-e000-000000000601', '00000000-0000-4000-e000-000000000602',
+               '00000000-0000-4000-e000-000000000201')
+  and d::date >= a.starts_on
+  and (a.rrule = 'FREQ=DAILY'
+       or (a.rrule like 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR' and extract(isodow from d) between 1 and 5)
+       or (a.rrule is null and d::date = a.starts_on))
+on conflict do nothing;
