@@ -33,17 +33,35 @@ const today = () => householdToday(new Date(), TZ);
 
 type Auth = { parent?: AuthSession; child?: string };
 
+// The local Edge Runtime retires an isolate once it has used ~1 s of CPU in total (PIN hashing
+// makes that frequent). A request dispatched to an isolate that is retiring is answered by the
+// runtime itself with a 500 that never reached the api (no `requestId`). The CLI retries that only
+// for requests without a body, so we retry it once here. Every 500 from the api keeps failing.
+function isRuntimeRetirement(status: number, body: unknown): boolean {
+  return (
+    status === 500 &&
+    typeof body === 'object' &&
+    body !== null &&
+    !('requestId' in body) &&
+    (body as { message?: unknown }).message === 'Request failed due to an internal server error'
+  );
+}
+
 async function api(method: string, path: string, auth: Auth = {}, body?: unknown) {
   const headers: Record<string, string> = { 'content-type': 'application/json' };
   if (auth.parent) headers.authorization = `Bearer ${auth.parent.accessToken}`;
   if (auth.child) headers['x-vionx-child-session'] = auth.child;
-  const res = await fetch(`${API}${path}`, {
-    method,
-    headers,
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
-  const text = await res.text();
-  return { status: res.status, body: text ? JSON.parse(text) : null };
+  for (let attempt = 1; ; attempt++) {
+    const res = await fetch(`${API}${path}`, {
+      method,
+      headers,
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+    const text = await res.text();
+    const parsed = text ? JSON.parse(text) : null;
+    if (attempt === 1 && isRuntimeRetirement(res.status, parsed)) continue;
+    return { status: res.status, body: parsed };
+  }
 }
 
 async function tickWorker() {
@@ -147,7 +165,10 @@ beforeAll(async () => {
   policyVersion = PoliciesResponseSchema.parse(res.body).policies.find(
     (p) => p.type === 'PRIVACY_POLICY',
   )!.version;
-  [a, b] = await Promise.all([newFamily('Lịch A'), newFamily('Lịch B')]);
+  // One family after the other: if one setup fails, the cleanup in afterAll must not race the
+  // other family's requests still in flight.
+  a = await newFamily('Lịch A');
+  b = await newFamily('Lịch B');
 });
 
 afterAll(async () => {
