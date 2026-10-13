@@ -1,11 +1,12 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
 import type { HouseholdResponse, Student } from '@vionx/contracts/client';
 import { parentApi } from '../../src/api.ts';
 import { t, type MessageKey } from '../../src/i18n/index.ts';
 import { AppError, isAccountDeletionPending, unwrap } from '../../src/lib/api-error.ts';
 import { canChildSignIn } from '../../src/lib/consent.ts';
+import { badgeText } from '../../src/lib/tasks.ts';
 import { childToken, deviceMode } from '../../src/state/device.ts';
 import { signOutGoogle } from '../../src/state/google.ts';
 import { signOutParent } from '../../src/state/supabase.ts';
@@ -20,9 +21,16 @@ import { useLoad } from '../../src/ui/useLoad.ts';
 export default function ParentHome() {
   const theme = useTheme();
   const c = theme.colors;
+  const [pending, setPending] = useState(0);
   const { state, reload } = useLoad(async (): Promise<HouseholdResponse | null> => {
     try {
-      return await unwrap(parentApi.GET('/api/v1/household'));
+      const household = await unwrap(parentApi.GET('/api/v1/household'));
+      // Approvals badge; never blocks the home screen.
+      void unwrap(parentApi.GET('/api/v1/approvals')).then(
+        (a) => setPending(a.count),
+        () => setPending(0),
+      );
+      return household;
     } catch (e) {
       if (e instanceof AppError && e.status === 404) return null;
       if (isAccountDeletionPending(e)) router.replace('/privacy');
@@ -130,6 +138,16 @@ export default function ParentHome() {
           </View>
         )}
       </StateView>
+      <Button
+        testID="open-approvals"
+        label={
+          badgeText(pending)
+            ? `${t('approvals.open')} (${badgeText(pending)})`
+            : t('approvals.open')
+        }
+        color={pending > 0 ? c.warning : c.parent}
+        onPress={() => router.push('/approvals')}
+      />
       <Button
         testID="add-child"
         label={t('children.add')}

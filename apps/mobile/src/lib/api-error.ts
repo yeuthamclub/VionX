@@ -39,6 +39,18 @@ export async function unwrap<T>(
   throw new AppError('api', result.response.status, body && 'code' in body ? body : undefined);
 }
 
+const TASK_REASONS = new Set([
+  'ALREADY_COMPLETED',
+  'PENDING_APPROVAL',
+  'FUTURE_OCCURRENCE',
+  'TASK_ARCHIVED',
+  'SYSTEM_VERIFIED_ONLY',
+  'PROOF_REQUIRED',
+  'PROOF_NOT_UPLOADED',
+  'NOT_PENDING',
+  'NOT_SCHEDULED',
+]);
+
 const CODE_MESSAGES: Partial<Record<string, MessageKey>> = {
   UNAUTHENTICATED: 'error.unauthenticated',
   NOT_FOUND: 'error.notFound',
@@ -53,6 +65,10 @@ export function describeError(error: unknown, now: Date = new Date()): string {
   if (!(error instanceof AppError)) return t('error.generic');
   if (error.kind === 'offline') return t('error.offline');
   const details = (error.body?.details ?? {}) as Record<string, unknown>;
+  // M03 task rules answer with details.reason (ALREADY_COMPLETED, FUTURE_OCCURRENCE, …).
+  if (typeof details.reason === 'string' && TASK_REASONS.has(details.reason)) {
+    return t(`error.task.${details.reason}` as MessageKey);
+  }
   switch (error.code) {
     case 'INVALID_CREDENTIALS': {
       const left = details.attemptsRemaining;
