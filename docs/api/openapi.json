@@ -2166,15 +2166,12 @@
         "type": "object",
         "properties": {
           "profile": {
-            "allOf": [
+            "anyOf": [
               {
                 "$ref": "#/components/schemas/SubjectProfile"
               },
               {
-                "type": [
-                  "object",
-                  "null"
-                ]
+                "type": "null"
               }
             ]
           },
@@ -2661,39 +2658,24 @@
               "sourceRefs": {},
               "provenance": {},
               "template": {
-                "allOf": [
+                "anyOf": [
                   {
-                    "$ref": "#/components/schemas/ItemTemplate"
+                    "$ref": "#/components/schemas/ItemTemplateDetail"
                   },
                   {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
-                    "properties": {
-                      "flaggedAt": {
-                        "type": [
-                          "string",
-                          "null"
-                        ],
-                        "format": "date-time"
-                      },
-                      "flagReason": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "flaggedAt",
-                      "flagReason"
-                    ]
+                    "type": "null"
                   }
                 ]
               },
               "group": {
-                "$ref": "#/components/schemas/ItemGroup"
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ItemGroup"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "media": {
                 "type": "array",
@@ -2718,6 +2700,35 @@
               "template",
               "group",
               "media"
+            ]
+          }
+        ]
+      },
+      "ItemTemplateDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ItemTemplate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "flaggedAt": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "flagReason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "flaggedAt",
+              "flagReason"
             ]
           }
         ]
@@ -2912,10 +2923,7 @@
         ]
       },
       "ItemGroup": {
-        "type": [
-          "object",
-          "null"
-        ],
+        "type": "object",
         "properties": {
           "id": {
             "type": "string",

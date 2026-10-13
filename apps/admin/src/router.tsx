@@ -2,10 +2,25 @@ import { createRootRoute, createRoute, createRouter, Link, Outlet } from '@tanst
 import { isGroup, NAV, navLeaves } from './nav.ts';
 import { supabase } from './auth.ts';
 import { DeleteAccountPage } from './DeleteAccountPage.tsx';
+import { CurriculumPage } from './library/CurriculumPage.tsx';
+import { parseItemFilters } from './library/edit.ts';
+import { GroupEditorPage, GroupsPage } from './library/GroupsPage.tsx';
+import { ImportPage } from './library/ImportPage.tsx';
+import { ItemEditorPage } from './library/ItemEditorPage.tsx';
+import { ItemsPage } from './library/ItemsPage.tsx';
+import { AccessContext } from './library/ui.tsx';
 import { AdminGate, DashboardPage, LoginPage, NotFoundPage, StubPage } from './pages.tsx';
 
 function Shell() {
-  return <AdminGate>{(access) => <ShellLayout userLabel={access.userLabel} />}</AdminGate>;
+  return (
+    <AdminGate>
+      {(access) => (
+        <AccessContext.Provider value={access}>
+          <ShellLayout userLabel={access.userLabel} />
+        </AccessContext.Provider>
+      )}
+    </AdminGate>
+  );
 }
 
 function ShellLayout({ userLabel }: { userLabel: string }) {
@@ -72,18 +87,85 @@ const deleteAccountRoute = createRoute({
 
 const shellRoute = createRoute({ getParentRoute: () => rootRoute, id: 'shell', component: Shell });
 
-const pageRoutes = navLeaves().map((leaf) =>
-  createRoute({
-    getParentRoute: () => shellRoute,
-    path: leaf.path,
-    component: leaf.path === '/' ? DashboardPage : () => <StubPage leaf={leaf} />,
-  }),
-);
+// M05 library screens; every other leaf is a stub until its module lands.
+const packagesRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/library/packages',
+  component: ImportPage,
+});
+
+const curriculumRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/curriculum',
+  component: CurriculumPage,
+});
+
+const questionsRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/content/questions',
+  validateSearch: parseItemFilters,
+  component: function QuestionsRoute() {
+    const navigate = questionsRoute.useNavigate();
+    const filters = questionsRoute.useSearch();
+    // Remount on filter change so the free-text inputs follow the URL (back/forward too).
+    return (
+      <ItemsPage
+        key={JSON.stringify(filters)}
+        filters={filters}
+        onFiltersChange={(filters) => void navigate({ search: filters })}
+      />
+    );
+  },
+});
+
+const questionRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/content/questions/$id',
+  component: function QuestionRoute() {
+    const { id } = questionRoute.useParams();
+    return <ItemEditorPage key={id} id={id} />;
+  },
+});
+
+const groupsRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/content/groups',
+  component: GroupsPage,
+});
+
+const groupRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/content/groups/$id',
+  component: function GroupRoute() {
+    const { id } = groupRoute.useParams();
+    return <GroupEditorPage key={id} id={id} />;
+  },
+});
+
+const libraryRoutes = [
+  packagesRoute,
+  curriculumRoute,
+  questionsRoute,
+  questionRoute,
+  groupsRoute,
+  groupRoute,
+];
+
+// M05 leaves are served by the library routes above.
+const pageRoutes = navLeaves()
+  .filter((leaf) => leaf.module !== 'M05')
+  .map((leaf) =>
+    createRoute({
+      getParentRoute: () => shellRoute,
+      path: leaf.path,
+      component: leaf.path === '/' ? DashboardPage : () => <StubPage leaf={leaf} />,
+    }),
+  );
 
 const routeTree = rootRoute.addChildren([
   loginRoute,
   deleteAccountRoute,
-  shellRoute.addChildren(pageRoutes),
+  shellRoute.addChildren([...pageRoutes, ...libraryRoutes]),
 ]);
 
 export const router = createRouter({ routeTree });

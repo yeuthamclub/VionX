@@ -22,6 +22,18 @@ describe('admin navigation (Master Spec §33.1)', () => {
     const paths = navLeaves().map((l) => l.path);
     expect(new Set(paths).size).toBe(paths.length);
     expect(paths.every((p) => p.startsWith('/'))).toBe(true);
-    expect(paths).toHaveLength(25);
+    expect(paths).toHaveLength(22);
+  });
+
+  it('lists the M05 library screens', () => {
+    const m05 = navLeaves()
+      .filter((l) => l.module === 'M05')
+      .map((l) => l.path);
+    expect(m05).toEqual([
+      '/library/packages',
+      '/curriculum',
+      '/content/questions',
+      '/content/groups',
+    ]);
   });
 });

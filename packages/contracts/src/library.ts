@@ -240,7 +240,7 @@ export const CurriculumResponseSchema = z
   .openapi('CurriculumResponse');
 
 export const CoverageResponseSchema = z
-  .object({ profile: SubjectProfileSchema.nullable(), coverage: CoverageReportSchema })
+  .object({ profile: z.union([SubjectProfileSchema, z.null()]), coverage: CoverageReportSchema })
   .openapi('CoverageResponse');
 
 // --- Media, groups, items -------------------------------------------------------------------------
@@ -347,11 +347,15 @@ export const ItemDetailSchema = ItemSummarySchema.extend({
   groupOrder: z.int().nullable(),
   sourceRefs: z.unknown(),
   provenance: z.unknown(),
-  template: ItemTemplateSchemaApi.extend({
-    flaggedAt: DateTime.nullable(),
-    flagReason: z.string().nullable(),
-  }).nullable(),
-  group: ItemGroupSchema.nullable(),
+  // z.union, not .nullable(): .nullable() on a named schema makes the shared component nullable.
+  template: z.union([
+    ItemTemplateSchemaApi.extend({
+      flaggedAt: DateTime.nullable(),
+      flagReason: z.string().nullable(),
+    }).openapi('ItemTemplateDetail'),
+    z.null(),
+  ]),
+  group: z.union([ItemGroupSchema, z.null()]),
   /** Every media asset the stem, options and group use, keyed by id and code. */
   media: z.array(MediaAssetSchema),
 }).openapi('ItemDetail');

@@ -21,20 +21,14 @@ export const NAV: NavEntry[] = [
     children: [
       { label: 'Books', path: '/library/books', module: 'M10' },
       { label: 'Import', path: '/library/import', module: 'M10' },
+      { label: 'Library Packages', path: '/library/packages', module: 'M05' },
       { label: 'Processing Queue', path: '/library/processing-queue', module: 'M11' },
       { label: 'Sources', path: '/library/sources', module: 'M13' },
     ],
   },
   {
     label: 'Curriculum',
-    children: [
-      { label: 'Grades', path: '/curriculum/grades', module: 'M05' },
-      { label: 'Subjects', path: '/curriculum/subjects', module: 'M05' },
-      { label: 'Chapters', path: '/curriculum/chapters', module: 'M05' },
-      { label: 'Lessons', path: '/curriculum/lessons', module: 'M05' },
-      { label: 'Concepts', path: '/curriculum/concepts', module: 'M05' },
-      { label: 'Skills', path: '/curriculum/skills', module: 'M05' },
-    ],
+    children: [{ label: 'Curriculum Tree', path: '/curriculum', module: 'M05' }],
   },
   { label: 'Knowledge Graph', path: '/knowledge-graph', module: 'M12' },
   {
@@ -42,6 +36,7 @@ export const NAV: NavEntry[] = [
     children: [
       { label: 'Learning Packs', path: '/content/learning-packs', module: 'M14' },
       { label: 'Questions', path: '/content/questions', module: 'M05' },
+      { label: 'Groups', path: '/content/groups', module: 'M05' },
       { label: 'Flashcards', path: '/content/flashcards', module: 'M14' },
       { label: 'Reviews', path: '/content/reviews', module: 'M14' },
     ],

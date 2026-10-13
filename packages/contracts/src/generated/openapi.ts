@@ -3387,7 +3387,7 @@ export interface components {
       reason: string | null;
     };
     CoverageResponse: {
-      profile: components['schemas']['SubjectProfile'] & (Record<string, never> | null);
+      profile: components['schemas']['SubjectProfile'] | null;
       coverage: components['schemas']['CoverageReport'];
     };
     ItemListResponse: {
@@ -3521,14 +3521,14 @@ export interface components {
       groupOrder: number | null;
       sourceRefs?: unknown;
       provenance?: unknown;
-      template: components['schemas']['ItemTemplate'] &
-        ({
-          /** Format: date-time */
-          flaggedAt: string | null;
-          flagReason: string | null;
-        } | null);
-      group: components['schemas']['ItemGroup'];
+      template: components['schemas']['ItemTemplateDetail'] | null;
+      group: components['schemas']['ItemGroup'] | null;
       media: components['schemas']['MediaAsset'][];
+    };
+    ItemTemplateDetail: components['schemas']['ItemTemplate'] & {
+      /** Format: date-time */
+      flaggedAt: string | null;
+      flagReason: string | null;
     };
     ItemTemplate: {
       params: (
@@ -3601,7 +3601,7 @@ export interface components {
       itemCount: number;
       /** Format: date-time */
       updatedAt: string;
-    } | null;
+    };
     MediaAsset: {
       /**
        * Format: uuid
