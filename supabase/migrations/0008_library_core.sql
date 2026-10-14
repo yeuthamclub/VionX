@@ -68,6 +68,7 @@ create index knowledge_edges_to_idx on library.knowledge_edges (to_node_id);
 create table library.book_series (
   id uuid primary key default gen_random_uuid(),
   code text not null unique,
+  version_id uuid not null references library.curriculum_versions (id),
   title text not null,
   publisher text,
   grade smallint not null check (grade between 1 and 12),
@@ -143,7 +144,8 @@ values
 create table library.media_assets (
   id uuid primary key default gen_random_uuid(),
   code text not null unique,
-  -- Package (grade-subject) that owns the code; archived when that package no longer lists it.
+  version_id uuid not null references library.curriculum_versions (id),
+  -- Package (curriculum version, grade-subject) that owns the code; archived when that package no longer lists it.
   grade smallint not null check (grade between 1 and 12),
   subject text not null check (subject ~ '^[a-z]+$'),
   kind text not null check (kind in ('ICON', 'SVG', 'IMAGE')),
@@ -164,6 +166,7 @@ comment on column library.media_assets.inline_svg is 'Sanitised on import: no sc
 create table library.item_groups (
   id uuid primary key default gen_random_uuid(),
   code text not null unique,
+  version_id uuid not null references library.curriculum_versions (id),
   grade smallint not null check (grade between 1 and 12),
   subject text not null check (subject ~ '^[a-z]+$'),
   stimulus_kind text not null check (stimulus_kind in ('PASSAGE', 'POEM', 'DIALOGUE', 'PICTURE_SCENE', 'EXPERIMENT')),
@@ -190,6 +193,7 @@ create index item_groups_scope_idx on library.item_groups (grade, subject, statu
 create table library.items (
   id uuid primary key default gen_random_uuid(),
   code text not null unique,
+  version_id uuid not null references library.curriculum_versions (id),
   grade smallint not null check (grade between 1 and 12),
   subject text not null check (subject ~ '^[a-z]+$'),
   kind text not null check (kind in ('STATIC', 'TEMPLATE')),

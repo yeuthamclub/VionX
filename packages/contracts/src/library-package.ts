@@ -27,6 +27,22 @@ const Code = z
 const Text = z.string().min(1);
 const OptionalText = z.string().optional();
 const Sha256 = z.string().regex(/^[0-9a-f]{64}$/);
+// Archiving happens by leaving a row out of the package (or in the admin), never by import.
+const notArchived = {
+  error: (issue: { input?: unknown }) =>
+    issue.input === 'ARCHIVED'
+      ? 'ARCHIVED cannot be imported: leave the row out of the package to archive it'
+      : undefined,
+};
+const PackageStatus = z.enum(CONTENT_STATUSES).exclude(['ARCHIVED'], notArchived);
+const minNotAboveMax = (p: { min: number; max: number }, ctx: z.RefinementCtx) => {
+  if (p.min > p.max) {
+    ctx.addIssue({
+      code: 'custom',
+      message: `min (${p.min}) must not be greater than max (${p.max})`,
+    });
+  }
+};
 
 export const PackageManifestSchema = z
   .object({
@@ -110,7 +126,7 @@ export const PackageMediaSchema = z
     alt: Text,
     license: Text,
     attribution: OptionalText,
-    reviewStatus: z.enum(MEDIA_REVIEW_STATUSES),
+    reviewStatus: z.enum(MEDIA_REVIEW_STATUSES).exclude(['ARCHIVED'], notArchived),
   })
   .strict();
 
@@ -127,7 +143,7 @@ export const PackageGroupSchema = z
     genre: OptionalText,
     sourceKind: z.enum(SOURCE_KINDS),
     sourceNote: OptionalText,
-    status: z.enum(CONTENT_STATUSES),
+    status: PackageStatus,
   })
   .strict();
 
@@ -191,7 +207,7 @@ export const PackageItemSchema = z
       .array(z.object({ kind: Text, ref: Text, page: z.int().positive().optional() }).strict())
       .default([]),
     provenance: z.record(z.string(), z.unknown()).default({}),
-    status: z.enum(CONTENT_STATUSES),
+    status: PackageStatus,
   })
   .strict();
 
@@ -206,7 +222,8 @@ export const TemplateParamSchema = z.discriminatedUnion('type', [
       max: z.int(),
       step: z.int().positive().optional(),
     })
-    .strict(),
+    .strict()
+    .superRefine(minNotAboveMax),
   z
     .object({
       name: ParamName,
@@ -215,7 +232,8 @@ export const TemplateParamSchema = z.discriminatedUnion('type', [
       max: z.number(),
       step: z.number().positive(),
     })
-    .strict(),
+    .strict()
+    .superRefine(minNotAboveMax),
   z
     .object({
       name: ParamName,

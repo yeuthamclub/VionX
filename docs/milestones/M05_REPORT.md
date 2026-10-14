@@ -50,8 +50,8 @@ comes in M06.
   - root dev dependency `fflate@0.8.2`.
 
 ## Evidence
-- `pnpm check`: green after merging main (M03). Lint, typecheck (including deno), unit tests,
-  106/106 API integration tests and the openapi diff all pass.
+- `pnpm check`: green after merging main (M04) and the review fixes. Lint, typecheck (including
+  deno), unit tests, 126/126 API integration tests and the openapi diff all pass.
 - Acceptance (`pnpm acceptance m05`): 8 passed, 0 failed.
   ```
   Toán 6        nodes +13, edges +3, series +1, mappings +3, media +1, items +10, templates +3; re-import no-op
@@ -89,6 +89,23 @@ comes in M06.
   event: `library.imported`.
 - No consent is needed: nothing here is child-facing or personalised.
 
+## Review fixes
+Each fix has a test that failed before it.
+- Packages cannot set `status: "ARCHIVED"` on items or groups, or `reviewStatus: "ARCHIVED"` on
+  media. The schema refuses it with a readable error. Archiving happens only by leaving a row out
+  of a package, or in the admin.
+- A package with APPROVED or PUBLISHED items or groups needs a non-empty `manifest.reviewer`
+  (`REVIEWER_REQUIRED`, CONTRACT §6). The fixtures already name one.
+- A numeric template param (`int` or `decimal`) with `min > max` is refused with a readable error.
+- Archive-by-omission is scoped to the package's curriculum version. `book_series`,
+  `media_assets`, `item_groups` and `items` carry a `version_id` (migration 0008). A code that
+  belongs to another curriculum version is refused (`CODE_TAKEN`).
+- When an item turns from TEMPLATE to STATIC, its `item_templates` row is deleted in the import
+  transaction. Archived items keep their template.
+- The zip is checked on its declared sizes before inflating: at most 100 MB unzipped and 2000
+  entries, otherwise 422 `PACKAGE_INVALID` with a readable message.
+- CI runs `pnpm acceptance m05` after m04.
+
 ## Known issues / follow-ups
 - The variant endpoint renders the saved template, so a template edit must be saved before it can
   be re-rolled. The editor says so.
@@ -98,6 +115,8 @@ comes in M06.
   already there before this module; code splitting could come later.
 - The 409 stale-version path is covered by the API integration tests and admin unit tests, but was
   not exercised live in the browser.
+- The variant GET writes `flagged_at` on a template without an audit entry.
+- A package that fails before its manifest parses leaves no `import_runs` row.
 
 ## What the next module can rely on
 - Tables:

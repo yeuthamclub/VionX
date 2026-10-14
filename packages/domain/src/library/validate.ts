@@ -189,6 +189,17 @@ export function validateLibraryPackage(
     );
   }
 
+  // A model never approves its own output (CONTRACT §6): approved content names its reviewer.
+  const approved = [...pkg.items, ...pkg.groups]
+    .filter((x) => x.status === 'APPROVED' || x.status === 'PUBLISHED')
+    .map((x) => x.code);
+  if (approved.length > 0 && !manifest.reviewer?.trim()) {
+    error(
+      'REVIEWER_REQUIRED',
+      `manifest reviewer is required when the package has APPROVED or PUBLISHED items or groups (${approved.slice(0, 5).join(', ')})`,
+    );
+  }
+
   // --- Curriculum tree ---
   const nodes = new Map(pkg.curriculum.nodes.map((n) => [n.code, n]));
   const subjects = pkg.curriculum.nodes.filter((n) => n.level === 'SUBJECT');

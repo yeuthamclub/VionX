@@ -71,6 +71,9 @@ export const LIBRARY_IMPORT: readonly AdminPermission[] = ['CONTENT_ADMIN'];
 
 /** Upload limit for a package zip (500 items with SVGs is well under 5 MB). */
 export const MAX_PACKAGE_BYTES = 20 * 1024 * 1024;
+/** Limits on what a package zip may unzip to (checked on the declared sizes, before inflating). */
+export const MAX_UNZIPPED_BYTES = 100 * 1024 * 1024;
+export const MAX_PACKAGE_ENTRIES = 2000;
 
 const TAGS = ['library'];
 const READ_ERRORS = errorResponses('VALIDATION_FAILED', 'UNAUTHENTICATED', 'FORBIDDEN');
@@ -391,9 +394,30 @@ export function registerLibraryRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps): 
       throw new ApiError('VALIDATION_FAILED', 'Upload the package as a zip body (at most 20 MB)');
     }
     let files: Record<string, Uint8Array>;
+    let tooLarge: string | undefined;
     try {
-      files = unzipSync(buffer);
+      let entries = 0;
+      let bytes = 0;
+      // fflate inflates each entry into a buffer of its declared size, so this bounds memory.
+      files = unzipSync(buffer, {
+        filter: (file) => {
+          bytes += file.originalSize;
+          if (++entries > MAX_PACKAGE_ENTRIES) {
+            tooLarge = `it holds more than ${MAX_PACKAGE_ENTRIES} files`;
+          } else if (bytes > MAX_UNZIPPED_BYTES) {
+            tooLarge = `it unzips to more than ${MAX_UNZIPPED_BYTES / 1024 / 1024} MB`;
+          }
+          if (tooLarge) throw new Error(tooLarge);
+          return true;
+        },
+      });
     } catch {
+      if (tooLarge) {
+        throw new ApiError('PACKAGE_INVALID', `Package is invalid: ${tooLarge}`, {
+          errors: [{ code: 'PACKAGE_TOO_LARGE', message: `Package ${tooLarge}` }],
+          warnings: [],
+        });
+      }
       throw new ApiError('VALIDATION_FAILED', 'Body is not a zip file');
     }
     const requestId = c.get('requestId');

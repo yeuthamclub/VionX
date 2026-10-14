@@ -271,7 +271,7 @@ function pkg(over: Partial<LibraryPackage> = {}): LibraryPackage {
       counts: {},
       checksums: {},
       models: [],
-      reviewer: null,
+      reviewer: 'Cô Lan',
       createdAt: '2026-10-13T00:00:00Z',
     },
     curriculum: {
@@ -361,6 +361,32 @@ describe('validateLibraryPackage', () => {
     expect(codes(pkg({ groups: [{ ...group, sourceKind: 'ORIGINAL_AI' }] }))).not.toContain(
       'SOURCE_NOTE_REQUIRED',
     );
+  });
+
+  it('refuses APPROVED or PUBLISHED content without a named reviewer (CONTRACT §6)', () => {
+    const base = pkg();
+    const unreviewed = (reviewer: string | null, over: Partial<LibraryPackage> = {}) =>
+      pkg({ manifest: { ...base.manifest, reviewer }, ...over });
+    const errors = validateLibraryPackage(unreviewed(null)).errors;
+    expect(errors.map((e) => e.code)).toEqual(['REVIEWER_REQUIRED']);
+    expect(errors[0]!.message).toBe(
+      'manifest reviewer is required when the package has APPROVED or PUBLISHED items or groups (I1, I2)',
+    );
+    expect(codes(unreviewed('  '))).toEqual(['REVIEWER_REQUIRED']);
+    const drafts = base.items.map((i) => ({ ...i, status: 'NEEDS_REVIEW' as const }));
+    expect(codes(unreviewed(null, { items: drafts }))).toEqual([]);
+    const group = {
+      code: 'G1',
+      stimulusKind: 'PASSAGE' as const,
+      title: 'Bài đọc',
+      bodyMd: 'Sáng nay trời đẹp.',
+      media: [],
+      sourceKind: 'ORIGINAL_AI' as const,
+      status: 'PUBLISHED' as const,
+    };
+    expect(codes(unreviewed(null, { items: drafts, groups: [group] }))).toEqual([
+      'REVIEWER_REQUIRED',
+    ]);
   });
 
   it('checks hint ladders, rubrics and template pairing', () => {

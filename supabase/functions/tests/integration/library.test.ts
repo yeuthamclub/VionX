@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { zipSync } from 'fflate';
 import postgres from 'postgres';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -242,6 +243,107 @@ describe('package import', () => {
     const res = await importZip(admin, thief, 'dry-run');
     expect(res.status).toBe(422);
     expect(res.body.details.errors[0]).toMatchObject({ code: 'CODE_TAKEN', ref: 'T6-SIMP-0001' });
+  });
+
+  it('archives by omission only within the package curriculum version', async () => {
+    const rename = (d: string) => {
+      for (const f of [
+        'manifest.json',
+        'curriculum.json',
+        'mappings.json',
+        'items.jsonl',
+        'templates.jsonl',
+        'media/media.jsonl',
+      ]) {
+        const text = readFileSync(join(d, f), 'utf8')
+          .replaceAll('gdpt2018', 'gdpt2031')
+          .replaceAll('KNTT-TOAN6-2026', 'KNTT-TOAN6-2031')
+          .replaceAll('"T6-', '"V31-T6-')
+          .replaceAll('"M6-', '"V31-M6-');
+        writeFileSync(join(d, f), text);
+      }
+    };
+    const other = await editedCopy('gdpt2018/6-math', rename);
+    const res = await importZip(admin, other, 'dry-run');
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    const dry = ImportResultSchema.parse(res.body);
+    for (const [entity, d] of Object.entries(dry.diff)) expect(d.archived, entity).toEqual([]);
+    expect(dry.diff.items.added).toHaveLength(10);
+
+    // A code that lives in another curriculum version is not taken over.
+    const clash = await editedCopy('gdpt2018/6-math', (d) => {
+      rename(d);
+      const path = join(d, 'items.jsonl');
+      writeFileSync(
+        path,
+        readFileSync(path, 'utf8').replace('"V31-T6-SIMP-0002"', '"T6-SIMP-0002"'),
+      );
+    });
+    const taken = await importZip(admin, clash, 'dry-run');
+    expect(taken.status).toBe(422);
+    expect(taken.body.details.errors[0]).toMatchObject({ code: 'CODE_TAKEN', ref: 'T6-SIMP-0002' });
+  });
+
+  it('drops the template row when an item turns from TEMPLATE to STATIC', async () => {
+    const staticGcd = await editedCopy('gdpt2018/6-math', (d) => {
+      const items = join(d, 'items.jsonl');
+      writeFileSync(
+        items,
+        readFileSync(items, 'utf8')
+          .split('\n')
+          .map((l) =>
+            l.includes('"T6-GCD-0001"')
+              ? l
+                  .replace('"kind": "TEMPLATE"', '"kind": "STATIC"')
+                  .replace('"answer": null', '"answer": {"value": 6}')
+              : l,
+          )
+          .join('\n'),
+      );
+      const templates = join(d, 'templates.jsonl');
+      writeFileSync(
+        templates,
+        readFileSync(templates, 'utf8')
+          .split('\n')
+          .filter((l) => !l.includes('"T6-GCD-0001"'))
+          .join('\n'),
+      );
+    });
+    const res = await importZip(admin, staticGcd, 'apply');
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    expect(ImportResultSchema.parse(res.body).diff.templates.archived).toEqual(['T6-GCD-0001']);
+    const left = await sql`
+      select 1 from library.item_templates t join library.items i on i.id = t.item_id
+      where i.code = 'T6-GCD-0001'`;
+    expect(left).toHaveLength(0);
+    const [item] = await sql<
+      { kind: string }[]
+    >`select kind from library.items where code = 'T6-GCD-0001'`;
+    expect(item!.kind).toBe('STATIC');
+    // The original package turns it back into a template.
+    const back = ImportResultSchema.parse(
+      (await importZip(admin, zipPackageDir(join(FIXTURES, 'gdpt2018/6-math')), 'apply')).body,
+    );
+    expect(back.diff.templates.added).toEqual(['T6-GCD-0001']);
+  });
+
+  it('refuses zips that unzip too large or hold too many files, before inflating', async () => {
+    const bomb = zipSync({ 'manifest.json': new Uint8Array(101 * 1024 * 1024) }, { level: 9 });
+    expect(bomb.byteLength).toBeLessThan(1024 * 1024);
+    const big = await importZip(admin, bomb, 'dry-run');
+    expect(big.status).toBe(422);
+    expect(big.body).toMatchObject({
+      code: 'PACKAGE_INVALID',
+      message: 'Package is invalid: it unzips to more than 100 MB',
+    });
+    const many = zipSync(
+      Object.fromEntries(
+        Array.from({ length: 2001 }, (_, i) => [`media/f${i}.svg`, new Uint8Array(1)]),
+      ),
+    );
+    const crowded = await importZip(admin, many, 'dry-run');
+    expect(crowded.status).toBe(422);
+    expect(crowded.body.message).toBe('Package is invalid: it holds more than 2000 files');
   });
 });
 
@@ -520,8 +622,8 @@ describe('database guards', () => {
           values (${item!.id}, '[]', 'x', '{}', 'h')`,
     ).rejects.toThrow(/not a TEMPLATE item/);
     await expect(
-      sql`insert into library.item_groups (code, grade, subject, stimulus_kind, title, body_md, source_kind, content_hash)
-          values ('X', 2, 'viet', 'POEM', 't', 'b', 'PUBLIC_DOMAIN', 'h')`,
+      sql`insert into library.item_groups (code, version_id, grade, subject, stimulus_kind, title, body_md, source_kind, content_hash)
+          values ('X', (select id from library.curriculum_versions limit 1), 2, 'viet', 'POEM', 't', 'b', 'PUBLIC_DOMAIN', 'h')`,
     ).rejects.toThrow(/check constraint/);
   });
 });

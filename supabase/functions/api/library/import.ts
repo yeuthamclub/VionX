@@ -1,6 +1,6 @@
 // Library package import (TASK_PACKS/M05.md): parse → validate → diff against the database →
 // apply in one transaction. Idempotent by code + content hash; entities of the package's
-// grade-subject that the package no longer lists are archived, never deleted.
+// curriculum version and grade-subject that the package no longer lists are archived, never deleted.
 import {
   canonicalJson,
   diffEntities,
@@ -113,6 +113,8 @@ type ExistingRow = {
   archived: boolean;
   grade: number | null;
   subject: string | null;
+  /** Curriculum version code, for entities whose codes are global (series, media, groups, items). */
+  version?: string;
 };
 
 async function existingRows(
@@ -142,9 +144,10 @@ async function existingRows(
         where e.version_id = ${versionId} and f.grade = ${grade} and f.subject = ${subject}`;
     case 'series':
       return db<ExistingRow[]>`
-        select code as key, content_hash as hash, status = 'ARCHIVED' as archived, grade, subject
-        from library.book_series
-        where (grade = ${grade} and subject = ${subject}) or code = any(${codes})`;
+        select code as key, content_hash as hash, status = 'ARCHIVED' as archived, grade, subject,
+               (select code from library.curriculum_versions v where v.id = x.version_id) as version
+        from library.book_series x
+        where (grade = ${grade} and subject = ${subject} and version_id = ${versionId}) or code = any(${codes})`;
     case 'mappings':
       return db<ExistingRow[]>`
         select s.code || '|' || m.lesson_ref || '|' || n.code as key, m.content_hash as hash,
@@ -152,27 +155,30 @@ async function existingRows(
         from library.book_lesson_mappings m
         join library.book_series s on s.id = m.series_id
         join library.curriculum_nodes n on n.id = m.node_id
-        where s.grade = ${grade} and s.subject = ${subject}`;
+        where s.grade = ${grade} and s.subject = ${subject} and s.version_id = ${versionId}`;
     case 'media':
       return db<ExistingRow[]>`
-        select code as key, content_hash as hash, review_status = 'ARCHIVED' as archived, grade, subject
-        from library.media_assets
-        where (grade = ${grade} and subject = ${subject}) or code = any(${codes})`;
+        select code as key, content_hash as hash, review_status = 'ARCHIVED' as archived, grade, subject,
+               (select code from library.curriculum_versions v where v.id = x.version_id) as version
+        from library.media_assets x
+        where (grade = ${grade} and subject = ${subject} and version_id = ${versionId}) or code = any(${codes})`;
     case 'groups':
       return db<ExistingRow[]>`
-        select code as key, content_hash as hash, status = 'ARCHIVED' as archived, grade, subject
-        from library.item_groups
-        where (grade = ${grade} and subject = ${subject}) or code = any(${codes})`;
+        select code as key, content_hash as hash, status = 'ARCHIVED' as archived, grade, subject,
+               (select code from library.curriculum_versions v where v.id = x.version_id) as version
+        from library.item_groups x
+        where (grade = ${grade} and subject = ${subject} and version_id = ${versionId}) or code = any(${codes})`;
     case 'items':
       return db<ExistingRow[]>`
-        select code as key, content_hash as hash, status = 'ARCHIVED' as archived, grade, subject
-        from library.items
-        where (grade = ${grade} and subject = ${subject}) or code = any(${codes})`;
+        select code as key, content_hash as hash, status = 'ARCHIVED' as archived, grade, subject,
+               (select code from library.curriculum_versions v where v.id = x.version_id) as version
+        from library.items x
+        where (grade = ${grade} and subject = ${subject} and version_id = ${versionId}) or code = any(${codes})`;
     case 'templates':
       return db<ExistingRow[]>`
         select i.code as key, t.content_hash as hash, i.status = 'ARCHIVED' as archived, i.grade, i.subject
         from library.item_templates t join library.items i on i.id = t.item_id
-        where i.grade = ${grade} and i.subject = ${subject}`;
+        where i.grade = ${grade} and i.subject = ${subject} and i.version_id = ${versionId}`;
   }
 }
 
@@ -211,10 +217,11 @@ export async function planImport(
       const owned = shared
         ? row.grade === scope.grade
         : row.grade === scope.grade && row.subject === scope.subject;
-      if (!owned) {
+      const otherVersion = row.version !== undefined && row.version !== manifest.curriculumVersion;
+      if (!owned || otherVersion) {
         errors.push({
           code: 'CODE_TAKEN',
-          message: `${entity} code ${row.key} already belongs to ${row.grade}-${row.subject ?? '(grade)'}`,
+          message: `${entity} code ${row.key} already belongs to ${row.grade}-${row.subject ?? '(grade)'}${otherVersion ? ` (${row.version})` : ''}`,
           ref: row.key,
         });
         continue;
@@ -314,8 +321,8 @@ export async function applyImport(
   for (const s of pkg.mappings.series) {
     if (!changedSeries.has(s.code)) continue;
     await tx`
-      insert into library.book_series (code, title, publisher, grade, subject, academic_year, status, content_hash)
-      values (${s.code}, ${s.title}, ${s.publisher ?? null}, ${grade}, ${subject}, ${s.academicYear ?? null},
+      insert into library.book_series (code, version_id, title, publisher, grade, subject, academic_year, status, content_hash)
+      values (${s.code}, ${versionId}, ${s.title}, ${s.publisher ?? null}, ${grade}, ${subject}, ${s.academicYear ?? null},
               'ACTIVE', ${incoming.series.get(s.code)!})
       on conflict (code) do update set
         title = excluded.title, publisher = excluded.publisher, academic_year = excluded.academic_year,
@@ -355,9 +362,9 @@ export async function applyImport(
     if (!changedMedia.has(m.code)) continue;
     const svg = m.kind === 'SVG' ? sanitisedSvg[m.code]! : null;
     await tx`
-      insert into library.media_assets (code, grade, subject, kind, storage_path, inline_svg, alt_vi, license,
-                                        attribution, review_status, content_hash)
-      values (${m.code}, ${grade}, ${subject}, ${m.kind}, ${svg === null ? (m.storagePath ?? null) : null}, ${svg},
+      insert into library.media_assets (code, version_id, grade, subject, kind, storage_path, inline_svg, alt_vi,
+                                        license, attribution, review_status, content_hash)
+      values (${m.code}, ${versionId}, ${grade}, ${subject}, ${m.kind}, ${svg === null ? (m.storagePath ?? null) : null}, ${svg},
               ${m.alt}, ${m.license}, ${m.attribution ?? null}, ${m.reviewStatus}, ${incoming.media.get(m.code)!})
       on conflict (code) do update set
         kind = excluded.kind, storage_path = excluded.storage_path, inline_svg = excluded.inline_svg,
@@ -379,9 +386,10 @@ export async function applyImport(
   for (const g of pkg.groups) {
     if (!changedGroups.has(g.code)) continue;
     await tx`
-      insert into library.item_groups (code, grade, subject, stimulus_kind, title, body_md, tts_text, tts_lang,
-                                       media_ids, word_count, genre, source_kind, source_note, status, content_hash)
-      values (${g.code}, ${grade}, ${subject}, ${g.stimulusKind}, ${g.title}, ${g.bodyMd}, ${g.ttsText ?? null},
+      insert into library.item_groups (code, version_id, grade, subject, stimulus_kind, title, body_md, tts_text,
+                                       tts_lang, media_ids, word_count, genre, source_kind, source_note, status,
+                                       content_hash)
+      values (${g.code}, ${versionId}, ${grade}, ${subject}, ${g.stimulusKind}, ${g.title}, ${g.bodyMd}, ${g.ttsText ?? null},
               ${g.ttsLang ?? null}, ${g.media.map((c) => mediaIds.get(c)!)}::uuid[], ${g.wordCount ?? null},
               ${g.genre ?? null}, ${g.sourceKind}, ${g.sourceNote ?? null}, ${g.status},
               ${incoming.groups.get(g.code)!})
@@ -409,11 +417,11 @@ export async function applyImport(
     if (!changedItems.has(i.code)) continue;
     const [row] = await tx<{ id: string }[]>`
       insert into library.items (
-        code, grade, subject, kind, skill_ids, difficulty, cognitive_level, type, stem_md, media_ids, options,
+        code, version_id, grade, subject, kind, skill_ids, difficulty, cognitive_level, type, stem_md, media_ids, options,
         answer, explanation_md, hints, worked_solution_md, distractor_feedback, misconception_tags, rubric,
         tts_text, tts_lang, group_id, group_order, source_refs, provenance, status, content_hash)
       values (
-        ${i.code}, ${grade}, ${subject}, ${i.kind}, ${i.skills.map((c) => nodeIds.get(c)!)}::uuid[],
+        ${i.code}, ${versionId}, ${grade}, ${subject}, ${i.kind}, ${i.skills.map((c) => nodeIds.get(c)!)}::uuid[],
         ${i.difficulty}, ${i.cognitiveLevel}, ${i.type}, ${i.stemMd},
         ${i.media.map((c) => mediaIds.get(c)!)}::uuid[], ${tx.json(i.options as never)},
         ${i.answer === null ? null : tx.json(i.answer as never)}, ${i.explanationMd}, ${tx.json(i.hints as never)},
@@ -456,5 +464,11 @@ export async function applyImport(
         params = excluded.params, constraints = excluded.constraints, answer_expr = excluded.answer_expr,
         render = excluded.render, distractor_exprs = excluded.distractor_exprs,
         content_hash = excluded.content_hash, flagged_at = null, flag_reason = null`;
+  }
+  // An item that turned STATIC loses its template row (archived items keep theirs).
+  if (diff.templates.archived.length > 0) {
+    await tx`
+      delete from library.item_templates t using library.items i
+      where i.id = t.item_id and i.kind = 'STATIC' and i.code = any(${diff.templates.archived})`;
   }
 }

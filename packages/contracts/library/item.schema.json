@@ -417,8 +417,7 @@
         "NEEDS_REVIEW",
         "APPROVED",
         "PUBLISHED",
-        "REJECTED",
-        "ARCHIVED"
+        "REJECTED"
       ]
     }
   },
