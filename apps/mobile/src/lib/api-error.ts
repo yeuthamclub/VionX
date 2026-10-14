@@ -51,6 +51,8 @@ const TASK_REASONS = new Set([
   'NOT_SCHEDULED',
 ]);
 
+const REWARD_REASONS = new Set(['INSUFFICIENT_COINS', 'ITEM_ARCHIVED', 'CLIENT_UUID_REUSED']);
+
 const CODE_MESSAGES: Partial<Record<string, MessageKey>> = {
   UNAUTHENTICATED: 'error.unauthenticated',
   NOT_FOUND: 'error.notFound',
@@ -68,6 +70,18 @@ export function describeError(error: unknown, now: Date = new Date()): string {
   // M03 task rules answer with details.reason (ALREADY_COMPLETED, FUTURE_OCCURRENCE, …).
   if (typeof details.reason === 'string' && TASK_REASONS.has(details.reason)) {
     return t(`error.task.${details.reason}` as MessageKey);
+  }
+  // M04 reward rules and redemptions.
+  if (typeof details.reason === 'string' && REWARD_REASONS.has(details.reason)) {
+    return t(`error.reward.${details.reason}` as MessageKey);
+  }
+  const violation = Array.isArray(details.violations)
+    ? (details.violations[0] as { error?: unknown; limit?: unknown } | undefined)
+    : undefined;
+  if (violation && typeof violation.error === 'string') {
+    return t(`rules.error.${violation.error}` as MessageKey, {
+      limit: typeof violation.limit === 'number' ? violation.limit : '',
+    });
   }
   switch (error.code) {
     case 'INVALID_CREDENTIALS': {

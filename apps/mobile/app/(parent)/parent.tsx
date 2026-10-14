@@ -22,6 +22,7 @@ export default function ParentHome() {
   const theme = useTheme();
   const c = theme.colors;
   const [pending, setPending] = useState(0);
+  const [redemptions, setRedemptions] = useState(0);
   const { state, reload } = useLoad(async (): Promise<HouseholdResponse | null> => {
     try {
       const household = await unwrap(parentApi.GET('/api/v1/household'));
@@ -29,6 +30,12 @@ export default function ParentHome() {
       void unwrap(parentApi.GET('/api/v1/approvals')).then(
         (a) => setPending(a.count),
         () => setPending(0),
+      );
+      void unwrap(
+        parentApi.GET('/api/v1/reward-redemptions', { params: { query: { status: 'PENDING' } } }),
+      ).then(
+        (r) => setRedemptions(r.pendingCount),
+        () => setRedemptions(0),
       );
       return household;
     } catch (e) {
@@ -147,6 +154,16 @@ export default function ParentHome() {
         }
         color={pending > 0 ? c.warning : c.parent}
         onPress={() => router.push('/approvals')}
+      />
+      <Button
+        testID="open-redemptions"
+        label={
+          badgeText(redemptions)
+            ? `${t('redemptions.open')} (${badgeText(redemptions)})`
+            : t('redemptions.open')
+        }
+        color={redemptions > 0 ? c.warning : c.parent}
+        onPress={() => router.push('/redemptions')}
       />
       <Button
         testID="add-child"

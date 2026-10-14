@@ -13,7 +13,7 @@ import { Screen } from '../../src/ui/Screen.tsx';
 import { StateView } from '../../src/ui/StateView.tsx';
 import { useLoad } from '../../src/ui/useLoad.ts';
 
-/** Child home placeholder (Today arrives with M07): greeting, assent requests, today's tasks, sign-out. */
+/** Child home placeholder (Today arrives with M07): greeting, assent requests, today's tasks, wallet, sign-out. */
 export default function ChildHome() {
   const theme = useTheme();
   const { state, reload } = useLoad(async () => {
@@ -93,6 +93,12 @@ export default function ChildHome() {
         label={t('childTasks.open')}
         color={theme.colors.child}
         onPress={() => router.push('/tasks')}
+      />
+      <Button
+        testID="open-child-wallet"
+        label={t('wallet.open')}
+        color={theme.colors.reward}
+        onPress={() => router.push('/wallet')}
       />
       <Button
         testID="child-sign-out"

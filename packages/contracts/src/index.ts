@@ -8,3 +8,4 @@ export * from './identity.ts';
 export * from './library.ts';
 export * from './library-package.ts';
 export * from './privacy.ts';
+export * from './rewards.ts';
