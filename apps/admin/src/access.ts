@@ -19,3 +19,10 @@ export function hasAdminPermission(access: AdminAccess, permission: string): boo
     (access.permissions.includes('SUPER_ADMIN') || access.permissions.includes(permission))
   );
 }
+
+export function hasAnyAdminPermission(
+  access: AdminAccess,
+  permissions: readonly string[],
+): boolean {
+  return permissions.some((permission) => hasAdminPermission(access, permission));
+}

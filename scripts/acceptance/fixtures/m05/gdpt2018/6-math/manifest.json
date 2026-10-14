@@ -1,0 +1,31 @@
+{
+  "format": 1,
+  "curriculumVersion": "gdpt2018",
+  "grade": 6,
+  "subject": "math",
+  "title": "Toán 6 (fixture M05)",
+  "counts": {
+    "nodes": 13,
+    "edges": 3,
+    "groups": 0,
+    "items": 10,
+    "templates": 3,
+    "media": 1
+  },
+  "checksums": {
+    "curriculum.json": "57a6226ffb6e4459ac949a7d6a0747f74e6d5717e8c1abff4d62e744d1fbc5da",
+    "edges.json": "484de047157de6b0def1ea652a03a16d5388e659e4e61b143cf361de4eff8257",
+    "groups.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "items.jsonl": "75db205c54dc4a5db5670bdd649b1841d951c90191257139caf8e7961fe86958",
+    "mappings.json": "03791e4ec35fc4f510cbc53b19018b6703c359131742c94d45fc9e62a403ef57",
+    "media/media.jsonl": "6e4984ec9c2cacdd09fbf0f88d902569faa81e664e2f9cf9d2bc547c9c05f8e4",
+    "media/rect-6x4.svg": "9b7d0805c7dd60542534b95ac29921c11e586aea8ab33e12a1e5f0ceaf7dd80b",
+    "templates.jsonl": "b15cbb2b6851b4edf5f258719db025ff20370eb6e71f8d2393aa48d389e1ceee"
+  },
+  "models": [
+    "fixture"
+  ],
+  "reviewer": "M05 fixture",
+  "createdAt": "2026-10-13T00:00:00Z",
+  "bookSeries": "KNTT-TOAN6-2026"
+}

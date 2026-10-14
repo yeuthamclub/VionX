@@ -1,0 +1,17 @@
+[
+  {
+    "from": "MATH.6.NUM.NAT.GCD",
+    "to": "MATH.6.NUM.FRAC.SIMP",
+    "type": "PREREQUISITE_OF"
+  },
+  {
+    "from": "MATH.6.NUM.FRAC.SIMP",
+    "to": "MATH.6.NUM.FRAC.ADD",
+    "type": "PREREQUISITE_OF"
+  },
+  {
+    "from": "MATH.6.NUM.FRAC.ADD",
+    "to": "MATH.6.NUM.NAT.GCD",
+    "type": "PREREQUISITE_OF"
+  }
+]

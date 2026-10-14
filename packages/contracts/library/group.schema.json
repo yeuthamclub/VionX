@@ -1,0 +1,91 @@
+{
+  "$id": "https://vionx.app/schemas/library/group.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "stimulusKind": {
+      "type": "string",
+      "enum": [
+        "PASSAGE",
+        "POEM",
+        "DIALOGUE",
+        "PICTURE_SCENE",
+        "EXPERIMENT"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bodyMd": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ttsText": {
+      "type": "string"
+    },
+    "ttsLang": {
+      "type": "string",
+      "enum": [
+        "vi",
+        "en"
+      ]
+    },
+    "media": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+      }
+    },
+    "wordCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "genre": {
+      "type": "string"
+    },
+    "sourceKind": {
+      "type": "string",
+      "enum": [
+        "ORIGINAL_AI",
+        "PUBLIC_DOMAIN",
+        "LICENSED"
+      ]
+    },
+    "sourceNote": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "AI_GENERATED",
+        "VALIDATING",
+        "NEEDS_REVIEW",
+        "APPROVED",
+        "PUBLISHED",
+        "REJECTED"
+      ]
+    }
+  },
+  "required": [
+    "code",
+    "stimulusKind",
+    "title",
+    "bodyMd",
+    "sourceKind",
+    "status"
+  ],
+  "additionalProperties": false
+}

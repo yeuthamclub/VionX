@@ -1,0 +1,13 @@
+[
+  {
+    "from": "MATH.2.NUM.COUNT.OBJ",
+    "to": "MATH.2.NUM.ADD100.NOCARRY",
+    "type": "PREREQUISITE_OF"
+  },
+  {
+    "from": "MATH.2.NUM.ADD100.NOCARRY",
+    "to": "MATH.2.NUM.ADD100.CARRY",
+    "type": "PREREQUISITE_OF",
+    "reason": "Cộng có nhớ dựa trên cộng không nhớ."
+  }
+]

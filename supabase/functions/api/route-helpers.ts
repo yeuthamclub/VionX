@@ -12,6 +12,10 @@ const ERROR_DESCRIPTIONS: Partial<Record<ErrorCode, [number, string]>> = {
   CONSENT_REQUIRED: [403, 'Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)'],
   NOT_FOUND: [404, 'Not found, or not in your household (NOT_FOUND)'],
   CONFLICT: [409, 'Conflict (CONFLICT)'],
+  PACKAGE_INVALID: [
+    422,
+    'Library package is invalid (PACKAGE_INVALID); details.errors lists every problem',
+  ],
   ACCOUNT_LOCKED: [423, 'Too many wrong PINs; locked for 15 minutes (ACCOUNT_LOCKED)'],
   RATE_LIMITED: [429, 'Too many attempts (RATE_LIMITED); see Retry-After'],
   SERVICE_UNAVAILABLE: [503, 'A dependency is unavailable (SERVICE_UNAVAILABLE)'],

@@ -19,6 +19,8 @@ export const ERROR_CODES = [
   'INVALID_CREDENTIALS',
   'ACCOUNT_LOCKED',
   'ACCOUNT_DISABLED',
+  // M05
+  'PACKAGE_INVALID',
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 

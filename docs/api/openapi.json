@@ -129,7 +129,8 @@
               "INTERNAL",
               "INVALID_CREDENTIALS",
               "ACCOUNT_LOCKED",
-              "ACCOUNT_DISABLED"
+              "ACCOUNT_DISABLED",
+              "PACKAGE_INVALID"
             ],
             "example": "VALIDATION_FAILED"
           },
@@ -3630,6 +3631,2342 @@
             "maxLength": 300
           }
         }
+      },
+      "LibraryImportResult": {
+        "type": "object",
+        "properties": {
+          "importId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "DRY_RUN",
+              "APPLY"
+            ]
+          },
+          "applied": {
+            "type": "boolean"
+          },
+          "package": {
+            "type": "object",
+            "properties": {
+              "curriculumVersion": {
+                "type": "string"
+              },
+              "grade": {
+                "type": "integer"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "curriculumVersion",
+              "grade",
+              "subject",
+              "title",
+              "sha256"
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PackageIssue"
+            }
+          },
+          "diff": {
+            "$ref": "#/components/schemas/ImportDiff"
+          },
+          "noop": {
+            "type": "boolean"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageReport"
+          }
+        },
+        "required": [
+          "importId",
+          "mode",
+          "applied",
+          "package",
+          "warnings",
+          "diff",
+          "noop",
+          "coverage"
+        ]
+      },
+      "PackageIssue": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "ImportDiff": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "$ref": "#/components/schemas/EntityDiff"
+          },
+          "edges": {
+            "$ref": "#/components/schemas/EntityDiff"
+          },
+          "series": {
+            "$ref": "#/components/schemas/EntityDiff"
+          },
+          "mappings": {
+            "$ref": "#/components/schemas/EntityDiff"
+          },
+          "media": {
+            "$ref": "#/components/schemas/EntityDiff"
+          },
+          "groups": {
+            "$ref": "#/components/schemas/EntityDiff"
+          },
+          "items": {
+            "$ref": "#/components/schemas/EntityDiff"
+          },
+          "templates": {
+            "$ref": "#/components/schemas/EntityDiff"
+          }
+        },
+        "required": [
+          "nodes",
+          "edges",
+          "series",
+          "mappings",
+          "media",
+          "groups",
+          "items",
+          "templates"
+        ]
+      },
+      "EntityDiff": {
+        "type": "object",
+        "properties": {
+          "added": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "archived": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "restored": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unchanged": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "added",
+          "updated",
+          "archived",
+          "restored",
+          "unchanged"
+        ]
+      },
+      "CoverageReport": {
+        "type": "object",
+        "properties": {
+          "totalItems": {
+            "type": "integer"
+          },
+          "approvedItems": {
+            "type": "integer"
+          },
+          "targetItems": {
+            "type": "integer"
+          },
+          "perSkill": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "items": {
+                  "type": "integer"
+                },
+                "approved": {
+                  "type": "integer"
+                },
+                "byLevel": {
+                  "type": "object",
+                  "properties": {
+                    "L1": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "L2": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "L3": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "L4": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "L5": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "L1",
+                    "L2",
+                    "L3",
+                    "L4",
+                    "L5"
+                  ]
+                },
+                "active": {
+                  "type": "boolean"
+                },
+                "levelSpread": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "code",
+                "title",
+                "items",
+                "approved",
+                "byLevel",
+                "active",
+                "levelSpread"
+              ]
+            }
+          },
+          "perLevel": {
+            "type": "object",
+            "properties": {
+              "L1": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "L2": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "L3": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "L4": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "L5": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "L1",
+              "L2",
+              "L3",
+              "L4",
+              "L5"
+            ]
+          },
+          "perType": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "templateShare": {
+            "type": "number"
+          },
+          "groupShare": {
+            "type": "number"
+          },
+          "writtenShare": {
+            "type": "number"
+          },
+          "readAloudShare": {
+            "type": "number"
+          },
+          "inactiveSkills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "totalItems",
+          "approvedItems",
+          "targetItems",
+          "perSkill",
+          "perLevel",
+          "perType",
+          "templateShare",
+          "groupShare",
+          "writtenShare",
+          "readAloudShare",
+          "inactiveSkills",
+          "flags"
+        ]
+      },
+      "LibraryImportRunsResponse": {
+        "type": "object",
+        "properties": {
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LibraryImportRun"
+            }
+          }
+        },
+        "required": [
+          "runs"
+        ]
+      },
+      "LibraryImportRun": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "DRY_RUN",
+              "APPLY"
+            ]
+          },
+          "curriculumVersion": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "integer"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "packageSha256": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "valid": {
+            "type": "boolean"
+          },
+          "errorCount": {
+            "type": "integer"
+          },
+          "diff": {},
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "mode",
+          "curriculumVersion",
+          "grade",
+          "subject",
+          "packageSha256",
+          "title",
+          "valid",
+          "errorCount",
+          "createdBy",
+          "createdAt"
+        ]
+      },
+      "LibraryOverview": {
+        "type": "object",
+        "properties": {
+          "versions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "academicYear": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "ACTIVE",
+                    "INACTIVE"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "code",
+                "title",
+                "academicYear",
+                "status"
+              ]
+            }
+          },
+          "libraries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "curriculumVersion": {
+                  "type": "string"
+                },
+                "grade": {
+                  "type": "integer"
+                },
+                "subject": {
+                  "type": "string"
+                },
+                "titleVi": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "skills": {
+                  "type": "integer"
+                },
+                "activeSkills": {
+                  "type": "integer"
+                },
+                "items": {
+                  "type": "integer"
+                },
+                "approvedItems": {
+                  "type": "integer"
+                },
+                "lastImportAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "curriculumVersion",
+                "grade",
+                "subject",
+                "titleVi",
+                "skills",
+                "activeSkills",
+                "items",
+                "approvedItems",
+                "lastImportAt"
+              ]
+            }
+          },
+          "profiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubjectProfile"
+            }
+          }
+        },
+        "required": [
+          "versions",
+          "libraries",
+          "profiles"
+        ]
+      },
+      "SubjectProfile": {
+        "type": "object",
+        "properties": {
+          "grade": {
+            "type": "integer"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "titleVi": {
+            "type": "string"
+          },
+          "templateShare": {
+            "type": "number"
+          },
+          "groupShare": {
+            "type": "number"
+          },
+          "writtenShare": {
+            "type": "number"
+          },
+          "readAloudDefault": {
+            "type": "boolean"
+          },
+          "ttsLang": {
+            "type": "string",
+            "enum": [
+              "vi",
+              "en"
+            ]
+          },
+          "imageLevel": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ]
+          },
+          "itemTypeMix": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "targetItems": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "grade",
+          "subject",
+          "titleVi",
+          "templateShare",
+          "groupShare",
+          "writtenShare",
+          "readAloudDefault",
+          "ttsLang",
+          "imageLevel",
+          "itemTypeMix",
+          "targetItems"
+        ]
+      },
+      "CurriculumResponse": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurriculumNode"
+            }
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeEdge"
+            }
+          }
+        },
+        "required": [
+          "nodes",
+          "edges"
+        ]
+      },
+      "CurriculumNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "parentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "level": {
+            "$ref": "#/components/schemas/NodeLevel"
+          },
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "gdptRef": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "weight": {
+            "type": "number"
+          },
+          "sortOrder": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "ARCHIVED"
+            ]
+          },
+          "items": {
+            "type": "integer",
+            "description": "Non-archived items on this skill (SKILL only)."
+          },
+          "approvedItems": {
+            "type": "integer"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "SKILL with ≥ 2 approved items."
+          }
+        },
+        "required": [
+          "id",
+          "parentId",
+          "level",
+          "code",
+          "title",
+          "description",
+          "gdptRef",
+          "weight",
+          "sortOrder",
+          "status",
+          "items",
+          "approvedItems",
+          "active"
+        ]
+      },
+      "NodeLevel": {
+        "type": "string",
+        "enum": [
+          "GRADE",
+          "SUBJECT",
+          "DOMAIN",
+          "TOPIC",
+          "LESSON",
+          "OBJECTIVE",
+          "CONCEPT",
+          "SKILL"
+        ]
+      },
+      "KnowledgeEdge": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "fromId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "toId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "PREREQUISITE_OF",
+              "PART_OF",
+              "RELATED_TO",
+              "NEXT_RECOMMENDED",
+              "EQUIVALENT_OR_OVERLAP"
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "fromId",
+          "toId",
+          "type",
+          "reason"
+        ]
+      },
+      "CoverageResponse": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SubjectProfile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageReport"
+          }
+        },
+        "required": [
+          "profile",
+          "coverage"
+        ]
+      },
+      "ItemListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemSummary"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "ItemSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "code": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "integer"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ItemKind"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ItemType"
+          },
+          "cognitiveLevel": {
+            "$ref": "#/components/schemas/CognitiveLevel"
+          },
+          "difficulty": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ContentStatus"
+          },
+          "stemMd": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "code",
+                "title"
+              ]
+            }
+          },
+          "groupId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "templateFlagged": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "grade",
+          "subject",
+          "kind",
+          "type",
+          "cognitiveLevel",
+          "difficulty",
+          "status",
+          "stemMd",
+          "skills",
+          "groupId",
+          "version",
+          "templateFlagged",
+          "updatedAt"
+        ]
+      },
+      "ItemKind": {
+        "type": "string",
+        "enum": [
+          "STATIC",
+          "TEMPLATE"
+        ]
+      },
+      "ItemType": {
+        "type": "string",
+        "enum": [
+          "single_choice",
+          "multi_choice",
+          "numeric",
+          "fill_blank",
+          "word_bank",
+          "picture_choice",
+          "ordering",
+          "matching",
+          "true_false",
+          "spelling_choice",
+          "written"
+        ]
+      },
+      "CognitiveLevel": {
+        "type": "string",
+        "enum": [
+          "L1",
+          "L2",
+          "L3",
+          "L4",
+          "L5"
+        ]
+      },
+      "ContentStatus": {
+        "type": "string",
+        "enum": [
+          "DRAFT",
+          "AI_GENERATED",
+          "VALIDATING",
+          "NEEDS_REVIEW",
+          "APPROVED",
+          "PUBLISHED",
+          "REJECTED",
+          "ARCHIVED"
+        ]
+      },
+      "ItemDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ItemSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "difficulty": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "stemMd": {
+                "type": "string",
+                "minLength": 1
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 20
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "media": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                    },
+                    "ttsText": {
+                      "type": "string"
+                    },
+                    "side": {
+                      "type": "string",
+                      "enum": [
+                        "left",
+                        "right"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "answer": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "optionId": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "optionId"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "optionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "optionIds"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "number"
+                      },
+                      "tolerance": {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "blanks": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "blanks"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "blankOptionIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "blankOptionIds"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "order": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "order"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "pairs": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "pairs"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "explanationMd": {
+                "type": "string"
+              },
+              "hints": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "md": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "ttsText": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "md"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "workedSolutionMd": {
+                "type": "string"
+              },
+              "distractorFeedback": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "md": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "misconception": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "md"
+                  ]
+                }
+              },
+              "misconceptionTags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "rubric": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "criteria": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "description": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "maxPoints": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "description",
+                        "maxPoints"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  },
+                  "guidanceMd": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "criteria"
+                ],
+                "additionalProperties": false
+              },
+              "ttsText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ttsLang": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "vi",
+                  "en",
+                  null
+                ]
+              },
+              "mediaIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+                }
+              },
+              "groupOrder": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "sourceRefs": {},
+              "provenance": {},
+              "template": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ItemTemplateDetail"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "group": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ItemGroup"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "media": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MediaAsset"
+                }
+              }
+            },
+            "required": [
+              "options",
+              "answer",
+              "explanationMd",
+              "hints",
+              "workedSolutionMd",
+              "distractorFeedback",
+              "misconceptionTags",
+              "rubric",
+              "ttsText",
+              "ttsLang",
+              "mediaIds",
+              "groupOrder",
+              "template",
+              "group",
+              "media"
+            ]
+          }
+        ]
+      },
+      "ItemTemplateDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ItemTemplate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "flaggedAt": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "flagReason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "flaggedAt",
+              "flagReason"
+            ]
+          }
+        ]
+      },
+      "ItemTemplate": {
+        "type": "object",
+        "properties": {
+          "params": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "int"
+                      ]
+                    },
+                    "min": {
+                      "type": "integer"
+                    },
+                    "max": {
+                      "type": "integer"
+                    },
+                    "step": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "type",
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "decimal"
+                      ]
+                    },
+                    "min": {
+                      "type": "number"
+                    },
+                    "max": {
+                      "type": "number"
+                    },
+                    "step": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "type",
+                    "min",
+                    "max",
+                    "step"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "choice"
+                      ]
+                    },
+                    "values": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "minItems": 1
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "type",
+                    "values"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "words"
+                      ]
+                    },
+                    "list": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": {}
+                      },
+                      "minItems": 1
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "type",
+                    "list"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "answerExpr": {
+            "type": "string",
+            "minLength": 1
+          },
+          "render": {
+            "type": "object",
+            "properties": {
+              "stem": {
+                "type": "string",
+                "minLength": 1
+              },
+              "ttsText": {
+                "type": "string"
+              },
+              "explanation": {
+                "type": "string"
+              },
+              "decimal": {
+                "type": "string",
+                "enum": [
+                  "comma",
+                  "point"
+                ]
+              }
+            },
+            "required": [
+              "stem"
+            ]
+          },
+          "distractorExprs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "params",
+          "constraints",
+          "answerExpr",
+          "render",
+          "distractorExprs"
+        ]
+      },
+      "ItemGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "code": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "integer"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "stimulusKind": {
+            "type": "string",
+            "enum": [
+              "PASSAGE",
+              "POEM",
+              "DIALOGUE",
+              "PICTURE_SCENE",
+              "EXPERIMENT"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bodyMd": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ttsText": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ttsLang": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "vi",
+              "en",
+              null
+            ]
+          },
+          "wordCount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "genre": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sourceKind": {
+            "type": "string",
+            "enum": [
+              "ORIGINAL_AI",
+              "PUBLIC_DOMAIN",
+              "LICENSED"
+            ]
+          },
+          "sourceNote": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ContentStatus"
+          },
+          "mediaIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            }
+          },
+          "version": {
+            "type": "integer"
+          },
+          "itemCount": {
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "grade",
+          "subject",
+          "stimulusKind",
+          "title",
+          "bodyMd",
+          "ttsText",
+          "ttsLang",
+          "wordCount",
+          "genre",
+          "sourceKind",
+          "sourceNote",
+          "status",
+          "mediaIds",
+          "version",
+          "itemCount",
+          "updatedAt"
+        ]
+      },
+      "MediaAsset": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "code": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ICON",
+              "SVG",
+              "IMAGE"
+            ]
+          },
+          "inlineSvg": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Sanitised SVG markup."
+          },
+          "storagePath": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "alt": {
+            "type": "string"
+          },
+          "license": {
+            "type": "string"
+          },
+          "attribution": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewStatus": {
+            "type": "string",
+            "enum": [
+              "NEEDS_REVIEW",
+              "APPROVED",
+              "REJECTED",
+              "ARCHIVED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "kind",
+          "inlineSvg",
+          "storagePath",
+          "alt",
+          "license",
+          "attribution",
+          "reviewStatus"
+        ]
+      },
+      "ItemPatch": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "difficulty": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "cognitiveLevel": {
+            "$ref": "#/components/schemas/CognitiveLevel"
+          },
+          "stemMd": {
+            "type": "string",
+            "minLength": 1
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 20
+                },
+                "text": {
+                  "type": "string"
+                },
+                "media": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "ttsText": {
+                  "type": "string"
+                },
+                "side": {
+                  "type": "string",
+                  "enum": [
+                    "left",
+                    "right"
+                  ]
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "optionId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "optionId"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "optionIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "optionIds"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "tolerance": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "blanks": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "blanks"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "blankOptionIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "blankOptionIds"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "order": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "order"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "pairs": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "pairs"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "explanationMd": {
+            "type": "string"
+          },
+          "hints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "md": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ttsText": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "md"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "workedSolutionMd": {
+            "type": "string"
+          },
+          "distractorFeedback": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "md": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "misconception": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "md"
+              ]
+            }
+          },
+          "misconceptionTags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rubric": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "description": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "maxPoints": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "description",
+                    "maxPoints"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "guidanceMd": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "criteria"
+            ],
+            "additionalProperties": false
+          },
+          "ttsText": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ttsLang": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "vi",
+              "en",
+              null
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ContentStatus"
+          },
+          "template": {
+            "$ref": "#/components/schemas/ItemTemplate"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "ItemVariant": {
+        "type": "object",
+        "properties": {
+          "seed": {
+            "type": "integer"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "stemMd": {
+            "type": "string"
+          },
+          "ttsText": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "explanationMd": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 20
+                },
+                "text": {
+                  "type": "string"
+                },
+                "media": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "ttsText": {
+                  "type": "string"
+                },
+                "side": {
+                  "type": "string",
+                  "enum": [
+                    "left",
+                    "right"
+                  ]
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "optionFeedbackKeys": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "optionId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "optionId"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "optionIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "optionIds"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "tolerance": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "blanks": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "blanks"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "blankOptionIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "blankOptionIds"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "order": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "order"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "pairs": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "pairs"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "distractors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "seed",
+          "params",
+          "stemMd",
+          "ttsText",
+          "explanationMd",
+          "options",
+          "optionFeedbackKeys",
+          "answer",
+          "distractors"
+        ]
+      },
+      "ItemGroupListResponse": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemGroup"
+            }
+          }
+        },
+        "required": [
+          "groups"
+        ]
+      },
+      "ItemGroupDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ItemGroup"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ItemSummary"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "groupOrder": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "groupOrder"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "media": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MediaAsset"
+                }
+              }
+            },
+            "required": [
+              "items",
+              "media"
+            ]
+          }
+        ]
+      },
+      "ItemGroupPatch": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "stimulusKind": {
+            "type": "string",
+            "enum": [
+              "PASSAGE",
+              "POEM",
+              "DIALOGUE",
+              "PICTURE_SCENE",
+              "EXPERIMENT"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bodyMd": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ttsText": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ttsLang": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "vi",
+              "en",
+              null
+            ]
+          },
+          "wordCount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "genre": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sourceKind": {
+            "type": "string",
+            "enum": [
+              "ORIGINAL_AI",
+              "PUBLIC_DOMAIN",
+              "LICENSED"
+            ]
+          },
+          "sourceNote": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ContentStatus"
+          }
+        },
+        "required": [
+          "version"
+        ]
       }
     },
     "parameters": {}
@@ -7731,6 +10068,1116 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RedemptionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/library/import": {
+      "post": {
+        "tags": [
+          "library"
+        ],
+        "summary": "Import a library package (zip): dry-run diff or apply",
+        "description": "CONTENT_ADMIN. Body: the package zip (`library/<version>/<grade>-<subject>/`). Validates schema, checksums and the library rules, then diffs against the library. `mode=apply` writes everything in one transaction; re-importing the same package is a no-op. Entities the package no longer lists are archived, never deleted. An invalid package answers 422 PACKAGE_INVALID with `details.errors`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "dry-run",
+                "apply"
+              ],
+              "default": "dry-run",
+              "description": "`dry-run` validates and diffs only; `apply` writes in one transaction."
+            },
+            "required": false,
+            "description": "`dry-run` validates and diffs only; `apply` writes in one transaction.",
+            "name": "mode",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/zip": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validation, diff and coverage (applied when mode=apply)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryImportResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Library package is invalid (PACKAGE_INVALID); details.errors lists every problem",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/library/imports": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "summary": "Recent package imports",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Newest first, at most 50",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryImportRunsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/library": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "summary": "Curriculum versions, imported libraries and subject profiles",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Library overview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryOverview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/library/curriculum": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "summary": "Curriculum tree of one grade-subject",
+        "description": "Flat node list (build the tree from parentId) with item counts per skill, plus active edges.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "default": "gdpt2018"
+            },
+            "required": false,
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "required": true,
+            "name": "grade",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]+$",
+              "example": "math"
+            },
+            "required": true,
+            "name": "subject",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nodes and edges",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurriculumResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/library/coverage": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "summary": "Coverage report of one grade-subject",
+        "description": "Items per skill, level and type, TEMPLATE/group/written/read-aloud shares against the subject profile, total vs target 500, inactive skills (< 2 approved items).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "default": "gdpt2018"
+            },
+            "required": false,
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "required": true,
+            "name": "grade",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]+$",
+              "example": "math"
+            },
+            "required": true,
+            "name": "subject",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coverage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/library/items": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "summary": "List items",
+        "description": "Filter by grade, subject, skill code, status, kind, type, level, group or text; cursor pagination by code.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "default": "gdpt2018"
+            },
+            "required": false,
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "required": false,
+            "name": "grade",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]+$",
+              "example": "math"
+            },
+            "required": false,
+            "name": "subject",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Skill code; includes items of that skill only."
+            },
+            "required": false,
+            "description": "Skill code; includes items of that skill only.",
+            "name": "skill",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/ContentStatus"
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/ItemKind"
+            },
+            "required": false,
+            "name": "kind",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/ItemType"
+            },
+            "required": false,
+            "name": "type",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/CognitiveLevel"
+            },
+            "required": false,
+            "name": "level",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": false,
+            "name": "groupId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "Code or stem text contains."
+            },
+            "required": false,
+            "description": "Code or stem text contains.",
+            "name": "q",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Opaque; from the previous page."
+            },
+            "required": false,
+            "description": "Opaque; from the previous page.",
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/library/items/{id}": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "summary": "Item detail (with template, group and media)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "library"
+        ],
+        "summary": "Edit an item (content fields, status, template)",
+        "description": "CONTENT_ADMIN or CONTENT_REVIEWER. `version` must be the one loaded (409 otherwise). The same rules as import apply (answer shape, 4 hints, rubric for written items, template renders). Audited; version + 1.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/library/items/{id}/variant": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "summary": "Render a TEMPLATE item variant for a seed",
+        "description": "Deterministic: the same seed gives the same variant (renderVariant). A template that cannot satisfy its constraints within 50 draws is flagged and answers 409.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "required": false,
+            "name": "seed",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Variant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemVariant"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/library/groups": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "summary": "List item groups (passages, poems, dialogues, picture scenes, experiments)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "default": "gdpt2018"
+            },
+            "required": false,
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "required": false,
+            "name": "grade",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]+$",
+              "example": "math"
+            },
+            "required": false,
+            "name": "subject",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/ContentStatus"
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemGroupListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/library/groups/{id}": {
+      "get": {
+        "tags": [
+          "library"
+        ],
+        "summary": "Group detail with its items",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemGroupDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "library"
+        ],
+        "summary": "Edit a group",
+        "description": "CONTENT_ADMIN or CONTENT_REVIEWER. PUBLIC_DOMAIN and LICENSED groups need a source note. `version` must match (409 otherwise). Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemGroupPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemGroupDetail"
                 }
               }
             }

@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "curriculumVersion": "gdpt2018",
+  "grade": 2,
+  "subject": "viet",
+  "title": "Tiếng Việt 2 (fixture M05)",
+  "counts": {
+    "nodes": 14,
+    "edges": 2,
+    "groups": 2,
+    "items": 7,
+    "templates": 1,
+    "media": 3
+  },
+  "checksums": {
+    "curriculum.json": "75216fb516daec7190a651da582dd137330f769a66b5b047897964c748dab454",
+    "edges.json": "c0eeed2f8f0affbba1de24d061143e9af4d07d8a7975ae0ed39cc112fa46e201",
+    "groups.jsonl": "ee78b5355d96b622869273fab7926209d6752af78292c7132d15bdd272fb36a0",
+    "items.jsonl": "371f50b369a6b9eee95cba322fd8a7cd76edc9e080f2f4fd0db746dec934e384",
+    "mappings.json": "822dd2d9339ec29864f421dee18a3ab23d68de2428b77aaa535592bad259e969",
+    "media/cat.svg": "6f9f0d06cd7500d867a4014979475a3cab4c98ed022248c44301ca709a175725",
+    "media/dog.svg": "d2c66300afcd4747721b611c8e6dcba66f086cbfafe6d12feba26215e6b72c68",
+    "media/fish.svg": "04e33331783ce3e9d1379d6ee11737e96afd8a1b69f1e5c54e05dca09db553e8",
+    "media/media.jsonl": "e1d384524c36c098e93459147344183335a81c6ab920c629fba8f98d5468f5a1",
+    "templates.jsonl": "47e956dc37d3ec25497e90a5a5d9c62b053674d055face4002a15c1d7a6fa5d4"
+  },
+  "models": [
+    "fixture"
+  ],
+  "reviewer": "M05 fixture",
+  "createdAt": "2026-10-13T00:00:00Z"
+}

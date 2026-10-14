@@ -8,6 +8,7 @@ import { format, resolveConfig } from 'prettier';
 import { SkeletonActorResolver } from '../supabase/functions/_shared/actor.ts';
 import { noDatabase } from '../supabase/functions/api/deps.ts';
 import { createApp, OPENAPI_INFO } from '../supabase/functions/api/app.ts';
+import { libraryJsonSchemas } from '../packages/contracts/src/library-package.ts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const jsonPath = resolve(root, 'docs/api/openapi.json');
@@ -41,6 +42,14 @@ const outputs: [string, string][] = [
   [jsonPath, json],
   [typesPath, types],
 ];
+
+// Library package JSON Schemas (TASK_PACKS/M05.md), for X01-X08 scripts and editors.
+for (const [file, schema] of Object.entries(libraryJsonSchemas())) {
+  outputs.push([
+    resolve(root, 'packages/contracts/library', file),
+    `${JSON.stringify(schema, null, 2)}\n`,
+  ]);
+}
 
 if (check) {
   const stale: string[] = [];

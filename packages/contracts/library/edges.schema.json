@@ -1,0 +1,41 @@
+{
+  "$id": "https://vionx.app/schemas/library/edges.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "from": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+      },
+      "to": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "PREREQUISITE_OF",
+          "PART_OF",
+          "RELATED_TO",
+          "NEXT_RECOMMENDED",
+          "EQUIVALENT_OR_OVERLAP"
+        ]
+      },
+      "reason": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "from",
+      "to",
+      "type"
+    ],
+    "additionalProperties": false
+  }
+}

@@ -3928,6 +3928,906 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/admin/library/import': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Import a library package (zip): dry-run diff or apply
+     * @description CONTENT_ADMIN. Body: the package zip (`library/<version>/<grade>-<subject>/`). Validates schema, checksums and the library rules, then diffs against the library. `mode=apply` writes everything in one transaction; re-importing the same package is a no-op. Entities the package no longer lists are archived, never deleted. An invalid package answers 422 PACKAGE_INVALID with `details.errors`.
+     */
+    post: {
+      parameters: {
+        query?: {
+          /** @description `dry-run` validates and diffs only; `apply` writes in one transaction. */
+          mode?: 'dry-run' | 'apply';
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/zip': string;
+        };
+      };
+      responses: {
+        /** @description Validation, diff and coverage (applied when mode=apply) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LibraryImportResult'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Library package is invalid (PACKAGE_INVALID); details.errors lists every problem */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/library/imports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Recent package imports */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Newest first, at most 50 */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LibraryImportRunsResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/library': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Curriculum versions, imported libraries and subject profiles */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Library overview */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LibraryOverview'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/library/curriculum': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Curriculum tree of one grade-subject
+     * @description Flat node list (build the tree from parentId) with item counts per skill, plus active edges.
+     */
+    get: {
+      parameters: {
+        query: {
+          version?: string;
+          grade: number;
+          subject: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Nodes and edges */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['CurriculumResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/library/coverage': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Coverage report of one grade-subject
+     * @description Items per skill, level and type, TEMPLATE/group/written/read-aloud shares against the subject profile, total vs target 500, inactive skills (< 2 approved items).
+     */
+    get: {
+      parameters: {
+        query: {
+          version?: string;
+          grade: number;
+          subject: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Coverage */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['CoverageResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/library/items': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List items
+     * @description Filter by grade, subject, skill code, status, kind, type, level, group or text; cursor pagination by code.
+     */
+    get: {
+      parameters: {
+        query?: {
+          version?: string;
+          grade?: number;
+          subject?: string;
+          /** @description Skill code; includes items of that skill only. */
+          skill?: string;
+          status?: components['schemas']['ContentStatus'];
+          kind?: components['schemas']['ItemKind'];
+          type?: components['schemas']['ItemType'];
+          level?: components['schemas']['CognitiveLevel'];
+          groupId?: string;
+          /** @description Code or stem text contains. */
+          q?: string;
+          /** @description Opaque; from the previous page. */
+          cursor?: string;
+          limit?: number;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A page of items */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ItemListResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/library/items/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Item detail (with template, group and media) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Item */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ItemDetail'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Edit an item (content fields, status, template)
+     * @description CONTENT_ADMIN or CONTENT_REVIEWER. `version` must be the one loaded (409 otherwise). The same rules as import apply (answer shape, 4 hints, rubric for written items, template renders). Audited; version + 1.
+     */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['ItemPatch'];
+        };
+      };
+      responses: {
+        /** @description Updated item */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ItemDetail'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/api/v1/admin/library/items/{id}/variant': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Render a TEMPLATE item variant for a seed
+     * @description Deterministic: the same seed gives the same variant (renderVariant). A template that cannot satisfy its constraints within 50 draws is flagged and answers 409.
+     */
+    get: {
+      parameters: {
+        query?: {
+          seed?: number | null;
+        };
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Variant */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ItemVariant'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/library/groups': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List item groups (passages, poems, dialogues, picture scenes, experiments) */
+    get: {
+      parameters: {
+        query?: {
+          version?: string;
+          grade?: number;
+          subject?: string;
+          status?: components['schemas']['ContentStatus'];
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Groups */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ItemGroupListResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/library/groups/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Group detail with its items */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Group */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ItemGroupDetail'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Edit a group
+     * @description CONTENT_ADMIN or CONTENT_REVIEWER. PUBLIC_DOMAIN and LICENSED groups need a source note. `version` must match (409 otherwise). Audited.
+     */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['ItemGroupPatch'];
+        };
+      };
+      responses: {
+        /** @description Updated group */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ItemGroupDetail'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3973,7 +4873,8 @@ export interface components {
         | 'INTERNAL'
         | 'INVALID_CREDENTIALS'
         | 'ACCOUNT_LOCKED'
-        | 'ACCOUNT_DISABLED';
+        | 'ACCOUNT_DISABLED'
+        | 'PACKAGE_INVALID';
       /** @example Request body is invalid */
       message: string;
       details?: unknown;
@@ -5238,6 +6139,583 @@ export interface components {
     };
     RedemptionDecision: {
       note?: string;
+    };
+    LibraryImportResult: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      importId: string;
+      /** @enum {string} */
+      mode: 'DRY_RUN' | 'APPLY';
+      applied: boolean;
+      package: {
+        curriculumVersion: string;
+        grade: number;
+        subject: string;
+        title: string;
+        sha256: string;
+      };
+      warnings: components['schemas']['PackageIssue'][];
+      diff: components['schemas']['ImportDiff'];
+      noop: boolean;
+      coverage: components['schemas']['CoverageReport'];
+    };
+    PackageIssue: {
+      code: string;
+      message: string;
+      ref?: string;
+    };
+    ImportDiff: {
+      nodes: components['schemas']['EntityDiff'];
+      edges: components['schemas']['EntityDiff'];
+      series: components['schemas']['EntityDiff'];
+      mappings: components['schemas']['EntityDiff'];
+      media: components['schemas']['EntityDiff'];
+      groups: components['schemas']['EntityDiff'];
+      items: components['schemas']['EntityDiff'];
+      templates: components['schemas']['EntityDiff'];
+    };
+    EntityDiff: {
+      added: string[];
+      updated: string[];
+      archived: string[];
+      restored: string[];
+      unchanged: number;
+    };
+    CoverageReport: {
+      totalItems: number;
+      approvedItems: number;
+      targetItems: number;
+      perSkill: {
+        code: string;
+        title: string;
+        items: number;
+        approved: number;
+        byLevel: {
+          L1: number;
+          L2: number;
+          L3: number;
+          L4: number;
+          L5: number;
+        };
+        active: boolean;
+        levelSpread: boolean;
+      }[];
+      perLevel: {
+        L1: number;
+        L2: number;
+        L3: number;
+        L4: number;
+        L5: number;
+      };
+      perType: {
+        [key: string]: number;
+      };
+      templateShare: number;
+      groupShare: number;
+      writtenShare: number;
+      readAloudShare: number;
+      inactiveSkills: string[];
+      flags: string[];
+    };
+    LibraryImportRunsResponse: {
+      runs: components['schemas']['LibraryImportRun'][];
+    };
+    LibraryImportRun: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** @enum {string} */
+      mode: 'DRY_RUN' | 'APPLY';
+      curriculumVersion: string;
+      grade: number;
+      subject: string;
+      packageSha256: string;
+      title: string;
+      valid: boolean;
+      errorCount: number;
+      diff?: unknown;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      createdBy: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    LibraryOverview: {
+      versions: {
+        /**
+         * Format: uuid
+         * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+         */
+        id: string;
+        code: string;
+        title: string;
+        academicYear: string | null;
+        /** @enum {string} */
+        status: 'ACTIVE' | 'INACTIVE';
+      }[];
+      libraries: {
+        curriculumVersion: string;
+        grade: number;
+        subject: string;
+        titleVi: string | null;
+        skills: number;
+        activeSkills: number;
+        items: number;
+        approvedItems: number;
+        /** Format: date-time */
+        lastImportAt: string | null;
+      }[];
+      profiles: components['schemas']['SubjectProfile'][];
+    };
+    SubjectProfile: {
+      grade: number;
+      subject: string;
+      titleVi: string;
+      templateShare: number;
+      groupShare: number;
+      writtenShare: number;
+      readAloudDefault: boolean;
+      /** @enum {string} */
+      ttsLang: 'vi' | 'en';
+      /** @enum {string} */
+      imageLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+      itemTypeMix: {
+        [key: string]: number;
+      };
+      targetItems: number;
+    };
+    CurriculumResponse: {
+      nodes: components['schemas']['CurriculumNode'][];
+      edges: components['schemas']['KnowledgeEdge'][];
+    };
+    CurriculumNode: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      parentId: string | null;
+      level: components['schemas']['NodeLevel'];
+      code: string;
+      title: string;
+      description: string | null;
+      gdptRef: string | null;
+      weight: number;
+      sortOrder: number;
+      /** @enum {string} */
+      status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+      /** @description Non-archived items on this skill (SKILL only). */
+      items: number;
+      approvedItems: number;
+      /** @description SKILL with ≥ 2 approved items. */
+      active: boolean;
+    };
+    /** @enum {string} */
+    NodeLevel:
+      'GRADE' | 'SUBJECT' | 'DOMAIN' | 'TOPIC' | 'LESSON' | 'OBJECTIVE' | 'CONCEPT' | 'SKILL';
+    KnowledgeEdge: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      fromId: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      toId: string;
+      /** @enum {string} */
+      type:
+        'PREREQUISITE_OF' | 'PART_OF' | 'RELATED_TO' | 'NEXT_RECOMMENDED' | 'EQUIVALENT_OR_OVERLAP';
+      reason: string | null;
+    };
+    CoverageResponse: {
+      profile: components['schemas']['SubjectProfile'] | null;
+      coverage: components['schemas']['CoverageReport'];
+    };
+    ItemListResponse: {
+      items: components['schemas']['ItemSummary'][];
+      nextCursor: string | null;
+    };
+    ItemSummary: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      code: string;
+      grade: number;
+      subject: string;
+      kind: components['schemas']['ItemKind'];
+      type: components['schemas']['ItemType'];
+      cognitiveLevel: components['schemas']['CognitiveLevel'];
+      difficulty: number;
+      status: components['schemas']['ContentStatus'];
+      stemMd: string;
+      skills: {
+        /**
+         * Format: uuid
+         * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+         */
+        id: string;
+        code: string;
+        title: string;
+      }[];
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      groupId: string | null;
+      version: number;
+      templateFlagged: boolean;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    /** @enum {string} */
+    ItemKind: 'STATIC' | 'TEMPLATE';
+    /** @enum {string} */
+    ItemType:
+      | 'single_choice'
+      | 'multi_choice'
+      | 'numeric'
+      | 'fill_blank'
+      | 'word_bank'
+      | 'picture_choice'
+      | 'ordering'
+      | 'matching'
+      | 'true_false'
+      | 'spelling_choice'
+      | 'written';
+    /** @enum {string} */
+    CognitiveLevel: 'L1' | 'L2' | 'L3' | 'L4' | 'L5';
+    /** @enum {string} */
+    ContentStatus:
+      | 'DRAFT'
+      | 'AI_GENERATED'
+      | 'VALIDATING'
+      | 'NEEDS_REVIEW'
+      | 'APPROVED'
+      | 'PUBLISHED'
+      | 'REJECTED'
+      | 'ARCHIVED';
+    ItemDetail: components['schemas']['ItemSummary'] & {
+      difficulty?: number;
+      stemMd?: string;
+      options: {
+        id: string;
+        text?: string;
+        media?: string;
+        ttsText?: string;
+        /** @enum {string} */
+        side?: 'left' | 'right';
+      }[];
+      answer:
+        | {
+            optionId: string;
+          }
+        | {
+            optionIds: string[];
+          }
+        | {
+            value: number;
+            tolerance?: number;
+          }
+        | {
+            blanks: string[][];
+          }
+        | {
+            blankOptionIds: string[];
+          }
+        | {
+            order: string[];
+          }
+        | {
+            pairs: [string, string][];
+          }
+        | {
+            value: boolean;
+          }
+        | null;
+      explanationMd: string;
+      hints: {
+        md: string;
+        ttsText?: string;
+      }[];
+      workedSolutionMd: string;
+      distractorFeedback: {
+        [key: string]: {
+          md: string;
+          misconception?: string;
+        };
+      };
+      misconceptionTags: string[];
+      rubric: {
+        criteria: {
+          name: string;
+          description: string;
+          maxPoints: number;
+        }[];
+        guidanceMd?: string;
+      } | null;
+      ttsText: string | null;
+      /** @enum {string|null} */
+      ttsLang: 'vi' | 'en' | null;
+      mediaIds: string[];
+      groupOrder: number | null;
+      sourceRefs?: unknown;
+      provenance?: unknown;
+      template: components['schemas']['ItemTemplateDetail'] | null;
+      group: components['schemas']['ItemGroup'] | null;
+      media: components['schemas']['MediaAsset'][];
+    };
+    ItemTemplateDetail: components['schemas']['ItemTemplate'] & {
+      /** Format: date-time */
+      flaggedAt: string | null;
+      flagReason: string | null;
+    };
+    ItemTemplate: {
+      params: (
+        | {
+            name: string;
+            /** @enum {string} */
+            type: 'int';
+            min: number;
+            max: number;
+            step?: number;
+          }
+        | {
+            name: string;
+            /** @enum {string} */
+            type: 'decimal';
+            min: number;
+            max: number;
+            step: number;
+          }
+        | {
+            name: string;
+            /** @enum {string} */
+            type: 'choice';
+            values: (number | string)[];
+          }
+        | {
+            name: string;
+            /** @enum {string} */
+            type: 'words';
+            list: {
+              [key: string]: unknown;
+            }[];
+          }
+      )[];
+      constraints: string[];
+      answerExpr: string;
+      render: {
+        stem: string;
+        ttsText?: string;
+        explanation?: string;
+        /** @enum {string} */
+        decimal?: 'comma' | 'point';
+      };
+      distractorExprs: string[];
+    };
+    ItemGroup: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      code: string;
+      grade: number;
+      subject: string;
+      /** @enum {string} */
+      stimulusKind: 'PASSAGE' | 'POEM' | 'DIALOGUE' | 'PICTURE_SCENE' | 'EXPERIMENT';
+      title: string;
+      bodyMd: string;
+      ttsText: string | null;
+      /** @enum {string|null} */
+      ttsLang: 'vi' | 'en' | null;
+      wordCount: number | null;
+      genre: string | null;
+      /** @enum {string} */
+      sourceKind: 'ORIGINAL_AI' | 'PUBLIC_DOMAIN' | 'LICENSED';
+      sourceNote: string | null;
+      status: components['schemas']['ContentStatus'];
+      mediaIds: string[];
+      version: number;
+      itemCount: number;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    MediaAsset: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      code: string;
+      /** @enum {string} */
+      kind: 'ICON' | 'SVG' | 'IMAGE';
+      /** @description Sanitised SVG markup. */
+      inlineSvg: string | null;
+      storagePath: string | null;
+      alt: string;
+      license: string;
+      attribution: string | null;
+      /** @enum {string} */
+      reviewStatus: 'NEEDS_REVIEW' | 'APPROVED' | 'REJECTED' | 'ARCHIVED';
+    };
+    ItemPatch: {
+      version: number;
+      difficulty?: number;
+      cognitiveLevel?: components['schemas']['CognitiveLevel'];
+      stemMd?: string;
+      options?: {
+        id: string;
+        text?: string;
+        media?: string;
+        ttsText?: string;
+        /** @enum {string} */
+        side?: 'left' | 'right';
+      }[];
+      answer?:
+        | {
+            optionId: string;
+          }
+        | {
+            optionIds: string[];
+          }
+        | {
+            value: number;
+            tolerance?: number;
+          }
+        | {
+            blanks: string[][];
+          }
+        | {
+            blankOptionIds: string[];
+          }
+        | {
+            order: string[];
+          }
+        | {
+            pairs: [string, string][];
+          }
+        | {
+            value: boolean;
+          }
+        | null;
+      explanationMd?: string;
+      hints?: {
+        md: string;
+        ttsText?: string;
+      }[];
+      workedSolutionMd?: string;
+      distractorFeedback?: {
+        [key: string]: {
+          md: string;
+          misconception?: string;
+        };
+      };
+      misconceptionTags?: string[];
+      rubric?: {
+        criteria: {
+          name: string;
+          description: string;
+          maxPoints: number;
+        }[];
+        guidanceMd?: string;
+      } | null;
+      ttsText?: string | null;
+      /** @enum {string|null} */
+      ttsLang?: 'vi' | 'en' | null;
+      status?: components['schemas']['ContentStatus'];
+      template?: components['schemas']['ItemTemplate'];
+    };
+    ItemVariant: {
+      seed: number;
+      params: {
+        [key: string]: unknown;
+      };
+      stemMd: string;
+      ttsText: string | null;
+      explanationMd: string | null;
+      options: {
+        id: string;
+        text?: string;
+        media?: string;
+        ttsText?: string;
+        /** @enum {string} */
+        side?: 'left' | 'right';
+      }[];
+      optionFeedbackKeys: {
+        [key: string]: string;
+      };
+      answer:
+        | {
+            optionId: string;
+          }
+        | {
+            optionIds: string[];
+          }
+        | {
+            value: number;
+            tolerance?: number;
+          }
+        | {
+            blanks: string[][];
+          }
+        | {
+            blankOptionIds: string[];
+          }
+        | {
+            order: string[];
+          }
+        | {
+            pairs: [string, string][];
+          }
+        | {
+            value: boolean;
+          };
+      distractors: string[];
+    };
+    ItemGroupListResponse: {
+      groups: components['schemas']['ItemGroup'][];
+    };
+    ItemGroupDetail: components['schemas']['ItemGroup'] & {
+      items: (components['schemas']['ItemSummary'] & {
+        groupOrder: number | null;
+      })[];
+      media: components['schemas']['MediaAsset'][];
+    };
+    ItemGroupPatch: {
+      version: number;
+      /** @enum {string} */
+      stimulusKind?: 'PASSAGE' | 'POEM' | 'DIALOGUE' | 'PICTURE_SCENE' | 'EXPERIMENT';
+      title?: string;
+      bodyMd?: string;
+      ttsText?: string | null;
+      /** @enum {string|null} */
+      ttsLang?: 'vi' | 'en' | null;
+      wordCount?: number | null;
+      genre?: string | null;
+      /** @enum {string} */
+      sourceKind?: 'ORIGINAL_AI' | 'PUBLIC_DOMAIN' | 'LICENSED';
+      sourceNote?: string | null;
+      status?: components['schemas']['ContentStatus'];
     };
   };
   responses: never;

@@ -9,6 +9,7 @@ import { ApiError, errorBody } from '../_shared/errors.ts';
 import type { ApiDeps } from './deps.ts';
 import { registerCalendarRoutes } from './calendar/routes.ts';
 import { registerIdentityRoutes } from './identity/routes.ts';
+import { registerLibraryRoutes } from './library/routes.ts';
 import { registerPrivacyRoutes } from './privacy/routes.ts';
 import { registerRewardRoutes } from './rewards/routes.ts';
 import { registerSystemRoutes } from './system/routes.ts';
@@ -116,6 +117,7 @@ export function createApp(deps: ApiDeps) {
   registerPrivacyRoutes(app, deps);
   registerCalendarRoutes(app, deps);
   registerRewardRoutes(app, deps);
+  registerLibraryRoutes(app, deps);
 
   app.doc31('/v1/openapi.json', OPENAPI_INFO);
 

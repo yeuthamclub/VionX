@@ -1,0 +1,46 @@
+{
+  "version": {
+    "code": "gdpt2018",
+    "title": "Chương trình GDPT 2018",
+    "academicYear": "2026-2027",
+    "source": "Thông tư 32/2018/TT-BGDĐT"
+  },
+  "nodes": [
+    {
+      "code": "GRADE.6",
+      "parent": null,
+      "level": "GRADE",
+      "title": "Lớp 6"
+    },
+    {
+      "code": "MATH.6",
+      "parent": "GRADE.6",
+      "level": "SUBJECT",
+      "title": "Toán 6"
+    },
+    {
+      "code": "MATH.6.NUM",
+      "parent": "MATH.6",
+      "level": "DOMAIN",
+      "title": "Số và Đại số"
+    },
+    {
+      "code": "MATH.6.NUM.NAT.GCD",
+      "parent": "MATH.6.NUM",
+      "level": "SKILL",
+      "title": "Tìm ước chung lớn nhất"
+    },
+    {
+      "code": "MATH.6.NUM.FRAC.SIMP",
+      "parent": "MATH.6.NUM",
+      "level": "SKILL",
+      "title": "Rút gọn phân số"
+    },
+    {
+      "code": "MATH.6.NUM.FRAC.ADD",
+      "parent": "MATH.6.NUM",
+      "level": "SKILL",
+      "title": "Cộng phân số"
+    }
+  ]
+}

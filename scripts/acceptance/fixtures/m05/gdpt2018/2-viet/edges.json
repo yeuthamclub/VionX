@@ -1,0 +1,12 @@
+[
+  {
+    "from": "VIET.2.VOCAB.THING.PIC",
+    "to": "VIET.2.WRITE.SENT.PET",
+    "type": "PREREQUISITE_OF"
+  },
+  {
+    "from": "VIET.2.READ.COMP.DETAIL",
+    "to": "VIET.2.READ.COMP.MEANING",
+    "type": "RELATED_TO"
+  }
+]

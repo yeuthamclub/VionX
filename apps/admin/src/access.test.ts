@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { adminAccess, hasAdminPermission } from './access.ts';
+import { adminAccess, hasAdminPermission, hasAnyAdminPermission } from './access.ts';
 
 const me = (adminPermissions: string[], email: string | null = 'a@vionx.local') => ({
   userId: 'u1',
@@ -27,5 +27,12 @@ describe('adminAccess', () => {
     const reviewer = adminAccess(me(['CONTENT_REVIEWER']));
     expect(hasAdminPermission(reviewer, 'CONTENT_REVIEWER')).toBe(true);
     expect(hasAdminPermission(reviewer, 'LIBRARIAN')).toBe(false);
+  });
+
+  it('checks any of several permissions', () => {
+    const librarian = adminAccess(me(['LIBRARIAN']));
+    expect(hasAnyAdminPermission(librarian, ['CONTENT_ADMIN', 'LIBRARIAN'])).toBe(true);
+    expect(hasAnyAdminPermission(librarian, ['CONTENT_ADMIN', 'CONTENT_REVIEWER'])).toBe(false);
+    expect(hasAnyAdminPermission(adminAccess(me(['SUPER_ADMIN'])), ['CONTENT_ADMIN'])).toBe(true);
   });
 });

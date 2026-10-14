@@ -1,0 +1,101 @@
+{
+  "version": {
+    "code": "gdpt2018",
+    "title": "Chương trình GDPT 2018",
+    "academicYear": "2026-2027",
+    "source": "Thông tư 32/2018/TT-BGDĐT"
+  },
+  "nodes": [
+    {
+      "code": "GRADE.6",
+      "parent": null,
+      "level": "GRADE",
+      "title": "Lớp 6"
+    },
+    {
+      "code": "MATH.6",
+      "parent": "GRADE.6",
+      "level": "SUBJECT",
+      "title": "Toán 6"
+    },
+    {
+      "code": "MATH.6.NUM",
+      "parent": "MATH.6",
+      "level": "DOMAIN",
+      "title": "Số và Đại số",
+      "sortOrder": 1
+    },
+    {
+      "code": "MATH.6.NUM.NAT",
+      "parent": "MATH.6.NUM",
+      "level": "TOPIC",
+      "title": "Số tự nhiên",
+      "sortOrder": 1
+    },
+    {
+      "code": "MATH.6.NUM.NAT.GCD",
+      "parent": "MATH.6.NUM.NAT",
+      "level": "SKILL",
+      "title": "Tìm ước chung lớn nhất của hai số",
+      "gdptRef": "Toán 6 – Số tự nhiên: xác định được ước chung, ước chung lớn nhất",
+      "weight": 1.2
+    },
+    {
+      "code": "MATH.6.NUM.FRAC",
+      "parent": "MATH.6.NUM",
+      "level": "TOPIC",
+      "title": "Phân số",
+      "sortOrder": 2
+    },
+    {
+      "code": "MATH.6.NUM.FRAC.SIMP",
+      "parent": "MATH.6.NUM.FRAC",
+      "level": "SKILL",
+      "title": "Rút gọn phân số",
+      "gdptRef": "Toán 6 – Phân số: rút gọn về phân số tối giản",
+      "weight": 1
+    },
+    {
+      "code": "MATH.6.NUM.FRAC.ADD",
+      "parent": "MATH.6.NUM.FRAC",
+      "level": "SKILL",
+      "title": "Cộng hai phân số cùng mẫu",
+      "gdptRef": "Toán 6 – Phân số: thực hiện phép cộng phân số",
+      "weight": 1.5
+    },
+    {
+      "code": "MATH.6.NUM.DEC",
+      "parent": "MATH.6.NUM",
+      "level": "TOPIC",
+      "title": "Số thập phân",
+      "sortOrder": 3
+    },
+    {
+      "code": "MATH.6.NUM.DEC.MUL",
+      "parent": "MATH.6.NUM.DEC",
+      "level": "SKILL",
+      "title": "Nhân số thập phân với số tự nhiên",
+      "weight": 1
+    },
+    {
+      "code": "MATH.6.GEO",
+      "parent": "MATH.6",
+      "level": "DOMAIN",
+      "title": "Hình học và Đo lường",
+      "sortOrder": 2
+    },
+    {
+      "code": "MATH.6.GEO.RECT",
+      "parent": "MATH.6.GEO",
+      "level": "TOPIC",
+      "title": "Hình chữ nhật"
+    },
+    {
+      "code": "MATH.6.GEO.RECT.PERIM",
+      "parent": "MATH.6.GEO.RECT",
+      "level": "SKILL",
+      "title": "Tính chu vi hình chữ nhật",
+      "weight": 1
+    }
+  ]
+}

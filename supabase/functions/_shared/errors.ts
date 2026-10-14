@@ -17,6 +17,7 @@ const STATUS: Record<ErrorCode, number> = {
   INVALID_CREDENTIALS: 401,
   ACCOUNT_LOCKED: 423,
   ACCOUNT_DISABLED: 403,
+  PACKAGE_INVALID: 422,
 };
 
 /** Throw from any handler; the error handler renders `{code, message, details?, requestId}`. */
