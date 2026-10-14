@@ -1,0 +1,25 @@
+Excerpt for tests: Chương trình GDPT 2018 môn Toán (Thông tư 32/2018/TT-BGDĐT), Lớp 6, shortened.
+LỚP 6
+Nội dung Yêu cầu cần đạt
+SỐ VÀ ĐẠI SỐ
+Số tự nhiên Tính chia hết trong tập hợp các số tự nhiên. Số nguyên tố. Ước chung và bội chung
+– Nhận biết được khái niệm số nguyên tố, hợp số.
+– Xác định được ước chung, ước chung lớn nhất; xác định được bội chung, bội chung nhỏ nhất của hai hoặc ba số tự nhiên.
+Phân số Các phép tính với phân số
+– So sánh được hai phân số cho trước.
+– Thực hiện được các phép tính cộng, trừ, nhân, chia với phân số.
+Số thập phân Tỉ số và tỉ số phần trăm
+– Tính được giá trị phần trăm của một số cho trước và tính được một số biết giá trị phần trăm của số đó.
+HÌNH HỌC VÀ ĐO LƯỜNG
+Tam giác đều, hình vuông, lục giác đều
+– Nhận dạng được tam giác đều, hình vuông, lục giác đều.
+Hình chữ nhật, hình thoi, hình bình hành, hình thang cân
+– Giải quyết được một số vấn đề thực tiễn gắn với việc tính chu vi và diện tích của các hình đặc biệt nói trên.
+Hình có trục đối xứng
+– Nhận biết được trục đối xứng của một hình phẳng.
+Đoạn thẳng. Độ dài đoạn thẳng
+– Nhận biết được khái niệm đoạn thẳng, trung điểm của đoạn thẳng, độ dài đoạn thẳng.
+MỘT SỐ YẾU TỐ THỐNG KÊ VÀ XÁC SUẤT
+– Sử dụng được phân số để mô tả xác suất (thực nghiệm) của khả năng xảy ra nhiều lần thông qua kiểm đếm số lần lặp lại của khả năng đó trong một số mô hình xác suất đơn giản.
+LỚP 7
+Nội dung Yêu cầu cần đạt

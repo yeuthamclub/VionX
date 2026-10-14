@@ -1,0 +1,40 @@
+{
+  "edges": [
+    {
+      "from": "MATH.6.NUM.NAT.GCD",
+      "to": "MATH.6.NUM.FRAC.ADD",
+      "type": "PREREQUISITE_OF",
+      "reason": "Quy đồng mẫu số cần tìm ước chung và bội chung."
+    },
+    {
+      "from": "MATH.6.NUM.FRAC.CMP",
+      "to": "MATH.6.NUM.FRAC.ADD",
+      "type": "RELATED_TO",
+      "reason": "Cả hai đều dùng quy đồng mẫu số."
+    },
+    {
+      "from": "MATH.6.GEO.SHAPE.POLY",
+      "to": "MATH.6.GEO.SHAPE.PERIM",
+      "type": "PREREQUISITE_OF",
+      "reason": "Phải nhận ra hình trước khi tính chu vi, diện tích."
+    },
+    {
+      "from": "MATH.6.GEO.SHAPE.POLY",
+      "to": "MATH.6.GEO.SHAPE.SYM",
+      "type": "PREREQUISITE_OF",
+      "reason": "Trục đối xứng được tìm trên các hình đã biết."
+    },
+    {
+      "from": "MATH.6.GEO.SHAPE.SYM",
+      "to": "MATH.6.GEO.SHAPE.POLY",
+      "type": "PREREQUISITE_OF",
+      "reason": "Recorded output with a cycle: the step must break it."
+    },
+    {
+      "from": "MATH.6.NUM.FRAC.ADD",
+      "to": "MATH.6.NUM.NOPE",
+      "type": "RELATED_TO",
+      "reason": "Unknown code: the step must drop it."
+    }
+  ]
+}

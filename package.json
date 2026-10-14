@@ -27,7 +27,8 @@
     "check": "pnpm check:static && pnpm test:api",
     "acceptance": "tsx scripts/acceptance/run.ts",
     "ai:check": "pnpm --filter @vionx/ai ai:check",
-    "library:validate": "tsx scripts/library-validate.ts"
+    "library:validate": "tsx scripts/library-validate.ts",
+    "library:build": "tsx tools/library-build/src/cli.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -1,0 +1,74 @@
+{
+  "MATH.6.GEO.SHAPE.PERIM.Q01": {
+    "answerJson": "{\"blanks\":[[\"22\"]]}",
+    "solvable": true,
+    "hintsOk": true,
+    "ageAppropriate": true,
+    "issues": [],
+    "note": "Giải được, gợi ý hợp lí."
+  },
+  "MATH.6.GEO.SHAPE.PERIM.Q02": {
+    "answerJson": "{\"optionId\":\"a\"}",
+    "solvable": true,
+    "hintsOk": true,
+    "ageAppropriate": true,
+    "issues": [],
+    "note": "Giải được, gợi ý hợp lí."
+  },
+  "MATH.6.GEO.SHAPE.PERIM.Q03": {
+    "answerJson": "{\"value\":46}",
+    "solvable": true,
+    "hintsOk": true,
+    "ageAppropriate": true,
+    "issues": [],
+    "note": "Giải được, gợi ý hợp lí."
+  },
+  "MATH.6.GEO.SHAPE.POLY.Q01": {
+    "answerJson": "{\"value\":3}",
+    "solvable": true,
+    "hintsOk": true,
+    "ageAppropriate": true,
+    "issues": [],
+    "note": "Giải được, gợi ý hợp lí."
+  },
+  "MATH.6.GEO.SHAPE.POLY.Q02": {
+    "answerJson": "{\"optionId\":\"a\"}",
+    "solvable": true,
+    "hintsOk": true,
+    "ageAppropriate": true,
+    "issues": ["Câu hơi dễ so với mức vận dụng (L3)."],
+    "note": "Đáp án đúng; mức độ có thể thấp hơn L3."
+  },
+  "MATH.6.GEO.SHAPE.POLY.Q03": {
+    "answerJson": "{\"order\":[\"b\",\"c\",\"a\"]}",
+    "solvable": true,
+    "hintsOk": true,
+    "ageAppropriate": true,
+    "issues": [],
+    "note": "Giải được, gợi ý hợp lí."
+  },
+  "MATH.6.GEO.SHAPE.SYM.Q01": {
+    "answerJson": "{\"optionId\": \"b\"}",
+    "solvable": true,
+    "hintsOk": true,
+    "ageAppropriate": true,
+    "issues": [],
+    "note": "Hình vuông có một trục đối xứng nằm ngang."
+  },
+  "MATH.6.GEO.SHAPE.SYM.Q02": {
+    "answerJson": "{\"blanks\": [[\"4\"]]}",
+    "solvable": true,
+    "hintsOk": true,
+    "ageAppropriate": true,
+    "issues": [],
+    "note": "Giải được, gợi ý hợp lí."
+  },
+  "MATH.6.GEO.SHAPE.SYM.Q03": {
+    "answerJson": "{\"pairs\":[[\"l1\",\"r2\"],[\"l2\",\"r3\"],[\"l3\",\"r1\"]]}",
+    "solvable": true,
+    "hintsOk": true,
+    "ageAppropriate": true,
+    "issues": [],
+    "note": "Giải được, gợi ý hợp lí."
+  }
+}

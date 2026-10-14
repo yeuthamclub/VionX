@@ -1,0 +1,25 @@
+{
+  "SGK-Toan6-tap1-fixture#2": [
+    {
+      "type": "heading",
+      "text": "Bài 20. Chu vi và diện tích của một số tứ giác đã học",
+      "latex": null
+    },
+    {
+      "type": "definition",
+      "text": "Chu vi của hình chữ nhật bằng hai lần tổng của chiều dài và chiều rộng của hình chữ nhật đó.",
+      "latex": null
+    },
+    { "type": "formula", "text": "C = 2 nhân (a cộng b)", "latex": "C = 2(a + b)" },
+    {
+      "type": "definition",
+      "text": "Diện tích hình chữ nhật bằng chiều dài nhân với chiều rộng.",
+      "latex": null
+    },
+    {
+      "type": "exercise",
+      "text": "Luyện tập 1. Một mảnh vườn hình chữ nhật có chiều dài 12 m và chiều rộng 8 m. Tính chu vi của mảnh vườn.",
+      "latex": null
+    }
+  ]
+}

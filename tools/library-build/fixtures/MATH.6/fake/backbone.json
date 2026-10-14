@@ -1,0 +1,138 @@
+{
+  "domains": [
+    {
+      "code": "NUM",
+      "title": "Số và Đại số",
+      "topics": [
+        {
+          "code": "NAT",
+          "title": "Số tự nhiên",
+          "skills": [
+            {
+              "code": "GCD",
+              "title": "Tìm ước chung lớn nhất của hai số",
+              "gdptRef": "Xác định được ước chung, ước chung lớn nhất",
+              "weight": 1.5,
+              "templatable": true,
+              "visual": false
+            },
+            {
+              "code": "PRIME",
+              "title": "Nhận biết số nguyên tố, hợp số",
+              "gdptRef": "Nhận biết được khái niệm số nguyên tố, hợp số.",
+              "weight": 1,
+              "templatable": false,
+              "visual": false
+            }
+          ]
+        },
+        {
+          "code": "FRAC",
+          "title": "Phân số",
+          "skills": [
+            {
+              "code": "ADD",
+              "title": "Cộng, trừ phân số",
+              "gdptRef": "Thực hiện được các phép tính cộng, trừ, nhân, chia với phân số.",
+              "weight": 2,
+              "templatable": true,
+              "visual": false
+            },
+            {
+              "code": "CMP",
+              "title": "So sánh hai phân số",
+              "gdptRef": "So sánh được hai phân số cho trước.",
+              "weight": 1,
+              "templatable": true,
+              "visual": false
+            }
+          ]
+        },
+        {
+          "code": "DEC",
+          "title": "Số thập phân",
+          "skills": [
+            {
+              "code": "PCT",
+              "title": "Tính giá trị phần trăm của một số",
+              "gdptRef": "Tính được giá trị phần trăm của một số cho trước và tính được một số biết giá trị phần trăm của số đó.",
+              "weight": 1.5,
+              "templatable": true,
+              "visual": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "GEO",
+      "title": "Hình học và Đo lường",
+      "topics": [
+        {
+          "code": "SHAPE",
+          "title": "Các hình phẳng trong thực tiễn",
+          "skills": [
+            {
+              "code": "POLY",
+              "title": "Nhận dạng tam giác đều, hình vuông, lục giác đều",
+              "gdptRef": "Nhận dạng được tam giác đều, hình vuông, lục giác đều.",
+              "weight": 1,
+              "templatable": false,
+              "visual": true
+            },
+            {
+              "code": "PERIM",
+              "title": "Tính chu vi, diện tích hình chữ nhật, hình vuông",
+              "gdptRef": "Giải quyết được một số vấn đề thực tiễn gắn với việc tính chu vi và diện tích của các hình đặc biệt nói trên.",
+              "weight": 2,
+              "templatable": true,
+              "visual": true
+            },
+            {
+              "code": "SYM",
+              "title": "Nhận biết trục đối xứng của hình phẳng",
+              "gdptRef": "Nhận biết được trục đối xứng của một hình phẳng.",
+              "weight": 1,
+              "templatable": false,
+              "visual": true
+            }
+          ]
+        },
+        {
+          "code": "LINE",
+          "title": "Các hình hình học cơ bản",
+          "skills": [
+            {
+              "code": "SEG",
+              "title": "Trung điểm và độ dài đoạn thẳng",
+              "gdptRef": "Nhận biết được khái niệm đoạn thẳng, trung điểm của đoạn thẳng, độ dài đoạn thẳng.",
+              "weight": 1,
+              "templatable": false,
+              "visual": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "STAT",
+      "title": "Thống kê và Xác suất",
+      "topics": [
+        {
+          "code": "PROB",
+          "title": "Xác suất thực nghiệm",
+          "skills": [
+            {
+              "code": "EXP",
+              "title": "Tính xác suất thực nghiệm bằng phân số",
+              "gdptRef": "Sử dụng được phân số để mô tả xác suất (thực nghiệm) của khả năng xảy ra nhiều lần thông qua kiểm đếm số lần lặp lại của khả năng đó trong một số mô hình xác suất đơn giản.",
+              "weight": 1,
+              "templatable": true,
+              "visual": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

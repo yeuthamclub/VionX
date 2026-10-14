@@ -1,0 +1,12 @@
+{
+  "MATH.6.GEO.SHAPE.POLY.Q01": {
+    "brief": "Lục giác đều ABCDEF, các đỉnh ghi chữ A, B, C, D, E, F theo chiều kim đồng hồ; không vẽ đường chéo.",
+    "alt": "Hình lục giác đều ABCDEF",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"240\" height=\"220\" viewBox=\"0 0 240 220\"><title>Lục giác đều ABCDEF</title><polygon points=\"70,20 170,20 220,110 170,200 70,200 20,110\" fill=\"none\" stroke=\"#222\" stroke-width=\"3\"/><text x=\"62\" y=\"16\" font-family=\"sans-serif\" font-size=\"16\" text-anchor=\"end\">A</text><text x=\"178\" y=\"16\" font-family=\"sans-serif\" font-size=\"16\">B</text><text x=\"226\" y=\"115\" font-family=\"sans-serif\" font-size=\"16\">C</text><text x=\"178\" y=\"214\" font-family=\"sans-serif\" font-size=\"16\">D</text><text x=\"62\" y=\"214\" font-family=\"sans-serif\" font-size=\"16\" text-anchor=\"end\">E</text><text x=\"14\" y=\"115\" font-family=\"sans-serif\" font-size=\"16\" text-anchor=\"end\">F</text></svg>"
+  },
+  "MATH.6.GEO.SHAPE.PERIM.Q01": {
+    "brief": "Hình chữ nhật, cạnh dài ghi 7 cm, cạnh ngắn ghi 4 cm.",
+    "alt": "Hình chữ nhật có chiều dài 7 cm và chiều rộng 4 cm",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"190\" viewBox=\"0 0 300 190\"><title>Hình chữ nhật 7 cm x 4 cm</title><rect x=\"30\" y=\"30\" width=\"224\" height=\"128\" fill=\"none\" stroke=\"#222\" stroke-width=\"3\"/><text x=\"142\" y=\"22\" font-family=\"sans-serif\" font-size=\"16\" text-anchor=\"middle\">7 cm</text><text x=\"262\" y=\"99\" font-family=\"sans-serif\" font-size=\"16\">4 cm</text></svg>"
+  }
+}
