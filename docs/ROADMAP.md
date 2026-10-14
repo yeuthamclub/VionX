@@ -12,7 +12,7 @@ Status: TODO | IN_PROGRESS | DONE | BLOCKED.
 | M03 | Calendar, timetable & tasks | M02 | DONE (runnable acceptance green; Maestro flow needs an emulator, see M03_REPORT) |
 | M04 | Reward engine | M03 | DONE (runnable acceptance green; Maestro flow needs an emulator, see M04_REPORT) |
 | M05 | Curriculum & shared content library core (+ import) | M02 | DONE (acceptance green; no mobile screen, so no Maestro flow, see M05_REPORT) |
-| X01 | Toán 6 library: 500 items (build scripts, Claude batch + review) | M05 | TODO |
+| X01 | Toán 6 library: 500 items (build scripts, Claude batch + review) | M05 | IN_PROGRESS (scripts done, fake acceptance green; live 500-item run pending, see X01_REPORT runbook) |
 | X02 | Toán 2 library: 500 items (same scripts, read-aloud, SVG) | X01 | TODO |
 | M06 | Practice sessions, mastery, T0 hints, template variants, Grade 1-3 mode | M04, M05, X01, X02 | TODO |
 | M07 | Today planner | M06 | TODO |
