@@ -52,11 +52,20 @@ export type AiStopReason =
   | 'pause_turn'
   | (string & {});
 
+/** A base64 file sent before the text input (PDF pages for the vision route, rendered images). */
+export interface AiAttachment {
+  mediaType: 'application/pdf' | 'image/png' | 'image/jpeg';
+  /** Base64 without line breaks. */
+  data: string;
+}
+
 /** Provider-neutral request. `system` is the stable, cacheable prefix; `input` goes last. */
 export interface ProviderRequest {
   model: string;
   system: string;
   input: string;
+  /** Documents or images placed before `input` in the user turn. */
+  attachments?: AiAttachment[];
   maxTokens: number;
   effort: AiEffort | null;
   /** JSON Schema for structured output, or undefined for plain text. */

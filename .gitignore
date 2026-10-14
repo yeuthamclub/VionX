@@ -17,3 +17,6 @@ coverage/
 .wrangler/
 supabase/functions/.local-ca.pem
 apps/mobile/dist/
+
+# Library build work dirs (TASK_PACKS/X01.md): per-run state, batches, review files, packages.
+.library-build/

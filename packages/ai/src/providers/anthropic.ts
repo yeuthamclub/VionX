@@ -108,10 +108,27 @@ function toParams(request: ProviderRequest): Anthropic.MessageCreateParamsNonStr
           ],
         }
       : {}),
-    messages: [{ role: 'user', content: request.input }],
+    messages: [{ role: 'user', content: userContent(request) }],
   };
   if (Object.keys(outputConfig).length > 0) params.output_config = outputConfig;
   return params;
+}
+
+/** Attachments go before the text input (documents first, then the question). */
+function userContent(request: ProviderRequest): string | Anthropic.ContentBlockParam[] {
+  if (!request.attachments?.length) return request.input;
+  const blocks: Anthropic.ContentBlockParam[] = request.attachments.map((a) =>
+    a.mediaType === 'application/pdf'
+      ? {
+          type: 'document' as const,
+          source: { type: 'base64' as const, media_type: a.mediaType, data: a.data },
+        }
+      : {
+          type: 'image' as const,
+          source: { type: 'base64' as const, media_type: a.mediaType, data: a.data },
+        },
+  );
+  return [...blocks, { type: 'text', text: request.input }];
 }
 
 interface MessageLike {

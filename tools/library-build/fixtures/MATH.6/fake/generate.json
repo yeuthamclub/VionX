@@ -1,0 +1,413 @@
+{
+  "MATH.6.GEO.SHAPE.POLY.Q01": {
+    "slotId": "MATH.6.GEO.SHAPE.POLY.Q01",
+    "stemMd": "Quan sát lục giác đều $ABCDEF$ trong hình. Hình này có bao nhiêu đường chéo chính?",
+    "options": [],
+    "answerJson": "{\"value\": 3}",
+    "answerCheckExpr": "6 / 2",
+    "explanationMd": "Lục giác đều có ba đường chéo chính $AD$, $BE$, $CF$.",
+    "workedSolutionMd": "Các cặp đỉnh đối diện là $A$ và $D$, $B$ và $E$, $C$ và $F$. Vậy có $3$ đường chéo chính: $AD$, $BE$, $CF$.",
+    "hints": [
+      "Đường chéo chính nối hai đỉnh nằm đối diện nhau.",
+      "Lục giác đều có 6 đỉnh; mỗi đỉnh có đúng một đỉnh đối diện.",
+      "Mỗi đường chéo chính dùng hai đỉnh, nên hãy đếm theo cặp.",
+      "Sáu đỉnh ghép thành các cặp đối diện: $6 : 2 = ?$"
+    ],
+    "distractorFeedback": [],
+    "misconceptionTags": ["COUNT_ALL_DIAGONALS"],
+    "template": null,
+    "sourceRefs": [
+      {
+        "kind": "SGK",
+        "ref": "KNTT-TOAN6-2026",
+        "page": null
+      }
+    ]
+  },
+  "MATH.6.GEO.SHAPE.POLY.Q02": {
+    "slotId": "MATH.6.GEO.SHAPE.POLY.Q02",
+    "stemMd": "Một viên gạch lát nền có bốn cạnh bằng nhau và bốn góc vuông. Viên gạch có dạng hình gì?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Hình vuông",
+        "side": null
+      },
+      {
+        "id": "b",
+        "text": "Hình tam giác đều",
+        "side": null
+      },
+      {
+        "id": "c",
+        "text": "Hình lục giác đều",
+        "side": null
+      },
+      {
+        "id": "d",
+        "text": "Hình thang cân",
+        "side": null
+      }
+    ],
+    "answerJson": "{\"optionId\": \"a\"}",
+    "answerCheckExpr": null,
+    "explanationMd": "Hình vuông có bốn cạnh bằng nhau và bốn góc vuông.",
+    "workedSolutionMd": "Viên gạch có 4 cạnh nên không phải tam giác đều hay lục giác đều. Bốn cạnh bằng nhau và bốn góc vuông là đặc điểm của hình vuông.",
+    "hints": [
+      "Đếm số cạnh của viên gạch.",
+      "Hình có bốn cạnh bằng nhau là hình thoi hoặc hình vuông.",
+      "Trong hai hình đó, hình nào có bốn góc vuông?",
+      "Hình có bốn cạnh bằng nhau và bốn góc vuông là hình vuông."
+    ],
+    "distractorFeedback": [
+      {
+        "optionId": "b",
+        "md": "Tam giác đều chỉ có ba cạnh.",
+        "misconception": "COUNT_SIDES"
+      },
+      {
+        "optionId": "c",
+        "md": "Lục giác đều có sáu cạnh và không có góc vuông.",
+        "misconception": "COUNT_SIDES"
+      },
+      {
+        "optionId": "d",
+        "md": "Hình thang cân thường không có bốn cạnh bằng nhau.",
+        "misconception": "TRAPEZOID_SIDES"
+      }
+    ],
+    "misconceptionTags": ["COUNT_SIDES", "TRAPEZOID_SIDES"],
+    "template": null,
+    "sourceRefs": [
+      {
+        "kind": "SGK",
+        "ref": "KNTT-TOAN6-2026",
+        "page": null
+      }
+    ]
+  },
+  "MATH.6.GEO.SHAPE.POLY.Q03": {
+    "slotId": "MATH.6.GEO.SHAPE.POLY.Q03",
+    "stemMd": "Sắp xếp các hình sau theo số cạnh từ ít đến nhiều.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Lục giác đều",
+        "side": null
+      },
+      {
+        "id": "b",
+        "text": "Tam giác đều",
+        "side": null
+      },
+      {
+        "id": "c",
+        "text": "Hình vuông",
+        "side": null
+      }
+    ],
+    "answerJson": "{\"order\": [\"b\", \"c\", \"a\"]}",
+    "answerCheckExpr": null,
+    "explanationMd": "Số cạnh tăng dần: 3, 4, 6.",
+    "workedSolutionMd": "Tam giác đều có 3 cạnh, hình vuông có 4 cạnh, lục giác đều có 6 cạnh. Thứ tự là: tam giác đều, hình vuông, lục giác đều.",
+    "hints": [
+      "Đếm số cạnh của từng hình.",
+      "Tam giác có 3 cạnh, hình vuông có 4 cạnh.",
+      "Lục giác có 6 cạnh.",
+      "Xếp theo thứ tự 3, 4, 6 cạnh."
+    ],
+    "distractorFeedback": [],
+    "misconceptionTags": ["COUNT_SIDES"],
+    "template": null,
+    "sourceRefs": [
+      {
+        "kind": "SGK",
+        "ref": "KNTT-TOAN6-2026",
+        "page": null
+      }
+    ]
+  },
+  "MATH.6.GEO.SHAPE.PERIM.Q01": {
+    "slotId": "MATH.6.GEO.SHAPE.PERIM.Q01",
+    "stemMd": "Hình chữ nhật trong hình có chiều dài $7$ cm và chiều rộng $4$ cm. Chu vi của hình chữ nhật đó là ___ cm.",
+    "options": [],
+    "answerJson": "{\"blanks\": [[\"22\"]]}",
+    "answerCheckExpr": "2 * (7 + 4)",
+    "explanationMd": "Chu vi hình chữ nhật là $2 \\cdot (7 + 4) = 22$ cm.",
+    "workedSolutionMd": "Chu vi bằng $2 \\cdot (7 + 4) = 2 \\cdot 11 = 22$ (cm).",
+    "hints": [
+      "Chu vi là tổng độ dài bốn cạnh.",
+      "Hình chữ nhật có hai cạnh dài bằng nhau và hai cạnh ngắn bằng nhau.",
+      "Cộng chiều dài với chiều rộng rồi nhân với 2.",
+      "$2 \\cdot (7 + 4) = ?$"
+    ],
+    "distractorFeedback": [],
+    "misconceptionTags": ["AREA_FOR_PERIMETER", "HALF_PERIMETER"],
+    "template": null,
+    "sourceRefs": [
+      {
+        "kind": "SGK",
+        "ref": "KNTT-TOAN6-2026",
+        "page": null
+      }
+    ]
+  },
+  "MATH.6.GEO.SHAPE.PERIM.Q02": {
+    "slotId": "MATH.6.GEO.SHAPE.PERIM.Q02",
+    "stemMd": "Tính diện tích một mảnh bìa hình chữ nhật khi biết chiều dài và chiều rộng (đề sinh từ mẫu).",
+    "options": [],
+    "answerJson": null,
+    "answerCheckExpr": null,
+    "explanationMd": "Diện tích bằng tích chiều dài và chiều rộng.",
+    "workedSolutionMd": "Diện tích hình chữ nhật bằng chiều dài nhân chiều rộng.",
+    "hints": [
+      "Diện tích cho biết hình phủ bao nhiêu ô vuông $1\\ \\text{cm}^2$.",
+      "Mỗi hàng có số ô bằng chiều dài.",
+      "Số hàng bằng chiều rộng.",
+      "Nhân chiều dài với chiều rộng."
+    ],
+    "distractorFeedback": [
+      {
+        "optionId": "d1",
+        "md": "Đó là chu vi, không phải diện tích.",
+        "misconception": "PERIMETER_FOR_AREA"
+      },
+      {
+        "optionId": "d2",
+        "md": "Diện tích là tích của hai cạnh, không phải tổng.",
+        "misconception": "ADD_SIDES"
+      },
+      {
+        "optionId": "d3",
+        "md": "Chỉ nhân chiều dài với chiều rộng một lần.",
+        "misconception": "DOUBLE_AREA"
+      }
+    ],
+    "misconceptionTags": ["PERIMETER_FOR_AREA", "ADD_SIDES", "DOUBLE_AREA"],
+    "template": {
+      "params": [
+        {
+          "name": "a",
+          "type": "int",
+          "min": 5,
+          "max": 20,
+          "step": null,
+          "values": null
+        },
+        {
+          "name": "b",
+          "type": "int",
+          "min": 2,
+          "max": 12,
+          "step": null,
+          "values": null
+        }
+      ],
+      "constraints": ["a > b"],
+      "answerExpr": "a * b",
+      "distractorExprs": ["2 * (a + b)", "a + b", "2 * a * b"],
+      "stem": "Một mảnh bìa hình chữ nhật có chiều dài {{a}} cm và chiều rộng {{b}} cm. Diện tích mảnh bìa là bao nhiêu $\\text{cm}^2$?",
+      "explanation": "Diện tích bằng $({{a}}) \\cdot ({{b}}) = {{answer}}$ $\\text{cm}^2$."
+    },
+    "sourceRefs": [
+      {
+        "kind": "SGK",
+        "ref": "KNTT-TOAN6-2026",
+        "page": null
+      }
+    ]
+  },
+  "MATH.6.GEO.SHAPE.PERIM.Q03@1": {
+    "slotId": "MATH.6.GEO.SHAPE.PERIM.Q03",
+    "stemMd": "Bác Lan rào xung quanh một mảnh vườn hình chữ nhật dài $15$ m, rộng $9$ m, chừa lại một lối vào rộng $2$ m không rào. Bác cần bao nhiêu mét hàng rào?",
+    "options": [],
+    "answerJson": "{\"value\": 46}",
+    "answerCheckExpr": "2 * (15 + 9) - 2",
+    "explanationMd": "Cần $46$ m hàng rào.",
+    "workedSolutionMd": "Chu vi của hình chữ nhật bằng hai lần tổng của chiều dài và chiều rộng của hình chữ nhật đó, nên chu vi mảnh vườn là $2 \\cdot (15 + 9) = 48$ m. Trừ lối vào: $48 - 2 = 46$ m.",
+    "hints": [
+      "Hàng rào chạy quanh mảnh vườn, trừ chỗ lối vào.",
+      "Trước hết tính độ dài cả vòng quanh vườn (chu vi).",
+      "Nửa vòng quanh vườn gồm một chiều dài và một chiều rộng.",
+      "Lấy chu vi trừ đi độ dài lối vào."
+    ],
+    "distractorFeedback": [],
+    "misconceptionTags": ["FORGET_GATE", "HALF_PERIMETER"],
+    "template": null,
+    "sourceRefs": [
+      {
+        "kind": "SGK",
+        "ref": "KNTT-TOAN6-2026",
+        "page": null
+      }
+    ]
+  },
+  "MATH.6.GEO.SHAPE.PERIM.Q03@2": {
+    "slotId": "MATH.6.GEO.SHAPE.PERIM.Q03",
+    "stemMd": "Bác Lan rào xung quanh một mảnh vườn hình chữ nhật dài $15$ m, rộng $9$ m, chừa lại một lối vào rộng $2$ m không rào. Bác cần bao nhiêu mét hàng rào?",
+    "options": [],
+    "answerJson": "{\"value\": 46}",
+    "answerCheckExpr": "2 * (15 + 9) - 2",
+    "explanationMd": "Cần $46$ m hàng rào.",
+    "workedSolutionMd": "Nửa vòng quanh vườn dài $15 + 9 = 24$ m, nên cả vòng dài $2 \\cdot 24 = 48$ m. Bỏ phần lối vào: $48 - 2 = 46$ m.",
+    "hints": [
+      "Hàng rào chạy quanh mảnh vườn, trừ chỗ lối vào.",
+      "Trước hết tính độ dài cả vòng quanh vườn (chu vi).",
+      "Nửa vòng quanh vườn gồm một chiều dài và một chiều rộng.",
+      "Lấy chu vi trừ đi độ dài lối vào."
+    ],
+    "distractorFeedback": [],
+    "misconceptionTags": ["FORGET_GATE", "HALF_PERIMETER"],
+    "template": null,
+    "sourceRefs": [
+      {
+        "kind": "SGK",
+        "ref": "KNTT-TOAN6-2026",
+        "page": null
+      }
+    ]
+  },
+  "MATH.6.GEO.SHAPE.SYM.Q01": {
+    "slotId": "MATH.6.GEO.SHAPE.SYM.Q01",
+    "stemMd": "Hình nào sau đây có đúng một trục đối xứng?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Tam giác đều",
+        "side": null
+      },
+      {
+        "id": "b",
+        "text": "Hình vuông",
+        "side": null
+      },
+      {
+        "id": "c",
+        "text": "Hình thang cân",
+        "side": null
+      },
+      {
+        "id": "d",
+        "text": "Lục giác đều",
+        "side": null
+      }
+    ],
+    "answerJson": "{\"optionId\": \"c\"}",
+    "answerCheckExpr": null,
+    "explanationMd": "Hình thang cân có đúng một trục đối xứng.",
+    "workedSolutionMd": "Tam giác đều có 3 trục đối xứng, hình vuông có 4, lục giác đều có 6. Hình thang cân chỉ có 1 trục, đi qua trung điểm của hai đáy.",
+    "hints": [
+      "Trục đối xứng chia hình thành hai nửa trùng khít khi gấp lại.",
+      "Đếm số trục đối xứng của từng hình.",
+      "Tam giác đều có 3 trục, hình vuông có 4 trục, lục giác đều có 6 trục.",
+      "Hình còn lại chỉ có một trục đi qua trung điểm hai đáy."
+    ],
+    "distractorFeedback": [
+      {
+        "optionId": "a",
+        "md": "Tam giác đều có ba trục đối xứng.",
+        "misconception": "COUNT_AXES"
+      },
+      {
+        "optionId": "b",
+        "md": "Hình vuông có bốn trục đối xứng: hai đường chéo và hai đường nối trung điểm cạnh đối.",
+        "misconception": "MISS_DIAGONAL_AXES"
+      },
+      {
+        "optionId": "d",
+        "md": "Lục giác đều có sáu trục đối xứng.",
+        "misconception": "COUNT_AXES"
+      }
+    ],
+    "misconceptionTags": ["COUNT_AXES", "MISS_DIAGONAL_AXES"],
+    "template": null,
+    "sourceRefs": [
+      {
+        "kind": "SGK",
+        "ref": "KNTT-TOAN6-2026",
+        "page": null
+      }
+    ]
+  },
+  "MATH.6.GEO.SHAPE.SYM.Q02": {
+    "slotId": "MATH.6.GEO.SHAPE.SYM.Q02",
+    "stemMd": "Điền vào chỗ trống: Hình vuông có ___ trục đối xứng.",
+    "options": [],
+    "answerJson": "{\"blanks\": [[\"4\", \"bốn\"]]}",
+    "answerCheckExpr": "2 + 2",
+    "explanationMd": "Hình vuông có $4$ trục đối xứng.",
+    "workedSolutionMd": "Hình vuông có 2 trục đi qua trung điểm các cặp cạnh đối và 2 trục là hai đường chéo, tất cả $4$ trục.",
+    "hints": [
+      "Thử gấp hình vuông sao cho hai nửa trùng nhau.",
+      "Gấp theo đường nối trung điểm hai cạnh đối: có 2 cách.",
+      "Gấp theo đường chéo: thêm mấy cách nữa?",
+      "Cộng số trục theo đường nối trung điểm và theo đường chéo."
+    ],
+    "distractorFeedback": [],
+    "misconceptionTags": ["MISS_DIAGONAL_AXES"],
+    "template": null,
+    "sourceRefs": [
+      {
+        "kind": "SGK",
+        "ref": "KNTT-TOAN6-2026",
+        "page": null
+      }
+    ]
+  },
+  "MATH.6.GEO.SHAPE.SYM.Q03": {
+    "slotId": "MATH.6.GEO.SHAPE.SYM.Q03",
+    "stemMd": "Nối mỗi hình với số trục đối xứng của nó.",
+    "options": [
+      {
+        "id": "l1",
+        "text": "Tam giác đều",
+        "side": "left"
+      },
+      {
+        "id": "l2",
+        "text": "Hình vuông",
+        "side": "left"
+      },
+      {
+        "id": "l3",
+        "text": "Lục giác đều",
+        "side": "left"
+      },
+      {
+        "id": "r1",
+        "text": "6 trục",
+        "side": "right"
+      },
+      {
+        "id": "r2",
+        "text": "3 trục",
+        "side": "right"
+      },
+      {
+        "id": "r3",
+        "text": "4 trục",
+        "side": "right"
+      }
+    ],
+    "answerJson": "{\"pairs\": [[\"l1\", \"r2\"], [\"l2\", \"r3\"], [\"l3\", \"r1\"]]}",
+    "answerCheckExpr": null,
+    "explanationMd": "Số trục đối xứng của hình đều bằng số cạnh.",
+    "workedSolutionMd": "Với hình đều, số trục đối xứng bằng số cạnh: tam giác đều 3, hình vuông 4, lục giác đều 6.",
+    "hints": [
+      "Mỗi trục đối xứng chia hình thành hai nửa trùng khít.",
+      "Hình đều có bao nhiêu cạnh thì có bấy nhiêu trục đối xứng.",
+      "Tam giác đều có 3 cạnh, hình vuông có 4 cạnh.",
+      "Lục giác đều có 6 cạnh."
+    ],
+    "distractorFeedback": [],
+    "misconceptionTags": ["COUNT_AXES"],
+    "template": null,
+    "sourceRefs": [
+      {
+        "kind": "SGK",
+        "ref": "KNTT-TOAN6-2026",
+        "page": null
+      }
+    ]
+  }
+}

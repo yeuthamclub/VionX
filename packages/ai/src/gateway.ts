@@ -2,6 +2,7 @@ import { estimateCostUsd } from './cost.ts';
 import { AiError } from './errors.ts';
 import { supportsRefusalFallback } from './task-config.ts';
 import type {
+  AiAttachment,
   AiProvider,
   AiRunStore,
   AiTaskConfig,
@@ -20,6 +21,8 @@ export interface RunParams {
   system?: string;
   /** Item-specific input, sent last. Objects are serialised as JSON. */
   input: string | Record<string, unknown>;
+  /** PDF pages or images sent before `input`. */
+  attachments?: AiAttachment[];
   /** JSON Schema for structured output; the result is parsed into `output`. */
   outputSchema?: Record<string, unknown>;
   /** Pseudonymous student reference (never a name). */
@@ -41,6 +44,7 @@ export interface BatchItem {
   customId: string;
   system?: string;
   input: string | Record<string, unknown>;
+  attachments?: AiAttachment[];
   outputSchema?: Record<string, unknown>;
   sourceRefs?: string[];
 }
@@ -244,7 +248,7 @@ export class AiGateway {
 
 function buildRequest(
   config: AiTaskConfig,
-  params: Pick<RunParams, 'system' | 'input' | 'outputSchema'>,
+  params: Pick<RunParams, 'system' | 'input' | 'attachments' | 'outputSchema'>,
   mode: 'realtime' | 'batch',
 ): ProviderRequest {
   const request: ProviderRequest = {
@@ -257,6 +261,7 @@ function buildRequest(
     refusalFallback: mode === 'realtime' && supportsRefusalFallback(config.model),
   };
   if (params.outputSchema) request.outputSchema = params.outputSchema;
+  if (params.attachments?.length) request.attachments = params.attachments;
   return request;
 }
 

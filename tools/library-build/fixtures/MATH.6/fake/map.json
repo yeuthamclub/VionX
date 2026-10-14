@@ -1,0 +1,34 @@
+{
+  "SGK-Toan6-tap1-fixture": {
+    "lessons": [
+      {
+        "lessonRef": "Bài 18",
+        "title": "Hình tam giác đều. Hình vuông. Hình lục giác đều",
+        "pageStart": 2,
+        "pageEnd": null,
+        "skills": ["MATH.6.GEO.SHAPE.POLY", "MATH.6.GEO.SHAPE.SYM"]
+      },
+      {
+        "lessonRef": "Bài 19",
+        "title": "Hình chữ nhật. Hình thoi. Hình bình hành",
+        "pageStart": 2,
+        "pageEnd": 2,
+        "skills": ["MATH.6.GEO.SHAPE.POLY"]
+      },
+      {
+        "lessonRef": "Bài 20",
+        "title": "Chu vi và diện tích của một số tứ giác đã học",
+        "pageStart": 2,
+        "pageEnd": 2,
+        "skills": ["MATH.6.GEO.SHAPE.PERIM"]
+      },
+      {
+        "lessonRef": "Bài 21",
+        "title": "Hình có trục đối xứng",
+        "pageStart": 2,
+        "pageEnd": 2,
+        "skills": ["MATH.6.GEO.SHAPE.SYM", "MATH.6.GEO.SHAPE.UNKNOWN"]
+      }
+    ]
+  }
+}

@@ -143,3 +143,60 @@ export function coverageReport(
 }
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
+
+/** Approved items a launch library needs (TASK_PACKS/X01.md "Acceptance (per run)"). */
+export const MIN_APPROVED_FOR_ACCEPTANCE = 480;
+
+export interface LibraryAcceptance {
+  ok: boolean;
+  /** One line per criterion, `✓`/`✗` prefixed, for reports. */
+  lines: string[];
+  problems: string[];
+}
+
+/**
+ * The per-run acceptance criteria that can be read from a package: at least 480 approved items,
+ * every active skill with at least 2 approved items, and the TEMPLATE, group, read-aloud and
+ * written shares within ±5 points of the subject profile. (The copy check needs the source
+ * books and is reported by the build scripts.)
+ */
+export function libraryAcceptance(
+  report: CoverageReport,
+  profile: CoverageProfile,
+  options: { minApproved?: number; activeSkills?: string[] } = {},
+): LibraryAcceptance {
+  const lines: string[] = [];
+  const problems: string[] = [];
+  const check = (ok: boolean, text: string) => {
+    lines.push(`${ok ? '✓' : '✗'} ${text}`);
+    if (!ok) problems.push(text);
+  };
+  const minApproved = options.minApproved ?? MIN_APPROVED_FOR_ACCEPTANCE;
+  check(
+    report.approvedItems >= minApproved,
+    `${report.approvedItems} approved items (need ≥${minApproved})`,
+  );
+  const active = new Set(options.activeSkills ?? report.perSkill.map((s) => s.code));
+  const thin = report.perSkill.filter(
+    (s) => active.has(s.code) && s.approved < MIN_APPROVED_ITEMS_PER_SKILL,
+  );
+  check(
+    thin.length === 0,
+    thin.length === 0
+      ? `every active skill has ≥${MIN_APPROVED_ITEMS_PER_SKILL} approved items`
+      : `${thin.length} active skills have <${MIN_APPROVED_ITEMS_PER_SKILL} approved items (${thin
+          .slice(0, 5)
+          .map((s) => s.code)
+          .join(', ')}${thin.length > 5 ? ', …' : ''})`,
+  );
+  const within = (name: string, actual: number, expected: number) =>
+    check(
+      Math.abs(actual - expected) <= SHARE_TOLERANCE + 1e-9,
+      `${name} share ${pct(actual)} (profile ${pct(expected)} ±5 points)`,
+    );
+  within('TEMPLATE', report.templateShare, profile.templateShare);
+  within('group', report.groupShare, profile.groupShare);
+  within('read-aloud', report.readAloudShare, profile.readAloudDefault ? 1 : 0);
+  within('written', report.writtenShare, profile.writtenShare);
+  return { ok: problems.length === 0, lines, problems };
+}
