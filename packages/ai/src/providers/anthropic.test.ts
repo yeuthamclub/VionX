@@ -97,4 +97,37 @@ describe('AnthropicProvider', () => {
     const response = await provider.complete(baseRequest);
     expect(response).toMatchObject({ stopReason: 'refusal', refusalCategory: 'cyber' });
   });
+
+  it('puts PDF attachments before the text input, in batches too', async () => {
+    const { calls, fakeFetch } = capture({
+      id: 'msgbatch_1',
+      type: 'message_batch',
+      processing_status: 'in_progress',
+      request_counts: { processing: 1, succeeded: 0, errored: 0, canceled: 0, expired: 0 },
+    });
+    const provider = new AnthropicProvider({ apiKey: 'test', fetch: fakeFetch, maxRetries: 0 });
+    await provider.createBatch([
+      {
+        customId: 'p1',
+        request: {
+          ...baseRequest,
+          refusalFallback: false,
+          attachments: [{ mediaType: 'application/pdf', data: 'JVBERi0=' }],
+        },
+      },
+    ]);
+    const params = (calls[0]!.body.requests as { params: Record<string, unknown> }[])[0]!.params;
+    expect(params.messages).toEqual([
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'document',
+            source: { type: 'base64', media_type: 'application/pdf', data: 'JVBERi0=' },
+          },
+          { type: 'text', text: 'item input' },
+        ],
+      },
+    ]);
+  });
 });
