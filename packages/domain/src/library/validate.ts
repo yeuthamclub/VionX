@@ -141,7 +141,8 @@ export function answerProblem(
           left.has(p[0] as string) &&
           right.has(p[1] as string),
       );
-      return ok && pairs.length === left.size
+      const paired = new Set(pairs.map((p) => (Array.isArray(p) ? p[0] : undefined)));
+      return ok && pairs.length === left.size && paired.size === left.size
         ? null
         : 'answer.pairs must pair every left option with a right option';
     }

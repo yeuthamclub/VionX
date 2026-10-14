@@ -203,6 +203,19 @@ describe('sanitizeSvg', () => {
     );
   });
 
+  it('sees through character references and CSS escapes that hide external references', () => {
+    const r = sanitizeSvg(
+      '<svg><rect fill="u&#114;l(http://evil/x)"/><rect fill="u&#x72;l(#ok)"/><circle stroke="u\\72l(http://evil/y)"/><use href="&#35;a"/><path d="M0 0" fill="&#106;avascript:x"/></svg>',
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.svg).toBe(
+      '<svg><rect/><rect fill="u&#x72;l(#ok)"/><circle/><use href="&#35;a"/><path d="M0 0"/></svg>',
+    );
+    expect(r.value.svg).not.toMatch(/evil|javascript|&#106;/i);
+    expect(sanitizeSvg('<svg><rect fill="&#99999999;"/></svg>').ok).toBe(true);
+  });
+
   it('rejects DOCTYPE/ENTITY, non-svg roots and broken markup', () => {
     for (const bad of [
       '<!DOCTYPE svg [<!ENTITY x "y">]><svg/>',
@@ -434,6 +447,24 @@ describe('answerProblem', () => {
     ).not.toBeNull();
     expect(answerProblem({ type: 'numeric', options: [], answer: { value: true } })).not.toBeNull();
     expect(answerProblem({ type: 'written', options: [], answer: { value: 1 } })).not.toBeNull();
+    // Every left option is paired once: a repeated left leaves another one unpaired.
+    expect(
+      answerProblem({
+        type: 'matching',
+        options: [
+          { id: 'l1', side: 'left' },
+          { id: 'l2', side: 'left' },
+          { id: 'r1', side: 'right' },
+          { id: 'r2', side: 'right' },
+        ],
+        answer: {
+          pairs: [
+            ['l1', 'r1'],
+            ['l1', 'r2'],
+          ],
+        },
+      }),
+    ).not.toBeNull();
   });
 });
 

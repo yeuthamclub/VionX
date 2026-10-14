@@ -118,7 +118,21 @@ const escapeAttr = (value: string) =>
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;');
 
-function safeValue(name: string, value: string): boolean {
+/** Decodes character references, which the browser resolves before it reads the value. */
+const codePoint = (n: number) => (n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : '\ufffd');
+const decodeRefs = (value: string) =>
+  value
+    .replace(/&#x([0-9a-f]+);?/gi, (_, hex: string) => codePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);?/g, (_, dec: string) => codePoint(Number(dec)))
+    .replace(
+      /&(amp|lt|gt|quot|apos);/gi,
+      (_, n: string) => ({ amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" })[n.toLowerCase()]!,
+    );
+
+function safeValue(name: string, raw: string): boolean {
+  // CSS escapes (`u\72l(`) would hide url() in presentation attributes.
+  if (raw.includes('\\')) return false;
+  const value = decodeRefs(raw);
   if (/javascript:|data:|vbscript:/i.test(value.replace(/\s+/g, ''))) return false;
   if (name === 'href' || name === 'xlink:href') return /^#[\w.-]+$/.test(value.trim());
   for (const match of value.matchAll(URL_VALUE)) {
