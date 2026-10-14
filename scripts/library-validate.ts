@@ -3,6 +3,9 @@
 // cycles, orphan skills, source notes, answers, SVG sanitising), every template over N seeds
 // (default 1,000), and prints the coverage report against the subject profile.
 // --write-manifest refreshes manifest.json counts and checksums of a package directory first.
+// --acceptance [--min-approved N] also checks the launch-library acceptance criteria
+// (TASK_PACKS/X01.md): ≥480 approved items, ≥2 approved items per active skill, profile shares
+// within ±5 points. It fails the run when they are not met.
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import {
@@ -12,18 +15,23 @@ import {
 } from '../packages/contracts/src/library-package.ts';
 import {
   coverageReport,
+  libraryAcceptance,
   subjectProfile,
   validateLibraryPackage,
 } from '../packages/domain/src/index.ts';
 import { readPackage } from './lib/library-files.ts';
 
 const args = process.argv.slice(2);
-const path = args.find((a) => !a.startsWith('--'));
 const seedsArg = args[args.indexOf('--seeds') + 1];
 const seeds = args.includes('--seeds') ? Number(seedsArg) : 1000;
+const minApproved = args.includes('--min-approved')
+  ? Number(args[args.indexOf('--min-approved') + 1])
+  : undefined;
+const VALUED = ['--seeds', '--min-approved'];
+const path = args.find((a, i) => !a.startsWith('--') && !VALUED.includes(args[i - 1] ?? ''));
 if (!path || !Number.isInteger(seeds) || seeds < 1) {
   console.error(
-    'Usage: pnpm library:validate <package dir or .zip> [--write-manifest] [--seeds N] [--json]',
+    'Usage: pnpm library:validate <package dir or .zip> [--write-manifest] [--seeds N] [--json] [--acceptance [--min-approved N]]',
   );
   process.exit(2);
 }
@@ -91,10 +99,25 @@ const coverage = coverageReport(
   profile,
 );
 const warnings = [...parsed.warnings, ...validation.warnings];
-const valid = validation.errors.length === 0;
+const acceptance =
+  args.includes('--acceptance') && profile
+    ? libraryAcceptance(coverage, profile, {
+        ...(minApproved === undefined ? {} : { minApproved }),
+        activeSkills: pkg.curriculum.nodes
+          .filter((n) => n.level === 'SKILL' && n.status !== 'INACTIVE')
+          .map((n) => n.code),
+      })
+    : undefined;
+if (args.includes('--acceptance') && !profile) {
+  console.error(`No subject profile for ${pkg.manifest.grade}-${pkg.manifest.subject}`);
+  process.exit(2);
+}
+const valid = validation.errors.length === 0 && (acceptance?.ok ?? true);
 
 if (json) {
-  console.log(JSON.stringify({ valid, errors: validation.errors, warnings, coverage }, null, 2));
+  console.log(
+    JSON.stringify({ valid, errors: validation.errors, warnings, coverage, acceptance }, null, 2),
+  );
 } else {
   const m = pkg.manifest;
   console.log(
@@ -117,8 +140,16 @@ if (json) {
     );
   }
   for (const f of coverage.flags) console.log(`  flag: ${f}`);
+  if (acceptance) {
+    console.log('Acceptance (TASK_PACKS/X01.md):');
+    for (const line of acceptance.lines) console.log(`  ${line}`);
+  }
   console.log(
-    valid ? 'Package is valid.' : `Package is invalid (${validation.errors.length} errors).`,
+    validation.errors.length > 0
+      ? `Package is invalid (${validation.errors.length} errors).`
+      : acceptance && !acceptance.ok
+        ? `Package is valid but does not meet the acceptance criteria (${acceptance.problems.length}).`
+        : 'Package is valid.',
   );
 }
 process.exit(valid ? 0 : 1);
