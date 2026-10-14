@@ -64,6 +64,7 @@ jobs:
       - run: pnpm acceptance m03
       - run: pnpm acceptance m04
       - run: pnpm acceptance m05
+      - run: pnpm acceptance x01
       - name: Functions log
         if: failure()
         run: cat /tmp/functions.log
