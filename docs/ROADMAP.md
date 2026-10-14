@@ -10,7 +10,7 @@ Status: TODO | IN_PROGRESS | DONE | BLOCKED.
 | M01 | Identity & household (parent Google/OTP, child ID+PIN) | M00 | DONE (runnable acceptance green; Maestro flow and Google sign-in need an emulator and owner OAuth setup, see M01_REPORT) |
 | M02 | Consent & privacy core | M01 | DONE (runnable acceptance green; Maestro flows need an emulator; legal drafts need owner legal review, see M02_REPORT) |
 | M03 | Calendar, timetable & tasks | M02 | DONE (runnable acceptance green; Maestro flow needs an emulator, see M03_REPORT) |
-| M04 | Reward engine | M03 | TODO |
+| M04 | Reward engine | M03 | DONE (runnable acceptance green; Maestro flow needs an emulator, see M04_REPORT) |
 | M05 | Curriculum & shared content library core (+ import) | M02 | TODO |
 | X01 | Toán 6 library: 500 items (build scripts, Claude batch + review) | M05 | TODO |
 | X02 | Toán 2 library: 500 items (same scripts, read-aloud, SVG) | X01 | TODO |

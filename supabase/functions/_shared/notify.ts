@@ -6,7 +6,7 @@ import type { TxSql } from './db.ts';
 export interface ParentNotification {
   userId: string;
   householdId: string;
-  kind: 'privacy.export_ready' | 'task.approval_requested';
+  kind: 'privacy.export_ready' | 'task.approval_requested' | 'reward.redemption_requested';
   /** Small, non-sensitive payload for the app to route the tap (ids only). */
   data: Record<string, string>;
   /** One notification per key (e.g. per export job), however often the caller retries. */

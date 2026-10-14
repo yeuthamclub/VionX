@@ -102,6 +102,46 @@ export const EXPORT_SECTIONS: ExportSection[] = [
       from app.task_completions c where c.household_id = ${h} order by c.completed_at`,
   },
   {
+    file: 'reward_rules.json',
+    query: (db, h) => db`
+      select version, config, created_by, created_at
+      from app.reward_rules where household_id = ${h} order by version`,
+  },
+  {
+    file: 'xp_ledger.json',
+    query: (db, h) => db`
+      select id, student_id, reward_day::text as reward_day, lifetime_xp_delta, rewardable_xp_delta,
+             source_type, source_id, rule_id, capped_reason, reversal_of, created_at
+      from app.xp_ledger where household_id = ${h} order by created_at, id`,
+  },
+  {
+    file: 'coin_ledger.json',
+    query: (db, h) => db`
+      select id, student_id, amount, kind, reward_day::text as reward_day, source_type, source_id,
+             rule_id, reversal_of, created_at
+      from app.coin_ledger where household_id = ${h} order by created_at, id`,
+  },
+  {
+    file: 'reward_days.json',
+    query: (db, h) => db`
+      select student_id, local_day::text as local_day, version, weekend, tier, cap_coins,
+             rewardable_xp, coins_total, coins_granted, xp_forfeited, facts, settled_at
+      from app.daily_reward_snapshots where household_id = ${h} order by local_day, version`,
+  },
+  {
+    file: 'reward_catalog.json',
+    query: (db, h) => db`
+      select id, title, description, cost_coins, icon, status, archived_at, created_at, updated_at
+      from app.reward_catalog_items where household_id = ${h} order by created_at`,
+  },
+  {
+    file: 'reward_redemptions.json',
+    query: (db, h) => db`
+      select id, student_id, item_id, title, cost_coins, status, requested_at, decided_at,
+             decided_by, decision_note
+      from app.reward_redemptions where household_id = ${h} order by requested_at`,
+  },
+  {
     file: 'policy_acceptances.json',
     query: (db, h) => db`
       select a.user_id, a.policy_type, a.policy_version, a.locale, a.accepted_at

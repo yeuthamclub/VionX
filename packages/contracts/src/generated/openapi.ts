@@ -3088,6 +3088,846 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/students/{id}/rewards/wallet': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A child’s wallet: XP, level, Coin and today’s cap bar
+     * @description Lifetime XP and level, spendable Coin (held Coin of pending redemptions excluded) with its nominal VND value (display only), and today’s cap bar: rewardable XP of the household-local day, the cap of the weekday or of the weekend tier reached so far, and the Coin the day would convert to at day end. Parent: any child of the household; child: only their own id. Other ids answer 404.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Wallet */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Wallet'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/rewards/ledger': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * A child’s XP or Coin ledger, newest first
+     * @description Append-only entries: XP grants (with `cappedReason` when part of it counts toward lifetime XP only) and reversals; Coin day conversions, redemption holds and reversals. Cursor pagination. Parent or the child themself; others 404.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Which ledger (default coin). */
+          kind?: 'coin' | 'xp';
+          /** @description `nextCursor` of the previous page. */
+          cursor?: string;
+          limit?: number;
+        };
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Ledger page */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LedgerResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/household/reward-rules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Reward rules in force, with the system caps
+     * @description The household’s rules (or the system default), the defaults and the product safety caps (Master Spec §14.2). Parent only.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Rules */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['RewardRulesResponse'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Change the reward rules (stricter only)
+     * @description Parent only. Caps may be lowered, never raised above the system caps (400 with `details.violations`, e.g. ABOVE_SYSTEM_CAP); weekend tier caps must not decrease from tier to tier. Each change stores a new version; settled days keep their Coin. Audited.
+     */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['RewardRulesPatch'];
+        };
+      };
+      responses: {
+        /** @description Updated */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['RewardRulesResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/api/v1/household/reward-catalog': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The household’s reward catalog
+     * @description Parent: every item (`includeArchived=true` adds archived ones); child: the active items of their household.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Parent only. */
+          includeArchived?: 'true' | 'false';
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Catalog */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['CatalogResponse'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Add a catalog reward */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['CatalogItemCreate'];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['CatalogItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/household/reward-catalog/{itemId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Remove a catalog reward (archived, so its redemptions stay) */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          itemId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Archived */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /**
+     * Change or archive a catalog reward
+     * @description Parent only. Pending redemptions keep the title and cost they were asked with.
+     */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          itemId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['CatalogItemUpdate'];
+        };
+      };
+      responses: {
+        /** @description Updated */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['CatalogItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/api/v1/reward-redemptions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Redemptions: the parent inbox, or the child’s own
+     * @description Parent: the household’s redemptions, pending first (up to 100), `pendingCount` drives the badge; child: their own.
+     */
+    get: {
+      parameters: {
+        query?: {
+          status?: components['schemas']['RedemptionStatus'];
+          studentId?: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Redemptions */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['RedemptionsResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /**
+     * The child asks for a catalog reward
+     * @description Child actor. Idempotent by `clientUuid` (a retry returns the stored request with `replayed: true`; 409 if the UUID was used for another item). The cost is held from the Coin balance at once (409 `INSUFFICIENT_COINS` or `ITEM_ARCHIVED`); the parents get a push request.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['RedemptionCreate'];
+        };
+      };
+      responses: {
+        /** @description Requested (or replayed) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['RedemptionCreateResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/reward-redemptions/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a redemption
+     * @description Parent only; 409 unless pending. The held Coin is spent. Emits `reward.redeemed` (RewardRedeemed). Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['RedemptionDecision'];
+        };
+      };
+      responses: {
+        /** @description Approved */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['RedemptionResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/reward-redemptions/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a redemption
+     * @description Parent only, with an optional note; 409 unless pending. The held Coin returns to the child through a reversal entry. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['RedemptionDecision'];
+        };
+      };
+      responses: {
+        /** @description Rejected */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['RedemptionResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4110,6 +4950,294 @@ export interface components {
       taskId: string;
       /** @enum {string} */
       contentType: 'image/jpeg' | 'image/png' | 'image/webp';
+    };
+    Wallet: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      timezone: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-14
+       */
+      today: string;
+      lifetimeXp: number;
+      level: components['schemas']['LevelInfo'];
+      /** @description Coin the child can spend (held Coin excluded). */
+      coinBalance: number;
+      /** @description Coin held by redemptions waiting for a parent. */
+      coinsHeld: number;
+      /** @description coinBalance × 1,000 VND, display only. */
+      nominalVnd: number;
+      xpPerCoin: number;
+      todayCap: components['schemas']['CapView'];
+      lastSettled: components['schemas']['SettledDay'];
+    };
+    LevelInfo: {
+      level: number;
+      levelStartXp: number;
+      nextLevelXp: number;
+      xpIntoLevel: number;
+      xpForNextLevel: number;
+    };
+    /** @description Today’s cap bar: Coin the day converts to at day end. */
+    CapView: {
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-14
+       */
+      day: string;
+      weekend: boolean;
+      /** @description Weekend tier reached so far. */
+      tier: number | null;
+      capCoins: number;
+      /** @description Highest cap the day can reach (top weekend tier). */
+      maxCapCoins: number;
+      rewardableXp: number;
+      capXp: number;
+      projectedCoins: number;
+      reached: boolean;
+    };
+    SettledDay: {
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-14
+       */
+      day: string;
+      tier: number | null;
+      capCoins: number;
+      rewardableXp: number;
+      coinsTotal: number;
+      /** Format: date-time */
+      settledAt: string;
+    } | null;
+    LedgerResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      /** @enum {string} */
+      kind: 'coin' | 'xp';
+      entries: components['schemas']['LedgerEntry'][];
+      nextCursor: string | null;
+    };
+    LedgerEntry: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** Format: date-time */
+      createdAt: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-10-14
+       */
+      rewardDay: string | null;
+      /** @description XP: GRANT or REVERSAL. Coin: DAY_CONVERSION, REDEMPTION_HOLD, REVERSAL. */
+      entryKind: string;
+      lifetimeXpDelta: number | null;
+      rewardableXpDelta: number | null;
+      coinDelta: number | null;
+      sourceType: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      sourceId: string;
+      ruleId: string;
+      /** @enum {string|null} */
+      cappedReason: 'DAILY_XP_CAP' | 'MICRO_CAP' | 'LATE' | null;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      reversalOf: string | null;
+      /** @description Task or reward title, when known. */
+      label: string | null;
+    };
+    RewardRulesResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      householdId: string;
+      /** @description Version of the rules in force (0 = system default). */
+      version: number;
+      /** @description The household changed the defaults. */
+      custom: boolean;
+      rules: components['schemas']['RewardRulesConfig'];
+      defaults: components['schemas']['RewardRulesConfig'];
+      systemCaps: components['schemas']['SystemCaps'];
+      /** Format: date-time */
+      updatedAt: string | null;
+    };
+    RewardRulesConfig: {
+      /** @description Monday-Friday cap (≤ system cap). */
+      weekdayCapCoins: number;
+      /**
+       * @description Weekend tier caps 0-3 in Coin (Master Spec §14.2).
+       * @example [
+       *       20,
+       *       30,
+       *       40,
+       *       50
+       *     ]
+       */
+      weekendTierCaps: number[];
+      weekendGoals: {
+        /** @description Completed READING tasks needed for weekend Tier 2. */
+        readingTasks: number;
+        /** @description Completed SPORT tasks needed for weekend Tier 2. */
+        activityTasks: number;
+      };
+      micro: {
+        TASK_APPROVED: {
+          /** @description Micro-action cap: approved tasks that give XP per child per day. */
+          maxGrantsPerDay: number;
+        };
+      };
+    };
+    /** @description Product safety caps. Household rules may be stricter, never looser. */
+    SystemCaps: {
+      xpPerCoin: number;
+      coinNominalVnd: number;
+      weekdayCapCoins: number;
+      /**
+       * @description Weekend tier caps 0-3 in Coin (Master Spec §14.2).
+       * @example [
+       *       20,
+       *       30,
+       *       40,
+       *       50
+       *     ]
+       */
+      weekendTierCaps: number[];
+      weekendMaxCoins: number;
+      maxGrantsPerRulePerDay: number;
+      lateGrantDays: number;
+    };
+    RewardRulesPatch: {
+      weekdayCapCoins?: number;
+      /**
+       * @description Weekend tier caps 0-3 in Coin (Master Spec §14.2).
+       * @example [
+       *       20,
+       *       30,
+       *       40,
+       *       50
+       *     ]
+       */
+      weekendTierCaps?: number[];
+      weekendGoals?: {
+        readingTasks?: number;
+        activityTasks?: number;
+      };
+      micro?: {
+        TASK_APPROVED?: {
+          maxGrantsPerDay: number;
+        };
+      };
+    };
+    CatalogResponse: {
+      items: components['schemas']['CatalogItem'][];
+      coinNominalVnd: number;
+    };
+    CatalogItem: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      title: string;
+      description: string | null;
+      costCoins: number;
+      icon: components['schemas']['CatalogIcon'];
+      status: components['schemas']['CatalogItemStatus'];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    /** @enum {string} */
+    CatalogIcon: 'gift' | 'screen' | 'game' | 'book' | 'outing' | 'food' | 'toy' | 'star';
+    /** @enum {string} */
+    CatalogItemStatus: 'ACTIVE' | 'ARCHIVED';
+    CatalogItemResponse: {
+      item: components['schemas']['CatalogItem'];
+    };
+    CatalogItemCreate: {
+      title: string;
+      description?: string | null;
+      costCoins: number;
+      icon?: components['schemas']['CatalogIcon'];
+    };
+    CatalogItemUpdate: {
+      title?: string;
+      description?: string | null;
+      costCoins?: number;
+      icon?: components['schemas']['CatalogIcon'];
+      archived?: boolean;
+    };
+    RedemptionsResponse: {
+      /** @description Redemptions waiting for a parent (badge). */
+      pendingCount: number;
+      items: components['schemas']['Redemption'][];
+    };
+    Redemption: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      studentName: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      itemId: string;
+      title: string;
+      costCoins: number;
+      status: components['schemas']['RedemptionStatus'];
+      /** Format: date-time */
+      requestedAt: string;
+      /** Format: date-time */
+      decidedAt: string | null;
+      decisionNote: string | null;
+    };
+    /** @enum {string} */
+    RedemptionStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+    RedemptionCreateResponse: {
+      redemption: components['schemas']['Redemption'];
+      replayed: boolean;
+      coinBalance: number;
+    };
+    RedemptionCreate: {
+      /**
+       * Format: uuid
+       * @description Generated by the app per request; a retry with the same value is a no-op.
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      clientUuid: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      itemId: string;
+    };
+    RedemptionResponse: {
+      redemption: components['schemas']['Redemption'];
+    };
+    RedemptionDecision: {
+      note?: string;
     };
   };
   responses: never;

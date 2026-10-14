@@ -2800,6 +2800,836 @@
           "taskId",
           "contentType"
         ]
+      },
+      "Wallet": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "today": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-14",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "lifetimeXp": {
+            "type": "integer"
+          },
+          "level": {
+            "$ref": "#/components/schemas/LevelInfo"
+          },
+          "coinBalance": {
+            "type": "integer",
+            "description": "Coin the child can spend (held Coin excluded)."
+          },
+          "coinsHeld": {
+            "type": "integer",
+            "description": "Coin held by redemptions waiting for a parent."
+          },
+          "nominalVnd": {
+            "type": "integer",
+            "description": "coinBalance × 1,000 VND, display only."
+          },
+          "xpPerCoin": {
+            "type": "integer"
+          },
+          "todayCap": {
+            "$ref": "#/components/schemas/CapView"
+          },
+          "lastSettled": {
+            "$ref": "#/components/schemas/SettledDay"
+          }
+        },
+        "required": [
+          "studentId",
+          "timezone",
+          "today",
+          "lifetimeXp",
+          "level",
+          "coinBalance",
+          "coinsHeld",
+          "nominalVnd",
+          "xpPerCoin",
+          "todayCap",
+          "lastSettled"
+        ]
+      },
+      "LevelInfo": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "integer"
+          },
+          "levelStartXp": {
+            "type": "integer"
+          },
+          "nextLevelXp": {
+            "type": "integer"
+          },
+          "xpIntoLevel": {
+            "type": "integer"
+          },
+          "xpForNextLevel": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "level",
+          "levelStartXp",
+          "nextLevelXp",
+          "xpIntoLevel",
+          "xpForNextLevel"
+        ]
+      },
+      "CapView": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-14",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "weekend": {
+            "type": "boolean"
+          },
+          "tier": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 3,
+            "description": "Weekend tier reached so far."
+          },
+          "capCoins": {
+            "type": "integer"
+          },
+          "maxCapCoins": {
+            "type": "integer",
+            "description": "Highest cap the day can reach (top weekend tier)."
+          },
+          "rewardableXp": {
+            "type": "integer"
+          },
+          "capXp": {
+            "type": "integer"
+          },
+          "projectedCoins": {
+            "type": "integer"
+          },
+          "reached": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "day",
+          "weekend",
+          "tier",
+          "capCoins",
+          "maxCapCoins",
+          "rewardableXp",
+          "capXp",
+          "projectedCoins",
+          "reached"
+        ],
+        "description": "Today’s cap bar: Coin the day converts to at day end."
+      },
+      "SettledDay": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "day": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-14",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "tier": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "capCoins": {
+            "type": "integer"
+          },
+          "rewardableXp": {
+            "type": "integer"
+          },
+          "coinsTotal": {
+            "type": "integer"
+          },
+          "settledAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "day",
+          "tier",
+          "capCoins",
+          "rewardableXp",
+          "coinsTotal",
+          "settledAt"
+        ]
+      },
+      "LedgerResponse": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "coin",
+              "xp"
+            ]
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LedgerEntry"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "studentId",
+          "kind",
+          "entries",
+          "nextCursor"
+        ]
+      },
+      "LedgerEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rewardDay": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-10-14",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "entryKind": {
+            "type": "string",
+            "description": "XP: GRANT or REVERSAL. Coin: DAY_CONVERSION, REDEMPTION_HOLD, REVERSAL."
+          },
+          "lifetimeXpDelta": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "rewardableXpDelta": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "coinDelta": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "ruleId": {
+            "type": "string"
+          },
+          "cappedReason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "DAILY_XP_CAP",
+              "MICRO_CAP",
+              "LATE",
+              null
+            ]
+          },
+          "reversalOf": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Task or reward title, when known."
+          }
+        },
+        "required": [
+          "id",
+          "createdAt",
+          "rewardDay",
+          "entryKind",
+          "lifetimeXpDelta",
+          "rewardableXpDelta",
+          "coinDelta",
+          "sourceType",
+          "sourceId",
+          "ruleId",
+          "cappedReason",
+          "reversalOf",
+          "label"
+        ]
+      },
+      "RewardRulesResponse": {
+        "type": "object",
+        "properties": {
+          "householdId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "version": {
+            "type": "integer",
+            "description": "Version of the rules in force (0 = system default)."
+          },
+          "custom": {
+            "type": "boolean",
+            "description": "The household changed the defaults."
+          },
+          "rules": {
+            "$ref": "#/components/schemas/RewardRulesConfig"
+          },
+          "defaults": {
+            "$ref": "#/components/schemas/RewardRulesConfig"
+          },
+          "systemCaps": {
+            "$ref": "#/components/schemas/SystemCaps"
+          },
+          "updatedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "householdId",
+          "version",
+          "custom",
+          "rules",
+          "defaults",
+          "systemCaps",
+          "updatedAt"
+        ]
+      },
+      "RewardRulesConfig": {
+        "type": "object",
+        "properties": {
+          "weekdayCapCoins": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Monday-Friday cap (≤ system cap)."
+          },
+          "weekendTierCaps": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Weekend tier caps 0-3 in Coin (Master Spec §14.2).",
+            "example": [
+              20,
+              30,
+              40,
+              50
+            ]
+          },
+          "weekendGoals": {
+            "type": "object",
+            "properties": {
+              "readingTasks": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "description": "Completed READING tasks needed for weekend Tier 2."
+              },
+              "activityTasks": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "description": "Completed SPORT tasks needed for weekend Tier 2."
+              }
+            },
+            "required": [
+              "readingTasks",
+              "activityTasks"
+            ]
+          },
+          "micro": {
+            "type": "object",
+            "properties": {
+              "TASK_APPROVED": {
+                "type": "object",
+                "properties": {
+                  "maxGrantsPerDay": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Micro-action cap: approved tasks that give XP per child per day."
+                  }
+                },
+                "required": [
+                  "maxGrantsPerDay"
+                ]
+              }
+            },
+            "required": [
+              "TASK_APPROVED"
+            ]
+          }
+        },
+        "required": [
+          "weekdayCapCoins",
+          "weekendTierCaps",
+          "weekendGoals",
+          "micro"
+        ]
+      },
+      "SystemCaps": {
+        "type": "object",
+        "properties": {
+          "xpPerCoin": {
+            "type": "integer"
+          },
+          "coinNominalVnd": {
+            "type": "integer"
+          },
+          "weekdayCapCoins": {
+            "type": "integer"
+          },
+          "weekendTierCaps": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Weekend tier caps 0-3 in Coin (Master Spec §14.2).",
+            "example": [
+              20,
+              30,
+              40,
+              50
+            ]
+          },
+          "weekendMaxCoins": {
+            "type": "integer"
+          },
+          "maxGrantsPerRulePerDay": {
+            "type": "integer"
+          },
+          "lateGrantDays": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "xpPerCoin",
+          "coinNominalVnd",
+          "weekdayCapCoins",
+          "weekendTierCaps",
+          "weekendMaxCoins",
+          "maxGrantsPerRulePerDay",
+          "lateGrantDays"
+        ],
+        "description": "Product safety caps. Household rules may be stricter, never looser."
+      },
+      "RewardRulesPatch": {
+        "type": "object",
+        "properties": {
+          "weekdayCapCoins": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "weekendTierCaps": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Weekend tier caps 0-3 in Coin (Master Spec §14.2).",
+            "example": [
+              20,
+              30,
+              40,
+              50
+            ]
+          },
+          "weekendGoals": {
+            "type": "object",
+            "properties": {
+              "readingTasks": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "activityTasks": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              }
+            }
+          },
+          "micro": {
+            "type": "object",
+            "properties": {
+              "TASK_APPROVED": {
+                "type": "object",
+                "properties": {
+                  "maxGrantsPerDay": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "maxGrantsPerDay"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "CatalogResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogItem"
+            }
+          },
+          "coinNominalVnd": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "coinNominalVnd"
+        ]
+      },
+      "CatalogItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "costCoins": {
+            "type": "integer"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/CatalogIcon"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CatalogItemStatus"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "costCoins",
+          "icon",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CatalogIcon": {
+        "type": "string",
+        "enum": [
+          "gift",
+          "screen",
+          "game",
+          "book",
+          "outing",
+          "food",
+          "toy",
+          "star"
+        ]
+      },
+      "CatalogItemStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "ARCHIVED"
+        ]
+      },
+      "CatalogItemResponse": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/CatalogItem"
+          }
+        },
+        "required": [
+          "item"
+        ]
+      },
+      "CatalogItemCreate": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300
+          },
+          "costCoins": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "icon": {
+            "$ref": "#/components/schemas/CatalogIcon"
+          }
+        },
+        "required": [
+          "title",
+          "costCoins"
+        ]
+      },
+      "CatalogItemUpdate": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300
+          },
+          "costCoins": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "icon": {
+            "$ref": "#/components/schemas/CatalogIcon"
+          },
+          "archived": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RedemptionsResponse": {
+        "type": "object",
+        "properties": {
+          "pendingCount": {
+            "type": "integer",
+            "description": "Redemptions waiting for a parent (badge)."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Redemption"
+            }
+          }
+        },
+        "required": [
+          "pendingCount",
+          "items"
+        ]
+      },
+      "Redemption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "studentName": {
+            "type": "string"
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "title": {
+            "type": "string"
+          },
+          "costCoins": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RedemptionStatus"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decidedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "decisionNote": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "studentId",
+          "studentName",
+          "itemId",
+          "title",
+          "costCoins",
+          "status",
+          "requestedAt",
+          "decidedAt",
+          "decisionNote"
+        ]
+      },
+      "RedemptionStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "APPROVED",
+          "REJECTED"
+        ]
+      },
+      "RedemptionCreateResponse": {
+        "type": "object",
+        "properties": {
+          "redemption": {
+            "$ref": "#/components/schemas/Redemption"
+          },
+          "replayed": {
+            "type": "boolean"
+          },
+          "coinBalance": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "redemption",
+          "replayed",
+          "coinBalance"
+        ]
+      },
+      "RedemptionCreate": {
+        "type": "object",
+        "properties": {
+          "clientUuid": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+            "description": "Generated by the app per request; a retry with the same value is a no-op."
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          }
+        },
+        "required": [
+          "clientUuid",
+          "itemId"
+        ]
+      },
+      "RedemptionResponse": {
+        "type": "object",
+        "properties": {
+          "redemption": {
+            "$ref": "#/components/schemas/Redemption"
+          }
+        },
+        "required": [
+          "redemption"
+        ]
+      },
+      "RedemptionDecision": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
       }
     },
     "parameters": {}
@@ -5995,6 +6825,958 @@
           },
           "503": {
             "description": "A dependency is unavailable (SERVICE_UNAVAILABLE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/rewards/wallet": {
+      "get": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "A child’s wallet: XP, level, Coin and today’s cap bar",
+        "description": "Lifetime XP and level, spendable Coin (held Coin of pending redemptions excluded) with its nominal VND value (display only), and today’s cap bar: rewardable XP of the household-local day, the cap of the weekday or of the weekend tier reached so far, and the Coin the day would convert to at day end. Parent: any child of the household; child: only their own id. Other ids answer 404.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wallet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Wallet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/rewards/ledger": {
+      "get": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "A child’s XP or Coin ledger, newest first",
+        "description": "Append-only entries: XP grants (with `cappedReason` when part of it counts toward lifetime XP only) and reversals; Coin day conversions, redemption holds and reversals. Cursor pagination. Parent or the child themself; others 404.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "coin",
+                "xp"
+              ],
+              "default": "coin",
+              "description": "Which ledger (default coin)."
+            },
+            "required": false,
+            "description": "Which ledger (default coin).",
+            "name": "kind",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "`nextCursor` of the previous page."
+            },
+            "required": false,
+            "description": "`nextCursor` of the previous page.",
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ledger page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LedgerResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/household/reward-rules": {
+      "get": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "Reward rules in force, with the system caps",
+        "description": "The household’s rules (or the system default), the defaults and the product safety caps (Master Spec §14.2). Parent only.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RewardRulesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "Change the reward rules (stricter only)",
+        "description": "Parent only. Caps may be lowered, never raised above the system caps (400 with `details.violations`, e.g. ABOVE_SYSTEM_CAP); weekend tier caps must not decrease from tier to tier. Each change stores a new version; settled days keep their Coin. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RewardRulesPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RewardRulesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/household/reward-catalog": {
+      "get": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "The household’s reward catalog",
+        "description": "Parent: every item (`includeArchived=true` adds archived ones); child: the active items of their household.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "description": "Parent only."
+            },
+            "required": false,
+            "description": "Parent only.",
+            "name": "includeArchived",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "Add a catalog reward",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogItemCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/household/reward-catalog/{itemId}": {
+      "patch": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "Change or archive a catalog reward",
+        "description": "Parent only. Pending redemptions keep the title and cost they were asked with.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "itemId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogItemUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "Remove a catalog reward (archived, so its redemptions stay)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "itemId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Archived"
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reward-redemptions": {
+      "get": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "Redemptions: the parent inbox, or the child’s own",
+        "description": "Parent: the household’s redemptions, pending first (up to 100), `pendingCount` drives the badge; child: their own.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/RedemptionStatus"
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": false,
+            "name": "studentId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Redemptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedemptionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "The child asks for a catalog reward",
+        "description": "Child actor. Idempotent by `clientUuid` (a retry returns the stored request with `replayed: true`; 409 if the UUID was used for another item). The cost is held from the Coin balance at once (409 `INSUFFICIENT_COINS` or `ITEM_ARCHIVED`); the parents get a push request.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedemptionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Requested (or replayed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedemptionCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reward-redemptions/{id}/approve": {
+      "post": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "Approve a redemption",
+        "description": "Parent only; 409 unless pending. The held Coin is spent. Emits `reward.redeemed` (RewardRedeemed). Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedemptionDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Approved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedemptionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reward-redemptions/{id}/reject": {
+      "post": {
+        "tags": [
+          "rewards"
+        ],
+        "summary": "Reject a redemption",
+        "description": "Parent only, with an optional note; 409 unless pending. The held Coin returns to the child through a reversal entry. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedemptionDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedemptionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
             "content": {
               "application/json": {
                 "schema": {

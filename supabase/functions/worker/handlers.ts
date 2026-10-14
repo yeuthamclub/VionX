@@ -1,5 +1,6 @@
 import type { TxSql } from '../_shared/db.ts';
 import type { EventHandlers } from '../_shared/queue.ts';
+import { grantTaskXp, settleDueDays } from '../_shared/rewards.ts';
 import { materialiseAll } from '../_shared/tasks.ts';
 import { runExportJob, type ExportDeps } from './privacy-export.ts';
 
@@ -54,6 +55,29 @@ export function createHandlers(deps: HandlerDeps): EventHandlers {
         insert into ops.audit_logs (actor_type, action, target_type, target_id, details)
         values ('system', 'task.materialised', 'domain_event', ${event.id},
                 ${tx.json({ tasks: result.tasks, created: result.created })})`;
+    },
+
+    // M04: XP for an approved task day. SELF_CHECK days emit both events; the ledger's unique
+    // (source_type, source_id, rule_id) lets only the first one grant.
+    'task.approved': async (event, tx) => {
+      await grantTaskXp(tx, event);
+    },
+    'task.completed': async (event, tx) => {
+      if (event.payload.status === 'APPROVED') await grantTaskXp(tx, event);
+    },
+
+    // M04: hourly request from pg_cron (vionx-reward-settlement) → settle every household-local
+    // day that has ended by `requestedAt` (idempotent).
+    'reward.settlement_requested': async (event, tx) => {
+      const requested = new Date(String(event.payload.requestedAt ?? event.occurredAt));
+      const at = Number.isNaN(requested.getTime()) ? new Date(event.occurredAt) : requested;
+      const result = await settleDueDays(tx, at, event.id);
+      if (result.settled > 0) {
+        await tx`
+          insert into ops.audit_logs (actor_type, action, target_type, target_id, details)
+          values ('system', 'reward.days_settled', 'domain_event', ${event.id},
+                  ${tx.json({ ...result, at: at.toISOString() })})`;
+      }
     },
 
     'privacy.export_requested': async (event, tx) => {

@@ -1,0 +1,255 @@
+# M04 main path: parent sets the reward rules (system caps shown; a cap above them is refused, a lower
+# one is saved) and adds a catalog reward → creates a SELF_CHECK task worth XP → the child completes
+# it on a child device and sees the XP, level, Coin and today's cap bar in the wallet, and the reward
+# in the catalog. Coin are credited at the end of the household day (pg_cron), so redemption and its
+# approval are covered by `pnpm acceptance m04` and the API tests rather than on the device.
+# Prereqs: as m01-identity.yaml (development build on an emulator, local Supabase + functions,
+# `pnpm dev:mobile`). Uses the LOCAL test OTP number 0900000004 / 123456 (supabase/config.toml).
+# Run: maestro test apps/mobile/.maestro/m04-rewards.yaml
+appId: vn.vionx.app
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Phụ huynh'
+    timeout: 60000
+- tapOn:
+    id: 'role-parent'
+- tapOn:
+    id: 'phone-input'
+- inputText: '0900000004'
+- tapOn:
+    id: 'send-code'
+- extendedWaitUntil:
+    visible:
+      id: 'otp-input'
+    timeout: 15000
+- tapOn:
+    id: 'otp-input'
+- inputText: '123456'
+- tapOn:
+    id: 'verify-code'
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục'
+    timeout: 20000
+- runFlow:
+    when:
+      visible:
+        id: 'policies-accept'
+    commands:
+      - tapOn:
+          id: 'policies-agree'
+      - tapOn:
+          id: 'policies-accept'
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình'
+    timeout: 20000
+- runFlow:
+    when:
+      visible: 'Tạo gia đình'
+    commands:
+      - tapOn:
+          id: 'household-name'
+      - inputText: 'Gia đình Thưởng'
+      - tapOn:
+          id: 'household-create'
+- extendedWaitUntil:
+    visible:
+      id: 'add-child'
+    timeout: 15000
+
+# A grade-6 child for this run
+- runFlow:
+    file: subflows/m01-add-child.yaml
+    env:
+      NAME: 'Minh'
+      YEAR: '2014'
+      GRADE: '6'
+      PIN: '2580'
+- evalScript: ${output.loginId = maestro.copiedText}
+
+# Parent: child → rewards → rules editor (system caps visible)
+- tapOn:
+    id: 'student-${output.loginId}'
+- scrollUntilVisible:
+    element:
+      id: 'open-rewards'
+- tapOn:
+    id: 'open-rewards'
+- extendedWaitUntil:
+    visible:
+      id: 'wallet-card'
+    timeout: 15000
+- tapOn:
+    id: 'open-reward-rules'
+- extendedWaitUntil:
+    visible: '.*Tối đa hệ thống: 20.*'
+    timeout: 15000
+- tapOn:
+    id: 'rules-weekdayCapCoins'
+- eraseText
+- inputText: '25'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'rules-save'
+- tapOn:
+    id: 'rules-save'
+- scrollUntilVisible:
+    element: 'Không được cao hơn 20'
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: 'rules-weekdayCapCoins'
+    direction: UP
+- tapOn:
+    id: 'rules-weekdayCapCoins'
+- eraseText
+- inputText: '15'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'rules-save'
+- tapOn:
+    id: 'rules-save'
+- extendedWaitUntil:
+    visible:
+      id: 'rules-message'
+    timeout: 15000
+- takeScreenshot: m04-rules
+- back
+
+# Catalog: add a reward
+- tapOn:
+    id: 'open-reward-catalog'
+- extendedWaitUntil:
+    visible:
+      id: 'catalog-add'
+    timeout: 15000
+- tapOn:
+    id: 'catalog-add'
+- tapOn:
+    id: 'catalog-title'
+- inputText: '30 phút xem hoạt hình'
+- tapOn:
+    id: 'catalog-cost'
+- inputText: '5'
+- hideKeyboard
+- tapOn:
+    id: 'catalog-icon-screen'
+- tapOn:
+    id: 'catalog-save'
+- extendedWaitUntil:
+    visible: '.*30 phút xem hoạt hình.*'
+    timeout: 15000
+- takeScreenshot: m04-catalog
+- back
+- back
+
+# A SELF_CHECK task worth 50 XP for today
+- tapOn:
+    id: 'open-calendar'
+- extendedWaitUntil:
+    visible:
+      id: 'add-task'
+    timeout: 15000
+- tapOn:
+    id: 'add-task'
+- extendedWaitUntil:
+    visible:
+      id: 'task-title'
+    timeout: 15000
+- tapOn:
+    id: 'task-title'
+- inputText: 'Luyện tiếng Anh'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'verification-SELF_CHECK'
+- tapOn:
+    id: 'verification-SELF_CHECK'
+- scrollUntilVisible:
+    element:
+      id: 'task-xp'
+- tapOn:
+    id: 'task-xp'
+- eraseText
+- inputText: '50'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'task-save'
+- tapOn:
+    id: 'task-save'
+- extendedWaitUntil:
+    visible: 'Luyện tiếng Anh'
+    timeout: 15000
+- back
+- back
+
+# Child device: complete the task, then the wallet and the rewards
+- tapOn:
+    id: 'child-device'
+- tapOn: 'Tiếp tục'
+- extendedWaitUntil:
+    visible:
+      id: 'child-login-id'
+    timeout: 15000
+- tapOn:
+    id: 'child-login-id'
+- inputText: ${output.loginId}
+- runFlow:
+    file: subflows/m01-enter-pin.yaml
+    env:
+      DIGITS: '2,5,8,0'
+- tapOn:
+    id: 'child-login-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'open-child-tasks'
+    timeout: 15000
+- tapOn:
+    id: 'open-child-tasks'
+- extendedWaitUntil:
+    visible: 'Luyện tiếng Anh'
+    timeout: 15000
+- tapOn:
+    id: 'complete-.*'
+- extendedWaitUntil:
+    visible:
+      id: 'child-tasks-message'
+    timeout: 15000
+- back
+# The worker grants XP within a minute (pg_cron tick).
+- tapOn:
+    id: 'open-child-wallet'
+- extendedWaitUntil:
+    visible:
+      id: 'wallet-card'
+    timeout: 15000
+- repeat:
+    while:
+      notVisible: 'Tổng 50 XP'
+    times: 12
+    commands:
+      - back
+      - tapOn:
+          id: 'open-child-wallet'
+      - extendedWaitUntil:
+          visible:
+            id: 'wallet-card'
+          timeout: 15000
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: 'Tổng 50 XP'
+- assertVisible:
+    id: 'wallet-cap-bar'
+- assertVisible: '.*50/1500 XP.*'
+- takeScreenshot: m04-wallet
+- tapOn:
+    id: 'open-child-rewards'
+- extendedWaitUntil:
+    visible: '.*30 phút xem hoạt hình.*'
+    timeout: 15000
+- assertVisible: 'Cần thêm 5 Coin'
+- takeScreenshot: m04-child-rewards
