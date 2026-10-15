@@ -61,7 +61,8 @@ export class FakeBuildProvider extends FakeAiProvider {
         return this.fixture('edges');
       case 'svg_illustration.v1':
         return this.fixture('media')[String(input.slotId)];
-      case 'item_generation.v1': {
+      case 'item_generation.v1':
+      case 'item_generation.v2': {
         const drafts = this.fixture('generate');
         const attempt = Number(input.attempt ?? 1);
         const slots = input.slots as { slotId: string }[];

@@ -17,6 +17,7 @@ Each file starts with `<!-- prompt: <stem> -->`; the library-build fake provider
 | `lesson_mapping.v1.md` | `structure_mapping` | `library:build … map` |
 | `prerequisite_edges.v1.md` | `structure_mapping` | `library:build … edges` |
 | `svg_illustration.v1.md` | `svg_illustration` | `library:build … media` |
-| `item_generation.v1.md` | `item_generation` | `library:build … generate` |
+| `item_generation.v1.md` | `item_generation` | superseded by v2 |
+| `item_generation.v2.md` | `item_generation` | `library:build … generate` |
 | `item_verification.v1.md` | `item_verification` | `library:build … verify` |
 | `item_dispute.v1.md` | `item_dispute` | `library:build … verify` (disagreements) |

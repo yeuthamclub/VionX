@@ -1,4 +1,4 @@
-// Step 8 `generate [--topic CODE]`: per skill, the planned slots in one request (item_generation,
+// Step 8 `generate [--topic CODE]`: per skill, the planned slots in requests of two (item_generation,
 // Batch): hints[4], worked solution, distractor feedback, misconception tags, templates with
 // math.js expressions. SGK/SGV pages of the skill's lessons are attached as reference only. Slots
 // rejected by `check` or by the reviewer are generated once more with the reason attached.
@@ -9,7 +9,7 @@ import { runBatch, type BatchJob } from '../ai/batch.ts';
 import { PROMPT_VERSIONS, systemPrompt } from '../ai/prompts.ts';
 import type { BuildContext } from '../context.ts';
 import { draftToItem, type ItemDraft } from '../lib/draft.ts';
-import { readJson } from '../lib/jsonl.ts';
+import { readJson, readJsonl } from '../lib/jsonl.ts';
 import type { PlanSlot } from '../lib/plan.ts';
 import { ItemStore, MAX_ATTEMPTS, reject } from '../items.ts';
 import { profileNotes } from '../profile.ts';
@@ -20,6 +20,8 @@ import { loadPages } from './textlayer.ts';
 
 /** Reference text budget per skill (characters). */
 const REFERENCE_CHARS = 12_000;
+/** Slots per request: a whole skill in one request can run past the output token limit. */
+const SLOTS_PER_REQUEST = 2;
 
 /** Slots that need a (new) draft: never generated, or rejected with an attempt left. */
 export function pendingSlots(
@@ -60,6 +62,37 @@ export async function generate(ctx: BuildContext): Promise<void> {
     const key = `${p.slot.skill}@${p.attempt}`;
     groups.set(key, [...(groups.get(key) ?? []), p]);
   }
+  for (const [key, list] of [...groups]) {
+    if (list.length <= SLOTS_PER_REQUEST) continue;
+    groups.delete(key);
+    for (let i = 0; i < list.length; i += SLOTS_PER_REQUEST)
+      groups.set(`${key}#${i / SLOTS_PER_REQUEST + 1}`, list.slice(i, i + SLOTS_PER_REQUEST));
+  }
+  // A request that already ran past the output limit is retried one slot per request.
+  const jobKey = (group: string, list: typeof ready) =>
+    `${group}:${createHash('sha1')
+      .update(
+        list
+          .map((p) => p.slot.id)
+          .sort()
+          .join(','),
+      )
+      .digest('hex')
+      .slice(0, 8)}`;
+  const resultsPath = ctx.path('batches', 'generate.results.jsonl');
+  const truncated = new Set(
+    (existsSync(resultsPath)
+      ? readJsonl<{ key: string; ok: boolean; error?: string }>(resultsPath)
+      : []
+    )
+      .filter((r) => !r.ok && /MAX_TOKENS/i.test(r.error ?? ''))
+      .map((r) => r.key),
+  );
+  for (const [group, list] of [...groups]) {
+    if (list.length < 2 || !truncated.has(jobKey(group, list))) continue;
+    groups.delete(group);
+    list.forEach((p, i) => groups.set(`${group}~${i + 1}`, [p]));
+  }
   const jobs: BatchJob[] = [];
   for (const [group, list] of groups) {
     const skill = skills.get(list[0]!.slot.skill)!;
@@ -78,9 +111,8 @@ export async function generate(ctx: BuildContext): Promise<void> {
         }
       }
     }
-    const ids = list.map((p) => p.slot.id).sort();
     jobs.push({
-      key: `${group}:${createHash('sha1').update(ids.join(',')).digest('hex').slice(0, 8)}`,
+      key: jobKey(group, list),
       item: {
         system,
         input: {
