@@ -12,7 +12,7 @@ export const PROMPT_VERSIONS = {
   map: 'lesson_mapping.v1',
   edges: 'prerequisite_edges.v1',
   media: 'svg_illustration.v1',
-  generate: 'item_generation.v1',
+  generate: 'item_generation.v2',
   verify: 'item_verification.v1',
   dispute: 'item_dispute.v1',
 } as const;
