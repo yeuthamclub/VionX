@@ -130,4 +130,24 @@ describe('AnthropicProvider', () => {
       },
     ]);
   });
+
+  it('opens the user turn with the cached context, before attachments and input', async () => {
+    const { calls, fakeFetch } = capture(message());
+    const provider = new AnthropicProvider({ apiKey: 'test', fetch: fakeFetch, maxRetries: 0 });
+    await provider.complete({
+      ...baseRequest,
+      context: 'skill pages',
+      attachments: [{ mediaType: 'image/png', data: 'iVBORw==' }],
+    });
+    expect(calls[0]!.body.messages).toEqual([
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'skill pages', cache_control: { type: 'ephemeral' } },
+          { type: 'image', source: { type: 'base64', media_type: 'image/png', data: 'iVBORw==' } },
+          { type: 'text', text: 'item input' },
+        ],
+      },
+    ]);
+  });
 });

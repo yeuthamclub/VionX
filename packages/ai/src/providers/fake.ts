@@ -81,7 +81,9 @@ export class FakeAiProvider implements AiProvider {
       stopReason: partial.stopReason ?? 'end_turn',
       text,
       usage: partial.usage ?? {
-        inputTokens: Math.ceil((request.system.length + request.input.length) / 4),
+        inputTokens: Math.ceil(
+          (request.system.length + (request.context?.length ?? 0) + request.input.length) / 4,
+        ),
         outputTokens: Math.ceil(text.length / 4),
         cacheReadTokens: 0,
         cacheCreationTokens: 0,

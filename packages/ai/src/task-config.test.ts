@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
@@ -8,24 +8,38 @@ import {
   supportsRefusalFallback,
 } from './index.ts';
 
-const migration = readFileSync(
-  resolve(import.meta.dirname, '../../../supabase/migrations/0001_base.sql'),
-  'utf8',
-);
+const MIGRATIONS = resolve(import.meta.dirname, '../../../supabase/migrations');
+const migrations = readdirSync(MIGRATIONS)
+  .filter((f) => /^\d{4}_.*\.sql$/.test(f))
+  .sort()
+  .map((f) => readFileSync(resolve(MIGRATIONS, f), 'utf8'));
 
-/** Parses the ai_task_config seed rows out of migration 0001. */
+/** The ai_task_config rows after every migration: the 0001 seed, then later effort updates. */
 function seededRows() {
-  const block = migration.split('insert into ops.ai_task_config')[1]!.split(');\n')[0]!;
+  const block = migrations[0]!.split('insert into ops.ai_task_config')[1]!.split(');\n')[0]!;
   const rows = [
     ...block.matchAll(/\('([a-z0-9_]+)',\s*'([^']+)',\s*'(\w+)',\s*(null|'\w+'),\s*(\d+),/g),
-  ];
-  return rows.map(([, task, model, mode, effort, maxTokens]) => ({
+  ].map(([, task, model, mode, effort, maxTokens]) => ({
     task,
     model,
     mode,
     effort: effort === 'null' ? null : effort!.replaceAll("'", ''),
     maxTokens: Number(maxTokens),
   }));
+  for (const sql of migrations.slice(1)) {
+    const updates = [
+      ...sql.matchAll(
+        /update ops\.ai_task_config set effort = (null|'\w+') where task = '([a-z0-9_]+)';/g,
+      ),
+    ];
+    // Any other kind of update would be missed here: extend the parser first.
+    expect(updates.length).toBe(sql.split('update ops.ai_task_config').length - 1);
+    for (const [, effort, task] of updates) {
+      const row = rows.find((r) => r.task === task)!;
+      row.effort = effort === 'null' ? null : effort!.replaceAll("'", '');
+    }
+  }
+  return rows;
 }
 
 describe('task config', () => {

@@ -19,8 +19,38 @@ import { loadPlan } from './plan.ts';
 import { backboneSkills, loadBackbone, type LessonMap } from './structure.ts';
 import { loadPages } from './textlayer.ts';
 
-/** Reference text budget per skill (characters). */
-const REFERENCE_CHARS = 12_000;
+/** Reference text budget per skill (characters); scope and terms only, not exercises to copy. */
+const REFERENCE_CHARS = 4_000;
+/** A page's exercise section starts at a "BÀI TẬP" heading line (SGK), e.g. "BÀI TẬP CUỐI CHƯƠNG". */
+const EXERCISES = /^[\s#*|]*BÀI TẬP\b/m;
+
+export type ReferencePage = { book: string; kind: string; page: number; text: string };
+
+/** The skill's lesson pages in book order, exercise sections dropped, within `budget` characters. */
+export function skillReferences(
+  skill: string,
+  lessons: LessonMap,
+  pages: { book: string; page: number; text: string }[],
+  budget = REFERENCE_CHARS,
+): ReferencePage[] {
+  const refs: ReferencePage[] = [];
+  for (const [book, { kind, lessons: ls }] of Object.entries(lessons)) {
+    for (const lesson of ls.filter((l) => l.skills.includes(skill))) {
+      for (const p of pages.filter(
+        (p) => p.book === book && p.page >= lesson.pageStart && p.page <= lesson.pageEnd && p.text,
+      )) {
+        const cut = p.text.search(EXERCISES);
+        const theory = (cut >= 0 ? p.text.slice(0, cut) : p.text).trim();
+        if (budget <= 0) return refs;
+        if (!theory) continue;
+        const text = theory.slice(0, budget);
+        budget -= text.length;
+        refs.push({ book, kind, page: p.page, text });
+      }
+    }
+  }
+  return refs;
+}
 /** Slots per request: a whole skill in one request can run past the output token limit. */
 const SLOTS_PER_REQUEST = 2;
 
@@ -100,30 +130,25 @@ export async function generate(ctx: BuildContext): Promise<void> {
     list.forEach((p, i) => groups.set(`${group}~${i + 1}`, [p]));
   }
   const jobs: BatchJob[] = [];
-  for (const [group, list] of groups) {
+  // Requests of one skill share a cached context (system + skill + pages + notes), so keep them
+  // next to each other in the batch.
+  const bySkill = [...groups].sort(([, a], [, b]) =>
+    a[0]!.slot.skill.localeCompare(b[0]!.slot.skill),
+  );
+  for (const [group, list] of bySkill) {
     const skill = skills.get(list[0]!.slot.skill)!;
-    const refs: { book: string; kind: string; page: number; text: string }[] = [];
-    let budget = REFERENCE_CHARS;
-    for (const [book, { kind, lessons: ls }] of Object.entries(lessons)) {
-      for (const lesson of ls.filter((l) => l.skills.includes(skill.code))) {
-        for (const p of pages.filter(
-          (p) =>
-            p.book === book && p.page >= lesson.pageStart && p.page <= lesson.pageEnd && p.text,
-        )) {
-          if (budget <= 0) break;
-          const text = p.text.slice(0, budget);
-          budget -= text.length;
-          refs.push({ book, kind, page: p.page, text });
-        }
-      }
-    }
+    const refs = skillReferences(skill.code, lessons, pages);
     jobs.push({
       key: jobKey(group, list),
       item: {
         system,
-        input: {
+        context: JSON.stringify({
           grade: ctx.profile.grade,
           skill: { code: skill.code, title: skill.title, gdptRef: skill.gdptRef },
+          references: refs,
+          ...(reviewNotes ? { reviewNotes } : {}),
+        }),
+        input: {
           attempt: list[0]!.attempt,
           slots: list.map(({ slot, problems }) => {
             const m = media.get(slot.id);
@@ -137,8 +162,6 @@ export async function generate(ctx: BuildContext): Promise<void> {
               ...(problems.length ? { previousAttemptRejectedFor: problems } : {}),
             };
           }),
-          references: refs,
-          ...(reviewNotes ? { reviewNotes } : {}),
         },
         outputSchema: itemGenerationOutputSchema,
         sourceRefs: refs.map((r) => `${r.kind}:${r.book}:${r.page}`),

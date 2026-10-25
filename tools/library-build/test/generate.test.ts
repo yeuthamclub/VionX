@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { PackageItem } from '@vionx/domain';
 import type { ItemRecord } from '../src/items.ts';
 import type { PlanSlot } from '../src/lib/plan.ts';
-import { pendingSlots } from '../src/steps/generate.ts';
+import { pendingSlots, skillReferences } from '../src/steps/generate.ts';
+import type { LessonMap } from '../src/steps/structure.ts';
 
 const slot = (id: string): PlanSlot => ({
   id,
@@ -43,5 +44,30 @@ describe('pendingSlots', () => {
     const pending = pendingSlots(slots, items, true);
     expect(ids(pending)).toEqual(['NEW@1', 'REJ1@2', 'REJ2@3']);
     expect(pending.find((p) => p.slot.id === 'REJ2')!.problems).toEqual(['ngram: copied']);
+  });
+});
+
+describe('skillReferences', () => {
+  const lessons = {
+    sgk: { kind: 'SGK', lessons: [{ skills: ['S'], pageStart: 9, pageEnd: 11 }] },
+  } as unknown as LessonMap;
+  const pages = [
+    { book: 'sgk', page: 9, text: 'Phân số bằng nhau.\nBÀI TẬP\n6.1. Hoàn thành bảng sau.' },
+    { book: 'sgk', page: 10, text: '**BÀI TẬP CUỐI CHƯƠNG**\n6.8. Rút gọn.' },
+    { book: 'sgk', page: 11, text: 'Luyện tập 1\nSo sánh hai phân số. '.repeat(10) },
+    { book: 'other', page: 9, text: 'Không thuộc bài.' },
+  ];
+
+  it('drops exercise sections and pages that are only exercises', () => {
+    const refs = skillReferences('S', lessons, pages);
+    expect(refs.map((r) => [r.page, r.text.slice(0, 18)])).toEqual([
+      [9, 'Phân số bằng nhau.'],
+      [11, 'Luyện tập 1\nSo sán'],
+    ]);
+  });
+
+  it('stops at the character budget', () => {
+    const refs = skillReferences('S', lessons, pages, 30);
+    expect(refs.reduce((n, r) => n + r.text.length, 0)).toBe(30);
   });
 });

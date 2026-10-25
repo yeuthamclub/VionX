@@ -1,7 +1,9 @@
 // Step 10 `verify [--topic CODE]`: an independent model solves each checked item blind and grades
 // its hints and age fit (item_verification, Batch). When its answer differs from the key or it
-// finds the item unsolvable, a stronger model settles the dispute (item_dispute, Batch). Nothing
-// is approved here: every item goes to the human review queue with the verdicts attached.
+// finds the item unsolvable, a stronger model settles the dispute (item_dispute, Batch). A wrong
+// answer on an item whose key code already recomputed skips the dispute and stays CHECK for the
+// reviewer (cost plan A: in the first wave 54/55 disputes kept the key). Nothing is approved here:
+// every item goes to the human review queue with the verdicts attached.
 import { readFileSync } from 'node:fs';
 import { itemDisputeOutputSchema, itemVerificationOutputSchema } from '@vionx/ai/schemas';
 import { runBatch, type BatchJob } from '../ai/batch.ts';
@@ -22,6 +24,26 @@ function verdictOf(record: ItemRecord, output: VerifyOutput): VerifyRecord {
     // An unreadable answer counts as a disagreement.
   }
   return { ...output, agree: output.solvable && answersAgree(record.item.type, key, given) };
+}
+
+/** Digit runs of a text, with thousands separators ("200 000", "1.000") joined first. */
+const digitRuns = (text: string) =>
+  text.replace(/(\d)[ .\u00a0](?=\d{3}(?!\d))/g, '$1').match(/\d+/g) ?? [];
+
+/**
+ * The key was recomputed by code: a TEMPLATE whose answer expression held on every seed, or an
+ * `answerCheckExpr` that passed `recompute` and uses only numbers printed in the stem (an
+ * expression of constants could match a wrong key). Formula constants not in the stem (the 2 of a
+ * perimeter) fall back to a dispute.
+ */
+export function codeConfirmed(r: ItemRecord): boolean {
+  const passed = (check: string) => r.checks?.some((c) => c.check === check && c.ok) ?? false;
+  if (r.item.kind === 'TEMPLATE') return passed('template_seeds');
+  const expr = r.item.provenance.answerCheckExpr;
+  if (typeof expr !== 'string' || !passed('recompute')) return false;
+  const stem = new Set(digitRuns(r.item.stemMd));
+  const used = digitRuns(expr);
+  return used.length > 0 && used.every((n) => stem.has(n));
 }
 
 export async function verify(ctx: BuildContext): Promise<void> {
@@ -59,7 +81,10 @@ export async function verify(ctx: BuildContext): Promise<void> {
   if (!first.complete) return ctx.markStep('verify', 'pending');
   for (const r of todo) r.verify = verdictOf(r, first.results.get(jobKey(r))!.output!);
 
-  const disputed = todo.filter((r) => !r.verify!.agree);
+  const disagreed = todo.filter((r) => !r.verify!.agree);
+  // An unsolvable verdict questions the wording, which code cannot settle.
+  const settled = disagreed.filter((r) => r.verify!.solvable && codeConfirmed(r));
+  const disputed = disagreed.filter((r) => !settled.includes(r));
   if (disputed.length > 0) {
     const disputeSystem = systemPrompt(PROMPT_VERSIONS.dispute);
     const disputeJobs: BatchJob[] = disputed.map((r) => {
@@ -107,10 +132,16 @@ export async function verify(ctx: BuildContext): Promise<void> {
   for (const r of todo) r.item.status = 'NEEDS_REVIEW';
   store.save();
   const rate = disputed.length / todo.length;
-  ctx.markStep('verify', 'done', { verified: todo.length, disputed: disputed.length });
+  ctx.markStep('verify', 'done', {
+    verified: todo.length,
+    disputed: disputed.length,
+    codeConfirmed: settled.length,
+  });
   ctx.log(
     `verify: ${todo.length} item(s) verified, ${disputed.length} disputed (${Math.round(rate * 100)}%) → review queue`,
   );
+  for (const r of settled)
+    ctx.log(`  ? ${r.item.code}: CHECK: verifier disagrees, key recomputed by code (no dispute)`);
   for (const r of disputed)
     ctx.log(`  ? ${r.item.code}: ${r.dispute!.verdict}: ${r.dispute!.note}`);
 }
