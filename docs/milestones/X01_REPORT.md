@@ -193,8 +193,9 @@ After the run:
 2. Set X01 to DONE.
 
 If `--acceptance` fails:
-- Under 480 approved: run another `generate,check,verify,review-export` round. `plan --target`
-  above 500 adds slots.
+- Under 480 approved: run another `generate,check,verify,review-export` round. Slots that used up
+  their 2 attempts need `generate --retry-rejected` (one more attempt per run, previous reasons
+  attached). `plan --target` above 500 adds slots.
 - Shares outside the profile: adjust `plan.csv` and re-approve.
 
 ## Decisions
@@ -217,7 +218,8 @@ If `--acceptance` fails:
   (profile `ngram: 10`). The page text is reference only, and prompts forbid copying.
 - **Each slot gets 2 attempts.** A slot is regenerated once after a check, verify or review
   rejection; after that it is left for the reviewer. The rejection reasons are appended to
-  `lessons.md`, which later generation and the next library's notes read.
+  `lessons.md`, which later generation and the next library's notes read. A top-up run reopens
+  spent slots on purpose with `generate --retry-rejected`; without the flag they stay closed.
 - **Plan TEMPLATE slots go only to templatable skills.** When that cannot reach the profile share,
   the plan flags it.
 - **Passages are deferred.** Profiles with item groups are refused by `plan` and `passages` until
@@ -256,6 +258,11 @@ If `--acceptance` fails:
   batches immediately.
 - **`--upload`** to Storage was not exercised: it needs a deployed bucket.
 - **Review hours are entered by hand** (`--hours`).
+- **`MATH.6.NUM.DIV.IRRED.Q03` was removed with a correct key.** It is a TEMPLATE (`answerExpr`
+  `a + b`, 1,000 seeds passed). For 45/72 the key 5 + 8 = 13 is right. The Haiku verifier added
+  5 + 8 = 19, and the Opus dispute repeated that error as KEY_WRONG. `answerCheckExpr` does not
+  apply to TEMPLATE items, so no change to that check is needed. The fix is to skip disputes
+  when code has already recomputed the key (cost plan item A).
 
 ## What the next run (X02) can rely on
 - `pnpm library:build <ID> …` with a new entry in `BUILD_PROFILES` and a `profiles/<ID>.md` notes

@@ -1,7 +1,8 @@
-// Step 8 `generate [--topic CODE]`: per skill, the planned slots in requests of two (item_generation,
-// Batch): hints[4], worked solution, distractor feedback, misconception tags, templates with
-// math.js expressions. SGK/SGV pages of the skill's lessons are attached as reference only. Slots
-// rejected by `check` or by the reviewer are generated once more with the reason attached.
+// Step 8 `generate [--topic CODE] [--retry-rejected]`: per skill, the planned slots in requests of
+// two (item_generation, Batch): hints[4], worked solution, distractor feedback, misconception tags,
+// templates with math.js expressions. SGK/SGV pages of the skill's lessons are attached as reference
+// only. Slots rejected by `check` or by the reviewer are generated once more with the reason
+// attached; `--retry-rejected` gives slots that used up their attempts one more (top-up run).
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { itemGenerationOutputSchema } from '@vionx/ai/schemas';
@@ -23,15 +24,19 @@ const REFERENCE_CHARS = 12_000;
 /** Slots per request: a whole skill in one request can run past the output token limit. */
 const SLOTS_PER_REQUEST = 2;
 
-/** Slots that need a (new) draft: never generated, or rejected with an attempt left. */
+/**
+ * Slots that need a (new) draft: never generated, or rejected with an attempt left.
+ * `retryRejected` reopens rejected slots that used up their attempts.
+ */
 export function pendingSlots(
   slots: PlanSlot[],
-  store: ItemStore,
+  store: Pick<ItemStore, 'get'>,
+  retryRejected = false,
 ): { slot: PlanSlot; attempt: number; problems: string[] }[] {
   return slots.flatMap((slot) => {
     const r = store.get(slot.id);
     if (!r) return [{ slot, attempt: 1, problems: [] }];
-    if (r.item.status !== 'REJECTED' || r.attempt >= MAX_ATTEMPTS) return [];
+    if (r.item.status !== 'REJECTED' || (r.attempt >= MAX_ATTEMPTS && !retryRejected)) return [];
     return [{ slot, attempt: r.attempt + 1, problems: r.rejectedFor ?? [] }];
   });
 }
@@ -51,6 +56,7 @@ export async function generate(ctx: BuildContext): Promise<void> {
   const pending = pendingSlots(
     plan.slots.filter((s) => ctx.inTopic(s.skill)),
     store,
+    ctx.flag('retry-rejected'),
   );
   const waitingForFigure = pending.filter((p) => p.slot.svg && !media.get(p.slot.id)?.ok);
   for (const p of waitingForFigure)

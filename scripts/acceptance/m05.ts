@@ -164,7 +164,7 @@ export const scenario: Scenario = {
         for (const dir of [...LIBRARIES.map((l) => l.dir), 'invalid/6-math-cycle']) {
           const r = spawnSync(
             'pnpm',
-            ['-s', 'library:validate', join(FIXTURES, dir), '--seeds', '200'],
+            ['--silent', 'library:validate', join(FIXTURES, dir), '--seeds', '200'],
             {
               cwd: root,
               encoding: 'utf8',
