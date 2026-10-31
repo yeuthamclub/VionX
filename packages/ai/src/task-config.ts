@@ -7,13 +7,14 @@ const OPUS = 'claude-opus-5-5';
 
 /**
  * Defaults from ARCHITECTURE §4. The database (`ops.ai_task_config`) is the source of truth at
- * runtime; migration 0001 seeds the same rows (a unit test keeps the two in sync).
+ * runtime; migration 0001 seeds the same rows and later migrations update them (a unit test keeps
+ * the two in sync).
  */
 export const DEFAULT_TASK_CONFIG: Record<AiTaskName, AiTaskConfig> = {
   page_extraction: cfg('page_extraction', HAIKU, 'batch', null, 16000),
   page_reread: cfg('page_reread', SONNET, 'batch', 'high', 16000),
   structure_mapping: cfg('structure_mapping', SONNET, 'batch', 'high', 16000),
-  item_generation: cfg('item_generation', SONNET, 'batch', 'high', 16000),
+  item_generation: cfg('item_generation', SONNET, 'batch', 'medium', 16000),
   item_verification: cfg('item_verification', HAIKU, 'batch', null, 8000),
   item_dispute: cfg('item_dispute', OPUS, 'batch', 'high', 16000),
   tutor_t2: cfg('tutor_t2', HAIKU, 'realtime', null, 4000),

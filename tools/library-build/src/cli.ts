@@ -7,7 +7,7 @@
 //   plan [--target N] | plan --approve [--by NAME]     plan.csv for owner approval
 //   passages                            item-group stimuli (no-op for MATH.6)
 //   media                               SVG figures, sanitised + PNG render          (Batch)
-//   generate                            items, hints, solutions, templates            (Batch)
+//   generate [--retry-rejected]         items, hints, solutions, templates            (Batch)
 //   check                               code checks
 //   verify (alias dispute)              blind solve, then disputes                    (Batch)
 //   review-export [--media-base-url U]  review/review.csv for Google Sheets
