@@ -19,15 +19,26 @@ import { noDatabase } from '../api/deps.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const FIXTURES = join(root, 'scripts/acceptance/fixtures/m05');
-const migration = readFileSync(join(root, 'supabase/migrations/0008_library_core.sql'), 'utf8');
+const MIGRATIONS = join(root, 'supabase/migrations');
+// Every `insert into library.subject_profiles` block, in migration order (0008 seeds 8, ADR-001 adds Toán 5).
+const profileBlocks = readdirSync(MIGRATIONS)
+  .filter((f) => f.endsWith('.sql'))
+  .sort()
+  .flatMap((f) =>
+    readFileSync(join(MIGRATIONS, f), 'utf8')
+      .split('insert into library.subject_profiles')
+      .slice(1)
+      .map((b) => b.split(';\n')[0]!),
+  );
 
 describe('subject profiles', () => {
-  it('migration 0008 seeds the same 8 profiles as the domain constant', () => {
-    const block = migration.split('insert into library.subject_profiles')[1]!.split(';\n')[0]!;
+  it('the migrations seed the same profiles as the domain constant', () => {
     const rows = [
-      ...block.matchAll(
-        /\((\d+), '(\w+)',\s*'([^']+)',\s*([\d.]+), ([\d.]+), ([\d.]+), (true|false),\s*'(\w+)', '(\w+)',\s*'(\{[^']*\})'\)/g,
-      ),
+      ...profileBlocks
+        .join('\n')
+        .matchAll(
+          /\((\d+), '(\w+)',\s*'([^']+)',\s*([\d.]+), ([\d.]+), ([\d.]+), (true|false),\s*'(\w+)', '(\w+)',\s*'(\{[^']*\})'\)/g,
+        ),
     ].map((m) => ({
       grade: Number(m[1]),
       subject: m[2],

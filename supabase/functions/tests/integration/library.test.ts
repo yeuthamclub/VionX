@@ -354,7 +354,7 @@ describe('reads', () => {
       (await api('GET', '/admin/library', librarian)).body,
     );
     expect(overview.versions.map((v) => v.code)).toContain('gdpt2018');
-    expect(overview.profiles).toHaveLength(8);
+    expect(overview.profiles).toHaveLength(9); // 8 launch libraries + Toán 5 (ADR-001)
     expect(overview.libraries.find((l) => l.grade === 6 && l.subject === 'math')).toMatchObject({
       items: 10,
       approvedItems: 10,
