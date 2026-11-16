@@ -8,6 +8,20 @@ export async function resetLibraryScope(
   subject: string,
 ): Promise<void> {
   await sql.begin(async (tx) => {
+    // M06: learning rows of test families point at the items and skills removed below.
+    await tx`delete from app.learning_sessions where grade = ${grade} and subject = ${subject}`;
+    for (const table of [
+      'student_item_history',
+      'mistake_patterns',
+      'review_schedule',
+      'student_skill_states',
+    ]) {
+      const column = table === 'student_item_history' ? 'item_id' : 'skill_id';
+      const source = column === 'item_id' ? 'items' : 'curriculum_nodes';
+      await tx`
+        delete from ${tx(`app.${table}`)} where ${tx(column)} in (
+          select id from ${tx(`library.${source}`)} where grade = ${grade} and subject = ${subject})`;
+    }
     await tx`
       delete from library.item_templates where item_id in (
         select id from library.items where grade = ${grade} and subject = ${subject})`;

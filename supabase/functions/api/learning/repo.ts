@@ -74,7 +74,7 @@ export interface SessionRow {
   hints_count: number;
   current_item: CurrentItem | null;
   last_answer: { clientUuid: string; result: Record<string, unknown> } | null;
-  served: { itemId: string; skillId: string }[];
+  served: { itemId: string; skillId: string; seed?: number | null }[];
   wrong_items: { itemId: string; seed: number | null }[];
   diagnostic_answers: {
     skillId: string;

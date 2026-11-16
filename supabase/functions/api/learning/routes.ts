@@ -536,33 +536,45 @@ export function registerLearningRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
       (d, a) => nextDifficulty(d, a.correct, a.hintsUsed),
       config.startDifficulty,
     );
-    for (const { skillId, kind: slotKindOf } of order) {
-      const target =
-        s.mode === 'DIAGNOSTIC'
-          ? diagnosticDifficulty
-          : (stateOf.get(skillId)?.currentDifficulty ?? config.startDifficulty);
-      const rows = await repo.candidates(tx, scope, s.student_id, skillId);
-      const excluded = new Set(served);
-      for (let tries = 0; tries < 5; tries++) {
-        const picked = pickItem(
-          rows.map((r) => ({
-            itemId: r.id,
-            kind: r.kind,
-            difficulty: r.difficulty,
-            seenCount: r.seen_count,
-            lastSeenAt: r.last_seen_at ? new Date(r.last_seen_at).getTime() : null,
-          })),
-          target,
-          excluded,
-          rand,
+    // Second pass, when every item was served: a TEMPLATE item may come back with a new seed.
+    for (const repeatTemplates of [false, true]) {
+      for (const { skillId, kind: slotKindOf } of order) {
+        const target =
+          s.mode === 'DIAGNOSTIC'
+            ? diagnosticDifficulty
+            : (stateOf.get(skillId)?.currentDifficulty ?? config.startDifficulty);
+        const rows = await repo.candidates(tx, scope, s.student_id, skillId);
+        const excluded = new Set(
+          repeatTemplates
+            ? rows.filter((r) => r.kind === 'STATIC' && served.has(r.id)).map((r) => r.id)
+            : served,
         );
-        if (!picked) break;
-        const row = rows.find((r) => r.id === picked.itemId)!;
-        const item = await repo.fullItem(tx, picked.itemId);
-        const seed = row.kind === 'TEMPLATE' ? newSeed(row.seeds.map(Number), rand) : null;
-        const rendered = item ? render(item, seed) : null;
-        if (rendered) return { current: make(picked.itemId, skillId, seed, slotKindOf), rendered };
-        excluded.add(picked.itemId);
+        for (let tries = 0; tries < 5; tries++) {
+          const picked = pickItem(
+            rows.map((r) => ({
+              itemId: r.id,
+              kind: r.kind,
+              difficulty: r.difficulty,
+              seenCount: r.seen_count,
+              lastSeenAt: r.last_seen_at ? new Date(r.last_seen_at).getTime() : null,
+            })),
+            target,
+            excluded,
+            rand,
+          );
+          if (!picked) break;
+          const row = rows.find((r) => r.id === picked.itemId)!;
+          const item = await repo.fullItem(tx, picked.itemId);
+          const usedSeeds = [
+            ...row.seeds.map(Number),
+            ...s.served.flatMap((x) => (x.itemId === row.id && x.seed != null ? [x.seed] : [])),
+          ];
+          const seed = row.kind === 'TEMPLATE' ? newSeed(usedSeeds, rand) : null;
+          const rendered = item ? render(item, seed) : null;
+          if (rendered)
+            return { current: make(picked.itemId, skillId, seed, slotKindOf), rendered };
+          excluded.add(picked.itemId);
+        }
       }
     }
     return null;
@@ -602,7 +614,7 @@ export function registerLearningRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
         await tx`
           update app.learning_sessions
           set current_item = ${tx.json(current as never)},
-              served = served || ${tx.json([{ itemId: current.itemId, skillId: current.skillId }] as never)}
+              served = served || ${tx.json([{ itemId: current.itemId, skillId: current.skillId, seed: current.seed }] as never)}
           where id = ${s.id}`;
       }
       const group = rendered.item.group_id
