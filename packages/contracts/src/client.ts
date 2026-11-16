@@ -54,6 +54,23 @@ export type CatalogResponse = components['schemas']['CatalogResponse'];
 export type Redemption = components['schemas']['Redemption'];
 export type RedemptionStatus = components['schemas']['RedemptionStatus'];
 export type RedemptionsResponse = components['schemas']['RedemptionsResponse'];
+export type LearningSession = components['schemas']['LearningSession'];
+export type SessionMode = components['schemas']['SessionMode'];
+export type MasteryState = components['schemas']['MasteryState'];
+export type PracticeItem = components['schemas']['PracticeItem'];
+export type PracticeOption = components['schemas']['PracticeOption'];
+export type PracticeMedia = components['schemas']['PracticeMedia'];
+export type PracticeGroup = components['schemas']['PracticeGroup'];
+export type PracticeHint = components['schemas']['PracticeHint'];
+export type NextItemResponse = components['schemas']['NextItemResponse'];
+export type AnswerResponse = components['schemas']['AnswerResponse'];
+export type HintResponse = components['schemas']['HintResponse'];
+export type LearningSessionSummary = components['schemas']['LearningSessionSummary'];
+export type SkillProgress = components['schemas']['SkillProgress'];
+export type KnowledgeNode = components['schemas']['KnowledgeNode'];
+export type KnowledgeSubject = components['schemas']['KnowledgeSubject'];
+export type KnowledgeMapResponse = components['schemas']['KnowledgeMapResponse'];
+export type LearningPathStep = components['schemas']['LearningPathStep'];
 export const CHILD_SESSION_HEADER = 'x-vionx-child-session';
 
 export interface ApiClientOptions {

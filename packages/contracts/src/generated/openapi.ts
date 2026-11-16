@@ -4828,6 +4828,663 @@ export interface paths {
     };
     trace?: never;
   };
+  '/api/v1/learning/sessions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start a practice, review or diagnostic session
+     * @description Child actor. Covers the practicable skills of `nodeId` (or `skillIds`) of the child’s grade. Without `mode` the first session on a topic is a DIAGNOSTIC (8-12 adaptive items), later ones PRACTICE (70% current skills, 30% due reviews). REVIEW serves the skills whose review is due (409 when none). Idempotent by `clientUuid`. Without EDUCATION_ANALYTICS consent the session works and only aggregates are stored (`analytics: false`).
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['LearningSessionCreate'];
+        };
+      };
+      responses: {
+        /** @description Started (or replayed) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LearningSessionCreateResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/learning/sessions/{id}/next': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The item to answer now
+     * @description Child actor. Returns the same item until it is answered. Selection: target difficulty ±1, unseen items first, a new seed for TEMPLATE items, the rest of a passage group after its first item. The answer is never included. `done` when the target, the time limit or the item pool is reached.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Learning session id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Next item */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['NextItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/learning/sessions/{id}/answers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Answer the current item
+     * @description Child actor. Judged against the stored item, or the variant of the stored seed for a TEMPLATE item. Updates the skill’s mastery (hints and rushed answers count less) and its review schedule. A wrong option returns its pre-written feedback. Idempotent by `clientUuid`; 409 when `itemId` is not the current item.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Learning session id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['AnswerCreate'];
+        };
+      };
+      responses: {
+        /** @description Judged (or replayed) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AnswerResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/learning/sessions/{id}/hint': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Next hint of the current item (tutor tier T0)
+     * @description Child actor. Returns the next of the 4 pre-generated hints; the last level also returns the worked solution. Each hint lowers the weight of the answer. No AI call.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Learning session id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Hint */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['HintResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/learning/sessions/{id}/finish': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Finish the session
+     * @description Child actor. Places the skills of a diagnostic, returns the summary with the worked solutions of wrong answers and emits `learning.session_finished` (LearningSessionFinished); the worker grants XP once per session (rule LEARNING_CORRECT_ANSWER). Calling it again returns the stored summary.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Learning session id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Finished (or replayed) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LearningSessionFinishResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/knowledge-map': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Knowledge map: curriculum of the child’s grade with mastery states
+     * @description Parent: any child of the household; child: only their own id (others 404). Nodes come parents first; a skill carries its state (Master Spec §10.2), a higher node the mean of its skills.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description One subject (e.g. math). */
+          subject?: string;
+        };
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Knowledge map */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['KnowledgeMapResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/learning-path': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * What to practise next
+     * @description Due reviews first, then skills in progress (weakest first), then new skills whose prerequisites are at least Proficient. Parent or the child themself; others 404.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description One subject (e.g. math). */
+          subject?: string;
+        };
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Learning path */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LearningPathResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/items/{id}/report': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Report a problem with a question
+     * @description Parent or child. Stores the reason and, for a TEMPLATE item, the seed. Never stores who reported.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Library item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['ItemReportCreate'];
+        };
+      };
+      responses: {
+        /** @description Reported */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ItemReportResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -6716,6 +7373,353 @@ export interface components {
       sourceKind?: 'ORIGINAL_AI' | 'PUBLIC_DOMAIN' | 'LICENSED';
       sourceNote?: string | null;
       status?: components['schemas']['ContentStatus'];
+    };
+    LearningSessionCreateResponse: {
+      session: components['schemas']['LearningSession'];
+      replayed: boolean;
+    };
+    LearningSession: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      mode: components['schemas']['SessionMode'];
+      /** @enum {string} */
+      status: 'ACTIVE' | 'FINISHED';
+      grade: number;
+      subject: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      nodeId: string | null;
+      skillIds: string[];
+      targetItems: number;
+      /** @description The session ends after this long (~15 for Grade 1-3). */
+      maxMinutes: number;
+      answeredCount: number;
+      correctCount: number;
+      hintsCount: number;
+      /** @description Grade 1-3 mode: large touch targets, minimal typing, encouraging feedback. */
+      youngMode: boolean;
+      /** @description Read stems, options and hints aloud by default (subject profile or Grade ≤ 3). */
+      readAloud: boolean;
+      /** @enum {string} */
+      ttsLang: 'vi' | 'en';
+      /** @description EDUCATION_ANALYTICS was in force at start. When false only aggregates are stored (no per-answer rows). */
+      analytics: boolean;
+      /** Format: date-time */
+      startedAt: string;
+      /** Format: date-time */
+      finishedAt: string | null;
+    };
+    /** @enum {string} */
+    SessionMode: 'PRACTICE' | 'REVIEW' | 'DIAGNOSTIC';
+    LearningSessionCreate: {
+      /**
+       * Format: uuid
+       * @description Client-generated id; a retry returns the session.
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      clientUuid: string;
+      mode?: components['schemas']['SessionMode'] & unknown;
+      /**
+       * Format: uuid
+       * @description Curriculum node (topic, lesson… or one skill): the session covers its skills.
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      nodeId?: string;
+      skillIds?: string[];
+      /** @description REVIEW without a node: the subject to review. */
+      subject?: string;
+      /** @description Number of items; a diagnostic is clamped to 8-12 (default 10). */
+      targetItems?: number;
+    };
+    NextItemResponse: {
+      done: boolean;
+      /** @enum {string|null} */
+      reason: 'TARGET_REACHED' | 'TIME_UP' | 'NO_ITEMS' | 'FINISHED' | null;
+      progress: components['schemas']['LearningSessionProgress'];
+      item: components['schemas']['PracticeItem'] | null;
+      group: components['schemas']['PracticeGroup'] | null;
+    };
+    LearningSessionProgress: {
+      answered: number;
+      correct: number;
+      target: number;
+    };
+    PracticeItem: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** @enum {string} */
+      type:
+        | 'single_choice'
+        | 'multi_choice'
+        | 'numeric'
+        | 'fill_blank'
+        | 'word_bank'
+        | 'picture_choice'
+        | 'ordering'
+        | 'matching'
+        | 'true_false'
+        | 'spelling_choice';
+      /** @enum {string} */
+      kind: 'STATIC' | 'TEMPLATE';
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      skillId: string;
+      /** @enum {string} */
+      slotKind: 'CURRENT' | 'REVIEW';
+      difficulty: number;
+      stemMd: string;
+      media: components['schemas']['PracticeMedia'][];
+      options: components['schemas']['PracticeOption'][];
+      /** @description fill_blank / word_bank: number of gaps to fill. */
+      blanks: number;
+      ttsText: string | null;
+      /** @enum {string} */
+      ttsLang: 'vi' | 'en';
+      /** @description TEMPLATE: seed of the variant shown; the answer is judged against it. */
+      seed: number | null;
+      hintsTotal: number;
+      /** @description Hints already taken. */
+      hints: components['schemas']['PracticeHint'][];
+    };
+    PracticeMedia: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** @enum {string} */
+      kind: 'ICON' | 'SVG' | 'IMAGE';
+      /** @description Sanitised inline SVG (kind SVG). */
+      svg: string | null;
+      storagePath: string | null;
+      alt: string;
+    };
+    PracticeOption: {
+      id: string;
+      text: string | null;
+      media: components['schemas']['PracticeMedia'] | null;
+      ttsText: string | null;
+      /**
+       * @description matching: column.
+       * @enum {string|null}
+       */
+      side: 'left' | 'right' | null;
+    };
+    PracticeHint: {
+      md: string;
+      ttsText: string | null;
+    };
+    /** @description Shared stimulus (passage, poem…) that stays visible while its items are answered. */
+    PracticeGroup: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** @enum {string} */
+      stimulusKind: 'PASSAGE' | 'POEM' | 'DIALOGUE' | 'PICTURE_SCENE' | 'EXPERIMENT';
+      title: string;
+      bodyMd: string;
+      ttsText: string | null;
+      /** @enum {string} */
+      ttsLang: 'vi' | 'en';
+      media: components['schemas']['PracticeMedia'][];
+      /** @description 1-based place of the item in its group. */
+      position: number;
+      total: number;
+    };
+    AnswerResponse: {
+      isCorrect: boolean;
+      replayed: boolean;
+      correctAnswer: {
+        [key: string]: unknown;
+      };
+      /** @description Pre-written feedback for the wrong option chosen (tutor tier T0). */
+      feedback: {
+        md: string;
+        misconception: string | null;
+      } | null;
+      explanationMd: string;
+      /** @description Only after hint level 4; otherwise at session end. */
+      workedSolutionMd: string | null;
+      /** @description Change of the skill score (0 in a diagnostic: placement happens at finish). */
+      masteryDelta: number;
+      skill: components['schemas']['SkillProgress'];
+      progress: components['schemas']['LearningSessionProgress'];
+    };
+    SkillProgress: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      skillId: string;
+      title: string;
+      state: components['schemas']['MasteryState'];
+      masteryScore: number;
+    };
+    /**
+     * @description Display state of a skill or topic (Master Spec §10.2). XP is not mastery.
+     * @enum {string}
+     */
+    MasteryState:
+      'NOT_LEARNED' | 'INTRODUCED' | 'LEARNING' | 'PROFICIENT' | 'MASTERED' | 'RETAINED';
+    AnswerCreate: {
+      /**
+       * Format: uuid
+       * @description A retry with the same id returns the stored result.
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      clientUuid: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      itemId: string;
+      /**
+       * @description By item type: {optionId} | {optionIds} | {value} | {blanks} | {blankOptionIds} | {order} | {pairs}.
+       * @example {
+       *       "optionId": "b"
+       *     }
+       */
+      response: {
+        [key: string]: unknown;
+      };
+      responseMs?: number;
+    };
+    HintResponse: {
+      level: number;
+      total: number;
+      hint: components['schemas']['PracticeHint'];
+      /** @description Shown with the last hint. */
+      workedSolutionMd: string | null;
+    };
+    LearningSessionFinishResponse: {
+      session: components['schemas']['LearningSession'];
+      summary: components['schemas']['LearningSessionSummary'];
+      replayed: boolean;
+    };
+    LearningSessionSummary: {
+      answered: number;
+      correct: number;
+      accuracy: number;
+      hintsUsed: number;
+      durationSec: number;
+      /** @description XP the session is worth (granted once by the worker). */
+      xp: number;
+      skills: components['schemas']['SkillProgress'][];
+      /** @description Worked solutions of the items answered wrong. */
+      solutions: components['schemas']['SessionSolution'][];
+    };
+    SessionSolution: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      itemId: string;
+      stemMd: string;
+      workedSolutionMd: string;
+      correctAnswer: {
+        [key: string]: unknown;
+      };
+    };
+    KnowledgeMapResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      grade: number;
+      subjects: components['schemas']['KnowledgeSubject'][];
+    };
+    KnowledgeSubject: {
+      subject: string;
+      title: string;
+      readAloud: boolean;
+      /** @enum {string} */
+      ttsLang: 'vi' | 'en';
+      nodes: components['schemas']['KnowledgeNode'][];
+    };
+    KnowledgeNode: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      parentId: string | null;
+      level: string;
+      title: string;
+      sortOrder: number;
+      /** @description Practicable skills under the node (1 for a skill). */
+      skillCount: number;
+      state: components['schemas']['MasteryState'];
+      /** @description Skill score, or the mean of the skills below. */
+      masteryScore: number;
+      confidenceScore: number | null;
+      attemptCount: number;
+      recentAccuracy: number | null;
+      /** Format: date-time */
+      lastAttemptAt: string | null;
+      /** Format: date-time */
+      nextReviewAt: string | null;
+      forgettingRisk: number | null;
+    };
+    LearningPathResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      steps: components['schemas']['LearningPathStep'][];
+    };
+    LearningPathStep: {
+      /** @enum {string} */
+      kind: 'REVIEW_DUE' | 'CONTINUE' | 'START';
+      subject: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      skillId: string;
+      skillTitle: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      topicId: string;
+      topicTitle: string;
+      state: components['schemas']['MasteryState'];
+      masteryScore: number;
+      /** Format: date-time */
+      dueAt: string | null;
+    };
+    ItemReportResponse: {
+      /** @enum {boolean} */
+      reported: true;
+    };
+    ItemReportCreate: {
+      /** @enum {string} */
+      reason:
+        'WRONG_ANSWER' | 'UNCLEAR' | 'TYPO' | 'BAD_MEDIA' | 'BAD_AUDIO' | 'TOO_HARD' | 'OTHER';
+      variantSeed?: number;
     };
   };
   responses: never;

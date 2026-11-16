@@ -36,8 +36,8 @@ insert into app.mastery_config (version, config) values (1, '{
 
 -- ---------------------------------------------------------------------------
 -- Sessions. `current_item` is the item being served ({itemId, skillId, seed, slot, hintsUsed,
--- servedAt}); the answer is judged against that stored seed. `served_item_ids`, `wrong_items` and
--- `diagnostic_answers` are working state of an ACTIVE session and are emptied at finish.
+-- servedAt}); the answer is judged against that stored seed. `served` ([{itemId, skillId}]),
+-- `wrong_items` and `diagnostic_answers` are working state of an ACTIVE session, emptied at finish.
 -- `analytics` records whether EDUCATION_ANALYTICS was in force when the session started.
 -- ---------------------------------------------------------------------------
 create table app.learning_sessions (
@@ -59,7 +59,7 @@ create table app.learning_sessions (
   hints_count integer not null default 0 check (hints_count >= 0),
   current_item jsonb,
   last_answer jsonb,
-  served_item_ids uuid[] not null default '{}',
+  served jsonb not null default '[]'::jsonb,
   wrong_items jsonb not null default '[]'::jsonb,
   diagnostic_answers jsonb not null default '[]'::jsonb,
   summary jsonb,

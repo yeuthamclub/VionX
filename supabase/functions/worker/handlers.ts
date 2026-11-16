@@ -1,6 +1,6 @@
 import type { TxSql } from '../_shared/db.ts';
 import type { EventHandlers } from '../_shared/queue.ts';
-import { grantTaskXp, settleDueDays } from '../_shared/rewards.ts';
+import { grantSessionXp, grantTaskXp, settleDueDays } from '../_shared/rewards.ts';
 import { materialiseAll } from '../_shared/tasks.ts';
 import { runExportJob, type ExportDeps } from './privacy-export.ts';
 
@@ -64,6 +64,11 @@ export function createHandlers(deps: HandlerDeps): EventHandlers {
     },
     'task.completed': async (event, tx) => {
       if (event.payload.status === 'APPROVED') await grantTaskXp(tx, event);
+    },
+
+    // M06: XP for a finished practice session (rule LEARNING_CORRECT_ANSWER), once per session.
+    'learning.session_finished': async (event, tx) => {
+      await grantSessionXp(tx, event);
     },
 
     // M04: hourly request from pg_cron (vionx-reward-settlement) → settle every household-local
