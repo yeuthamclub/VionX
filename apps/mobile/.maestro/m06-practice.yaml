@@ -1,0 +1,216 @@
+# M06 main path: a Grade 2 child opens Learn, starts the first topic of Toán 2 (a diagnostic of 10
+# items), answers by tapping only (option buttons, the on-screen number pad, tap-to-order), hears
+# every item read aloud in Vietnamese, takes a hint, reports a question, and reaches the summary.
+# Then the parent sees the per-skill states.
+# Which item types appear depends on the library, so the answer step is a loop of optional taps:
+# whatever control is on screen gets one tap. Right or wrong does not matter here; correctness,
+# mastery, template seeds, reviews and XP are covered by `pnpm acceptance m06` and the API tests.
+# Prereqs: as m01-identity.yaml (development build on an emulator, local Supabase + functions with
+# the Toán 2 library imported, `pnpm dev:mobile`). Uses the LOCAL test OTP number 0900000006 /
+# 123456 (supabase/config.toml). Read-aloud needs a device with a Vietnamese TTS voice; Maestro
+# cannot hear it, so check it by ear on the device.
+# Run: maestro test apps/mobile/.maestro/m06-practice.yaml
+appId: vn.vionx.app
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Phụ huynh'
+    timeout: 60000
+- tapOn:
+    id: 'role-parent'
+- tapOn:
+    id: 'phone-input'
+- inputText: '0900000006'
+- tapOn:
+    id: 'send-code'
+- extendedWaitUntil:
+    visible:
+      id: 'otp-input'
+    timeout: 15000
+- tapOn:
+    id: 'otp-input'
+- inputText: '123456'
+- tapOn:
+    id: 'verify-code'
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục'
+    timeout: 20000
+- runFlow:
+    when:
+      visible:
+        id: 'policies-accept'
+    commands:
+      - tapOn:
+          id: 'policies-agree'
+      - tapOn:
+          id: 'policies-accept'
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình'
+    timeout: 20000
+- runFlow:
+    when:
+      visible: 'Tạo gia đình'
+    commands:
+      - tapOn:
+          id: 'household-name'
+      - inputText: 'Gia đình Luyện tập'
+      - tapOn:
+          id: 'household-create'
+- extendedWaitUntil:
+    visible:
+      id: 'add-child'
+    timeout: 15000
+
+# A grade-2 child for this run
+- runFlow:
+    file: subflows/m01-add-child.yaml
+    env:
+      NAME: 'Na'
+      YEAR: '2018'
+      GRADE: '2'
+      PIN: '2580'
+- evalScript: ${output.loginId = maestro.copiedText}
+
+# Child device
+- tapOn:
+    id: 'child-device'
+- tapOn: 'Tiếp tục'
+- extendedWaitUntil:
+    visible:
+      id: 'child-login-id'
+    timeout: 15000
+- tapOn:
+    id: 'child-login-id'
+- inputText: ${output.loginId}
+- runFlow:
+    file: subflows/m01-enter-pin.yaml
+    env:
+      DIGITS: '2,5,8,0'
+- tapOn:
+    id: 'child-login-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'open-learn'
+    timeout: 15000
+
+# Learn → knowledge map → first topic
+- tapOn:
+    id: 'open-learn'
+- extendedWaitUntil:
+    visible:
+      id: 'screen-learn'
+    timeout: 15000
+- tapOn:
+    id: 'subject-math'
+- takeScreenshot: m06-knowledge-map
+- tapOn: 'Làm bài kiểm tra đầu vào'
+- extendedWaitUntil:
+    visible:
+      id: 'item-stem'
+    timeout: 20000
+- assertVisible:
+    id: 'speak-item'
+- assertVisible:
+    id: 'practice-progress'
+- takeScreenshot: m06-first-item
+
+# Hint ladder and report on the first item
+- scrollUntilVisible:
+    element:
+      id: 'practice-hint'
+- tapOn:
+    id: 'practice-hint'
+- scrollUntilVisible:
+    element:
+      id: 'hint-1'
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: 'practice-report'
+- tapOn:
+    id: 'practice-report'
+- tapOn:
+    id: 'report-UNCLEAR'
+- extendedWaitUntil:
+    visible:
+      id: 'report-sent'
+    timeout: 15000
+
+# Answer up to 12 items with taps only, whatever their type
+- repeat:
+    while:
+      notVisible:
+        id: 'practice-summary'
+    times: 14
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: 'item-stem'
+          direction: UP
+          optional: true
+      - assertVisible:
+          id: 'speak-item'
+      # choice, picture choice, spelling, multi choice, word bank, ordering (tap each in turn)
+      - tapOn:
+          id: 'option-a'
+          optional: true
+      - tapOn:
+          id: 'option-b'
+          optional: true
+      - tapOn:
+          id: 'option-c'
+          optional: true
+      - tapOn:
+          id: 'option-d'
+          optional: true
+      - tapOn:
+          id: 'option-true'
+          optional: true
+      # numeric: the on-screen pad
+      - tapOn:
+          id: 'key-5'
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'practice-submit'
+          optional: true
+      - tapOn:
+          id: 'practice-submit'
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: 'practice-continue'
+          timeout: 15000
+          optional: true
+      - tapOn:
+          id: 'practice-continue'
+          optional: true
+      # an item the taps above could not complete (matching, typing): stop the session
+      - runFlow:
+          when:
+            notVisible:
+              id: 'practice-summary'
+            visible:
+              id: 'practice-submit'
+              enabled: false
+          commands:
+            - scrollUntilVisible:
+                element:
+                  id: 'practice-finish'
+            - tapOn:
+                id: 'practice-finish'
+- assertVisible:
+    id: 'summary-score'
+- assertVisible:
+    id: 'summary-xp'
+- takeScreenshot: m06-summary
+- scrollUntilVisible:
+    element:
+      id: 'practice-done'
+- tapOn:
+    id: 'practice-done'
+- extendedWaitUntil:
+    visible:
+      id: 'screen-learn'
+    timeout: 15000

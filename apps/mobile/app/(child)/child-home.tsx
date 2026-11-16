@@ -89,6 +89,12 @@ export default function ChildHome() {
         )}
       </StateView>
       <Button
+        testID="open-learn"
+        label={t('learn.open')}
+        color={theme.colors.child}
+        onPress={() => router.push('/learn')}
+      />
+      <Button
         testID="open-child-tasks"
         label={t('childTasks.open')}
         color={theme.colors.child}

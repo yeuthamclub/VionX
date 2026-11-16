@@ -157,6 +157,16 @@ export default function StudentDetail() {
               }
             />
             <Button
+              testID="open-mastery"
+              label={t('student.mastery')}
+              onPress={() =>
+                router.push({
+                  pathname: '/mastery/[id]',
+                  params: { id: s.id, name: s.displayName },
+                })
+              }
+            />
+            <Button
               testID="open-consents"
               label={t('student.consents')}
               variant="secondary"
