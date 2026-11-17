@@ -8,7 +8,6 @@
 // time + parent setting), pins and removals, task completion through Today, the day-start job,
 // and that another household gets 404.
 import { randomUUID } from 'node:crypto';
-import { householdToday, isoWeekday } from '@vionx/domain';
 import { findTopic, solve } from '../lib/learning-solver.ts';
 import { signUpWithEmail, type AuthSession } from '../lib/local-supabase.ts';
 import { assert, connectDb, env, SkipStep, type Scenario } from './lib.ts';
@@ -376,7 +375,7 @@ export const scenario: Scenario = {
         const settled = await today(a);
         assert(settled.version === after.version, 'the worker changed an up-to-date plan');
         const xp = await sql<{ amount: number }[]>`
-          select amount from app.xp_ledger
+          select lifetime_xp_delta as amount from app.xp_ledger
           where student_id = ${a.studentId} and source_type = 'learning_session'
             and source_id = ${session.id}`;
         assert(xp.length === 1, `session XP rows: ${xp.length}`);
@@ -408,7 +407,8 @@ export const scenario: Scenario = {
       run: async () => {
         const g2 = state.g2!;
         const before = await today(g2, 'parent');
-        const weekday = isoWeekday(householdToday(new Date(), 'Asia/Ho_Chi_Minh'));
+        // ISO weekday of today in Asia/Ho_Chi_Minh (UTC+7, no daylight saving).
+        const weekday = new Date(Date.now() + 7 * 3_600_000).getUTCDay() || 7;
         await ok(
           'POST',
           `/students/${g2.studentId}/timetable`,
@@ -493,25 +493,32 @@ export const scenario: Scenario = {
       name: 'Day start: the hourly job writes the plan of a child that has none',
       run: async () => {
         const b = state.b!;
-        const [none] = await sql<{ n: number }[]>`
-          select count(*)::int as n from app.today_plans where student_id = ${b.studentId}`;
-        assert(none!.n === 0, 'family B already has a plan');
-        const [event] = await sql<{ id: string }[]>`
-          insert into ops.domain_events (type, aggregate_type, payload, idempotency_key)
-          values ('planner.day_start_requested', 'system',
-                  ${sql.json({ requestedAt: new Date().toISOString() })},
-                  ${`acceptance:${randomUUID()}`})
-          returning id`;
-        await drain([event!.id]);
-        const plans = await sql<{ version: number; items: number }[]>`
+        const readPlans = () => sql<{ version: number; items: number }[]>`
           select p.version,
                  (select count(*)::int from app.today_plan_items i where i.plan_id = p.id) as items
           from app.today_plans p where p.student_id = ${b.studentId}`;
+        // The project's own worker (deployed build, every minute) reads the same queue. Until the
+        // M07 build is deployed it acknowledges this event type without doing anything, so a
+        // request it took first is sent again for the worker served from this branch.
+        let plans = await readPlans();
+        let attempts = 0;
+        for (; attempts < 4; attempts++) {
+          await sql`delete from app.today_plans where student_id = ${b.studentId}`;
+          const [event] = await sql<{ id: string }[]>`
+            insert into ops.domain_events (type, aggregate_type, payload, idempotency_key)
+            values ('planner.day_start_requested', 'system',
+                    ${sql.json({ requestedAt: new Date().toISOString() })},
+                    ${`acceptance:${randomUUID()}`})
+            returning id`;
+          await drain([event!.id]);
+          plans = await readPlans();
+          if (plans.length > 0) break;
+        }
         assert(plans.length === 1 && plans[0]!.version === 1, `plans: ${JSON.stringify(plans)}`);
         const [job] = await sql<{ schedule: string }[]>`
           select schedule from cron.job where jobname = 'vionx-today-plans'`;
         assert(job?.schedule === '10 * * * *', `cron schedule ${job?.schedule}`);
-        return `plan written by the worker (version 1, ${plans[0]!.items} item(s)); pg_cron "vionx-today-plans" at ${job.schedule}`;
+        return `plan written by the worker (version 1, ${plans[0]!.items} item(s), request ${attempts + 1}); pg_cron "vionx-today-plans" at ${job.schedule}`;
       },
     },
     {

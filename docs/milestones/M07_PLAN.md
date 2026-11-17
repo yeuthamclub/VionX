@@ -31,23 +31,24 @@ Branch `m07-today-planner` (from `m06-practice` at 53b1577; M06 is not merged). 
 1. Migration `0012_today_planner.sql` → applied on the test project. **Done.**
 2. `packages/domain/src/planner` → 30 tests, 9 fast-check properties, green. **Done.**
 3. Contracts, `api/planner` (8 routes), calendar `skillIds`, worker handlers, privacy export,
-   `pnpm openapi` → typecheck (tsc + deno check) green. **Done, not yet exercised against a
-   database.**
+   `pnpm openapi` → typecheck (tsc + deno check) green. **Done.**
 4. `tests/integration/planner.test.ts` (config equals the domain default, RLS/grants, lifecycle,
    exam ranking, session → DONE, pin/remove/skip, cross-household 404 on every route) and unit
-   tests for the worker handlers. **To do.**
+   tests for the worker handlers. **Done, except the worker unit tests** (the integration test
+   and the acceptance drive the served worker instead).
 5. Mobile: child home = Today cards (duration, reward hint, cap bar), query invalidation after a
    session; parent Today with reasons, pin/remove, daily minutes; exam skills in the event form;
-   i18n vi/en; Jest/Vitest. **To do.**
-6. `apps/mobile/.maestro/m07-today.yaml`, `scripts/acceptance/m07.ts`. **To do.**
+   i18n vi/en; Jest/Vitest. **Done.**
+6. `apps/mobile/.maestro/m07-today.yaml`, `scripts/acceptance/m07.ts`. **Done.**
 7. `pnpm check:static`; `pnpm check` on the test project; `pnpm db:migrate` + `pnpm acceptance m07`
-   on the development project. **To do** (0012 is not applied on the development project yet).
-8. `M07_REPORT.md`, ROADMAP DONE, repo `CLAUDE.md` commands line. **To do.**
+   on the development project. **Done.**
+8. `M07_REPORT.md`, ROADMAP DONE, repo `CLAUDE.md` commands line. **Done.**
 
 ## Out of scope
 Parent dashboard and gradebook (M08), offline queue and push (M09), English plan, Health Connect
 activity and reading logs (M16/M18: task-based here), AI tutor.
 
-## Status (2026-11-17, session 1)
-Stopped at step 3 (usage limit of the session). Not run yet: lint/prettier, the full unit suite,
-any API call against a database. ROADMAP stays TODO.
+## Status (2026-11-17)
+All steps done on `m07-today-planner`. What ran, what could not be verified (Maestro, every
+screen, the Android build) and what is left for the owner is in `M07_REPORT.md`. Not pushed, no
+PR, functions not deployed.

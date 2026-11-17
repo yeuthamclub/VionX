@@ -31,7 +31,7 @@ If the module does not fit in one session, commit what is green, list remaining 
 - Do not widen scope; do not start the next module.
 
 ## Commands
-`pnpm dev:mobile | dev:admin | db:start | db:reset | db:migrate | db:seed | fn:serve | lint | typecheck | test | check | openapi | acceptance <m> | e2e:mobile | ai:check | library:build <grade-subject> <step> | library:validate <path>`
+`pnpm dev:mobile | dev:admin | cloud <cmd> | db:migrate | db:seed | fn:serve | lint | typecheck | test | check | openapi | acceptance <m> | e2e:mobile | ai:check | library:build <grade-subject> <step> | library:validate <path>`
 
 ## Coding behavior (Karpathy-inspired guidelines)
 Adapted from [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (MIT). If anything here conflicts with the rules above or `docs/CONTRACT.md`, those win. For trivial tasks, use judgment.
