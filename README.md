@@ -120,7 +120,7 @@ Deploy to the project (needs `supabase login` and `supabase link --project-ref <
 
 ```sh
 pnpm exec supabase secrets set VIONX_SERVICE_SECRET=... ALLOWED_ORIGINS=... VIONX_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
-pnpm exec supabase functions deploy api worker ai-batch
+pnpm exec supabase functions deploy api worker ai-batch --use-api   # --use-api: no Docker
 ```
 
 ### Seed accounts (development project only)

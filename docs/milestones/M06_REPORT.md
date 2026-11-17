@@ -104,6 +104,17 @@ The database content changed during the day, so each result says what it ran on:
   tests skipped; CI would have hit the same). The test now imports the M05 Toán 6 fixture when the
   library is empty. Second run from an empty library: again 140 of 141, only the phone-OTP test
   fails. Duration 553.72 s.
+- After the owner set the test phone numbers on both projects (Authentication → Phone), the full
+  integration suite on the test project is green:
+  ```
+   Test Files  7 passed (7)
+        Tests  141 passed (141)
+     Duration  526.37s (tests 99%, import 1%)
+  ```
+  One earlier run there, started by the owner, had 3 more failures in `privacy.test.ts` (three
+  consent tests in a row, each about 18.7 s, the API answer was not the expected body). The file
+  passed alone right after (39 of 39) and in the full run above. Cause not found; treat it as an
+  unexplained one-off until it shows again.
 - Guard: with content 3 in place, `resetLibraryScope(sql, 6, 'math')` was called once. It refused
   ("holds 500 items, more than a test fixture (50)") and the counts did not change.
 - Maestro `m06-practice.yaml`: written, **not run** (no emulator). No evidence.
@@ -260,19 +271,18 @@ changed here (Known issues). `tsx scripts/library-validate.ts` itself accepts al
 ## Owner actions
 - Run on an Android phone or emulator: rebuild the development build, `maestro test
   apps/mobile/.maestro/m06-practice.yaml`, and listen to the Vietnamese voice on a Grade 2 item.
-- Supabase dashboard of the development project, Authentication → Phone: enable the provider and add
-  the test phone numbers of the README (OTP `123456`). Until then one identity test fails and
-  `pnpm check` exits 1 there.
-- Create a second (test) project for `pnpm check`, or rely on CI: the development project now holds
-  the reviewed libraries, and the library tests refuse to run there.
-- Deploy the functions (no Supabase CLI login exists on this Mac, so this was not done):
-  `pnpm exec supabase login`, `pnpm exec supabase link --project-ref <ref>`, then the two commands
-  under "Development" in the README. **Before deploying, replace the service secret**: the value in
-  `seed.sql` is public in this repository, and a deployed worker would accept it. Set a new
-  `VIONX_SERVICE_SECRET` with `supabase secrets set`, and the Vault entries `vionx_service_secret`
-  and `vionx_worker_url` (SQL in the README).
-- The seed accounts (`admin@vionx.local` and the demo family) exist on the cloud project with the
-  passwords of the README. Delete them or change the passwords before any real family signs up.
+- Done with the owner on 2026-11-17 (no longer open):
+  - test phone numbers set on both cloud projects (OTP sign-in checked on each);
+  - a second project for tests (`.env.test`), where `pnpm check` runs in full;
+  - `api`, `worker` and `ai-batch` deployed to the development project with
+    `supabase functions deploy … --use-api` (the default bundling needs Docker and hangs without
+    it). Checked: health 200; the worker refuses the old public secret (401) and accepts the new one;
+    pg_cron reaches the worker (200) through the new Vault entries;
+  - a new service secret (functions and Vault) and a new password for `admin@vionx.local`, both
+    kept in `.env.cloud` only.
+- The demo family of `seed.sql` (children `vx-demy22`, `vx-demy66`, `vx-demy99`, PIN in the README)
+  still exists on the development project. Change the PINs or delete it before any real family
+  signs up.
 - Merge `x02-math5-profile` (Toán 5 subject profile, migration 0011) when ready, then `pnpm db:migrate`.
 - The old local Docker volume still holds its copy of the 2,010 items. It was not touched.
 
