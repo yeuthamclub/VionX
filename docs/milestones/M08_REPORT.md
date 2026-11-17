@@ -144,7 +144,7 @@ SKIP  Maestro suite on two emulators (apps/mobile/.maestro/m08-parent.yaml, m08-
 - **Chart: `react-native-svg`, not `victory-native`** (a deviation from the task pack).
   victory-native needs Skia, Reanimated and gesture-handler, three native modules that cannot be
   built or seen here. The chart is a line of dots drawn with the already installed
-  `react-native-svg`. To be confirmed by the owner.
+  `react-native-svg`. The owner confirmed keeping the SVG chart on 2026-11-17.
 - **Overview** builds the 7-day dashboard of each child, one child after the other; fine for a
   family, to be slimmed if a household ever has many children.
 - **A child has no access** to grades, the dashboard or the overview (403).
@@ -167,8 +167,6 @@ SKIP  Maestro suite on two emulators (apps/mobile/.maestro/m08-parent.yaml, m08-
 - On two Android emulators or phones: rebuild the development build and run the three Maestro
   files in the order given at the top of `m08-parent.yaml`. Look at the parent home, the four
   tabs and the grade form: nothing in this module was seen on a screen.
-- Decide on the chart library (keep the SVG chart, or add victory-native with its native
-  modules).
 - Deploy `api` and `worker` of this branch to the development project when the branches are
   accepted. Until then the installed app cannot call the dashboard routes there.
 - `m06-practice`, `m07-today-planner` and `m08-parent-dashboard` are local branches: not pushed,

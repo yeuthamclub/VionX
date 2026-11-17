@@ -26,7 +26,7 @@ Scope: `TASK_PACKS/M08.md`, Master Spec §7, §12. No AI calls. Started on the o
 - **Chart: `react-native-svg`, not `victory-native`.** victory-native needs Skia, Reanimated and
   gesture-handler (three native modules); nothing native can be built or seen here (no
   emulator). A line of points drawn with the already installed `react-native-svg` shows the same
-  trend. To be revisited with the owner.
+  trend. The owner confirmed keeping the SVG chart on 2026-11-17.
 - **§43 flow**: the acceptance script runs it through the API (parent → 3 children → timetable
   and tasks → child → task and practice → XP → Coin within the cap → dashboard). The Maestro
   suite on two emulators is written but cannot be run here.
