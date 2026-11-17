@@ -68,7 +68,7 @@ export const EXPORT_SECTIONS: ExportSection[] = [
     file: 'calendar_events.json',
     query: (db, h) => db`
       select id, student_id, type, title, note, location, subject_code, starts_at, ends_at, all_day,
-             created_at, updated_at
+             skill_ids, created_at, updated_at
       from app.calendar_events where household_id = ${h} order by starts_at`,
   },
   {
@@ -177,6 +177,24 @@ export const EXPORT_SECTIONS: ExportSection[] = [
     query: (db, h) => db`
       select student_id, item_id, seen_count, seeds, last_correct, last_seen_at
       from app.student_item_history where household_id = ${h} order by student_id, last_seen_at`,
+  },
+  {
+    file: 'today_plans.json',
+    query: (db, h) => db`
+      select p.student_id, p.local_date, p.version, p.budget_minutes, p.free_minutes,
+             p.generated_at,
+             (select coalesce(jsonb_agg(jsonb_build_object(
+                 'kind', i.kind, 'title', i.title, 'subject', i.subject, 'minutes', i.minutes,
+                 'priority', i.priority, 'reasons', i.reasons, 'status', i.status,
+                 'pinned', i.pinned, 'required', i.required) order by i.position), '[]'::jsonb)
+              from app.today_plan_items i where i.plan_id = p.id) as items
+      from app.today_plans p where p.household_id = ${h} order by p.student_id, p.local_date`,
+  },
+  {
+    file: 'planner_settings.json',
+    query: (db, h) => db`
+      select student_id, daily_minutes, updated_at
+      from app.planner_settings where household_id = ${h} order by student_id`,
   },
   {
     file: 'policy_acceptances.json',

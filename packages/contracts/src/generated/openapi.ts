@@ -5485,6 +5485,691 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/students/{id}/today': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Today plan of a child
+     * @description Parent: any child of the household (sees removed items too); child: only their own id (others 404). Items are ordered: pinned first, then by priority (§11: urgency + prerequisite gap + forgetting risk + curriculum importance + exam relevance + parent priority − recent workload), each with `reasons[]`. The plan is written at day start and regenerated when a task, an exam, the timetable, a finished session or a skill state changed since, so a finished session shows without a manual recalculation.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Today */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/today/recalculate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Regenerate the Today plan now
+     * @description Parent or the child themself. Pins, removals and skips of the day are kept. `version` grows only when the plan changed.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Today */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/today/settings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Minutes a day for Today
+     * @description Parent only. `dailyMinutes: null` returns to the default of the grade (3 sessions). The budget is never above the free time left by school and calendar events. Audited.
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['TodaySettings'];
+        };
+      };
+      responses: {
+        /** @description Today with the new budget */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/today-items/{id}/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start a Today item
+     * @description Child actor, own items of today. Marks the item STARTED. A learning item is then opened with POST /v1/learning/sessions using `link` (`mode`, `skillIds`, `subject`); it becomes DONE when a session covering it finishes (SYSTEM_VERIFIED).
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Today item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Item and the plan */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/today-items/{id}/skip': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Skip a Today item for today
+     * @description Child actor, own open items of today. Required tasks cannot be skipped (409 REQUIRED_ITEM). The item stays in the plan as SKIPPED and can still be started.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Today item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Item and the plan */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/today-items/{id}/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Complete a task item of Today
+     * @description Child actor. For task items this is POST /v1/tasks/{id}/complete for today (same rules, same idempotency by `clientUuid`, same errors). Learning items are completed by the system when a session finishes: 409 SYSTEM_VERIFIED_ONLY.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Today item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['TodayItemComplete'];
+        };
+      };
+      responses: {
+        /** @description Item and the plan */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/today-items/{id}/pin': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Pin (or unpin) a Today item
+     * @description Parent only. A pinned item is listed first and always fits the budget. `pinned: false` unpins. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Today item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['TodayItemPin'];
+        };
+      };
+      responses: {
+        /** @description Item and the plan */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/today-items/{id}/remove': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Remove an item from Today (or put it back)
+     * @description Parent only. The item is hidden from the child for the rest of the day; the task or skill itself is untouched. `removed: false` puts it back. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Today item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['TodayItemRemove'];
+        };
+      };
+      responses: {
+        /** @description Item and the plan */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -6083,6 +6768,8 @@ export interface components {
       /** Format: date-time */
       endsAt: string;
       allDay: boolean;
+      /** @description Skills an EXAM covers (M07 exam prep); empty = the weakest of the subject. */
+      skillIds: string[];
     };
     /** @enum {string} */
     CalendarEventType:
@@ -6293,6 +6980,7 @@ export interface components {
       /** Format: date-time */
       endsAt: string;
       allDay?: boolean;
+      skillIds?: string[];
     };
     CalendarEventUpdate: {
       type?: components['schemas']['CalendarEventType'];
@@ -6309,6 +6997,7 @@ export interface components {
       /** Format: date-time */
       endsAt?: string;
       allDay?: boolean;
+      skillIds?: string[];
     };
     TaskResponse: {
       task: components['schemas']['Task'];
@@ -7720,6 +8409,132 @@ export interface components {
       reason:
         'WRONG_ANSWER' | 'UNCLEAR' | 'TYPO' | 'BAD_MEDIA' | 'BAD_AUDIO' | 'TOO_HARD' | 'OTHER';
       variantSeed?: number;
+    };
+    TodayResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      /** @example 2026-11-17 */
+      localDate: string;
+      /** @description Grows by one each time the plan changes. */
+      version: number;
+      /** Format: date-time */
+      generatedAt: string;
+      budgetMinutes: number;
+      freeMinutes: number;
+      /** @description Length of one learning item at this grade. */
+      sessionMinutes: number;
+      /** @description Parent setting; null = default. */
+      dailyMinutes: number | null;
+      /** @description Open items that fit in the budget. */
+      plannedMinutes: number;
+      doneMinutes: number;
+      items: components['schemas']['TodayItem'][];
+    };
+    TodayItem: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      kind: components['schemas']['TodayItemKind'];
+      /** @description Task or skill title; empty for DUE_REVIEW. */
+      title: string;
+      /** @description Library subject, e.g. `math`. */
+      subject: string | null;
+      minutes: number;
+      priority: number;
+      reasons: components['schemas']['TodayReason'][];
+      status: components['schemas']['TodayItemStatus'];
+      pinned: boolean;
+      required: boolean;
+      /** @description Fits in the minutes left today. */
+      inBudget: boolean;
+      /** @description Reward hint: XP this item can give at most. */
+      rewardXp: number;
+      link: components['schemas']['TodayLink'];
+      detail: {
+        [key: string]: string | number | boolean;
+      };
+    };
+    /** @enum {string} */
+    TodayItemKind:
+      | 'PARENT_TASK'
+      | 'HOMEWORK'
+      | 'EXAM_PREP'
+      | 'WEAK_PREREQUISITE'
+      | 'DUE_REVIEW'
+      | 'READING_GOAL'
+      | 'ACTIVITY_GOAL'
+      | 'NEXT_SKILL';
+    TodayReason: {
+      /** @enum {string} */
+      code:
+        | 'DUE_TODAY'
+        | 'EXAM_SOON'
+        | 'EXAM_RELEVANT'
+        | 'PREREQUISITE_GAP'
+        | 'REVIEW_DUE'
+        | 'NEXT_IN_CURRICULUM'
+        | 'PARENT_PRIORITY'
+        | 'WORKLOAD_TODAY';
+      /** @description Points this term of the §11 formula adds to the priority (negative: takes). */
+      points: number;
+      params?: {
+        [key: string]: string | number | boolean;
+      };
+    };
+    /** @enum {string} */
+    TodayItemStatus: 'PLANNED' | 'STARTED' | 'PENDING_APPROVAL' | 'DONE' | 'SKIPPED' | 'REMOVED';
+    /** @description Where the item leads: a task to complete, or the body of POST /v1/learning/sessions. */
+    TodayLink:
+      | {
+          /** @enum {string} */
+          type: 'TASK';
+          /**
+           * Format: uuid
+           * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+           */
+          taskId: string;
+          /**
+           * Format: uuid
+           * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+           */
+          occurrenceId: string;
+          /** @enum {string} */
+          verificationMode: 'SELF_CHECK' | 'PHOTO_PROOF' | 'PARENT_APPROVAL' | 'SYSTEM_VERIFIED';
+        }
+      | {
+          /** @enum {string} */
+          type: 'SESSION';
+          /** @enum {string} */
+          mode: 'PRACTICE' | 'REVIEW';
+          skillIds: string[];
+          subject: string;
+        };
+    TodaySettings: {
+      dailyMinutes: number | null;
+    };
+    TodayItemResponse: {
+      item: components['schemas']['TodayItem'];
+      today: components['schemas']['TodayResponse'];
+    };
+    /** @description Same body as POST /v1/tasks/{id}/complete (without `date`: always today). */
+    TodayItemComplete: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      clientUuid: string;
+      proofPath?: string;
+    };
+    TodayItemPin: {
+      pinned?: boolean;
+    };
+    TodayItemRemove: {
+      removed?: boolean;
     };
   };
   responses: never;

@@ -360,6 +360,7 @@ function toEvent(row: repo.EventRow): CalendarEvent {
     startsAt: iso(row.starts_at)!,
     endsAt: iso(row.ends_at)!,
     allDay: row.all_day,
+    skillIds: row.skill_ids,
   };
 }
 
@@ -684,6 +685,7 @@ export function registerCalendarRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
       starts_at: new Date(input.startsAt),
       ends_at: new Date(input.endsAt),
       all_day: input.allDay ?? false,
+      skill_ids: input.skillIds ?? [],
     };
     checkEvent(values);
     const row = await repo.insertEvent(sql, student.household_id, id, parent.userId, values);
@@ -705,6 +707,7 @@ export function registerCalendarRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
       starts_at: input.startsAt ? new Date(input.startsAt) : new Date(current.starts_at),
       ends_at: input.endsAt ? new Date(input.endsAt) : new Date(current.ends_at),
       all_day: input.allDay ?? current.all_day,
+      skill_ids: input.skillIds ?? current.skill_ids,
     };
     checkEvent(values);
     const row = await repo.updateEvent(sql, scope, eventId, values);

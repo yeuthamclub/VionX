@@ -1,3 +1,5 @@
+import { PLANNER_EVENT_TYPES } from '@vionx/domain';
+import { generateMissingPlans, regenerateToday } from '../api/planner/regenerate.ts';
 import type { TxSql } from '../_shared/db.ts';
 import type { EventHandlers } from '../_shared/queue.ts';
 import { grantSessionXp, grantTaskXp, settleDueDays } from '../_shared/rewards.ts';
@@ -5,6 +7,8 @@ import { materialiseAll } from '../_shared/tasks.ts';
 import { runExportJob, type ExportDeps } from './privacy-export.ts';
 
 export type HandlerDeps = ExportDeps;
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function cancelConsentJobs(tx: TxSql, studentId: string, consentType: string) {
   const [row] = await tx<{ removed: number }[]>`
@@ -18,6 +22,14 @@ async function cancelConsentJobs(tx: TxSql, studentId: string, consentType: stri
  * as no-ops so the queue never backs up on events nobody consumes yet.
  */
 export function createHandlers(deps: HandlerDeps): EventHandlers {
+  const now = () => deps.now?.() ?? new Date();
+  // M07: a task or a finished session changes the child's Today plan.
+  const refreshToday: EventHandlers[string] = async (event, tx) => {
+    const studentId = String(event.payload.studentId ?? '');
+    if (event.householdId && UUID_RE.test(studentId)) {
+      await regenerateToday(tx, event.householdId, studentId, now());
+    }
+  };
   return {
     // Smoke event used by the M00 acceptance script; consuming it has no side effects.
     'system.ping': async () => {},
@@ -61,14 +73,33 @@ export function createHandlers(deps: HandlerDeps): EventHandlers {
     // (source_type, source_id, rule_id) lets only the first one grant.
     'task.approved': async (event, tx) => {
       await grantTaskXp(tx, event);
+      await refreshToday(event, tx);
     },
     'task.completed': async (event, tx) => {
       if (event.payload.status === 'APPROVED') await grantTaskXp(tx, event);
+      await refreshToday(event, tx);
+    },
+    'task.assigned': refreshToday,
+    'task.rejected': refreshToday,
+
+    // M07: hourly request from pg_cron (vionx-today-plans) → the plan of every child whose
+    // household-local day has none yet.
+    [PLANNER_EVENT_TYPES.dayStartRequested]: async (event, tx) => {
+      const requested = new Date(String(event.payload.requestedAt ?? event.occurredAt));
+      const at = Number.isNaN(requested.getTime()) ? new Date(event.occurredAt) : requested;
+      const plans = await generateMissingPlans(tx, at);
+      if (plans > 0) {
+        await tx`
+          insert into ops.audit_logs (actor_type, action, target_type, target_id, details)
+          values ('system', 'planner.day_started', 'domain_event', ${event.id},
+                  ${tx.json({ plans, at: at.toISOString() })})`;
+      }
     },
 
     // M06: XP for a finished practice session (rule LEARNING_CORRECT_ANSWER), once per session.
     'learning.session_finished': async (event, tx) => {
       await grantSessionXp(tx, event);
+      await refreshToday(event, tx);
     },
 
     // M04: hourly request from pg_cron (vionx-reward-settlement) → settle every household-local

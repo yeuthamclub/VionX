@@ -1729,6 +1729,15 @@
           },
           "allDay": {
             "type": "boolean"
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "description": "Skills an EXAM covers (M07 exam prep); empty = the weakest of the subject."
           }
         },
         "required": [
@@ -1741,7 +1750,8 @@
           "subjectCode",
           "startsAt",
           "endsAt",
-          "allDay"
+          "allDay",
+          "skillIds"
         ]
       },
       "CalendarEventType": {
@@ -2238,6 +2248,15 @@
           },
           "allDay": {
             "type": "boolean"
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "maxItems": 50
           }
         },
         "required": [
@@ -2290,6 +2309,15 @@
           },
           "allDay": {
             "type": "boolean"
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "maxItems": 50
           }
         }
       },
@@ -7030,6 +7058,367 @@
         "required": [
           "reason"
         ]
+      },
+      "TodayResponse": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "localDate": {
+            "type": "string",
+            "example": "2026-11-17"
+          },
+          "version": {
+            "type": "integer",
+            "description": "Grows by one each time the plan changes."
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "budgetMinutes": {
+            "type": "integer"
+          },
+          "freeMinutes": {
+            "type": "integer"
+          },
+          "sessionMinutes": {
+            "type": "integer",
+            "description": "Length of one learning item at this grade."
+          },
+          "dailyMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Parent setting; null = default."
+          },
+          "plannedMinutes": {
+            "type": "integer",
+            "description": "Open items that fit in the budget."
+          },
+          "doneMinutes": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TodayItem"
+            }
+          }
+        },
+        "required": [
+          "studentId",
+          "localDate",
+          "version",
+          "generatedAt",
+          "budgetMinutes",
+          "freeMinutes",
+          "sessionMinutes",
+          "dailyMinutes",
+          "plannedMinutes",
+          "doneMinutes",
+          "items"
+        ]
+      },
+      "TodayItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TodayItemKind"
+          },
+          "title": {
+            "type": "string",
+            "description": "Task or skill title; empty for DUE_REVIEW."
+          },
+          "subject": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Library subject, e.g. `math`."
+          },
+          "minutes": {
+            "type": "integer"
+          },
+          "priority": {
+            "type": "number"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TodayReason"
+            },
+            "minItems": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/TodayItemStatus"
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "inBudget": {
+            "type": "boolean",
+            "description": "Fits in the minutes left today."
+          },
+          "rewardXp": {
+            "type": "integer",
+            "description": "Reward hint: XP this item can give at most."
+          },
+          "link": {
+            "$ref": "#/components/schemas/TodayLink"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "subject",
+          "minutes",
+          "priority",
+          "reasons",
+          "status",
+          "pinned",
+          "required",
+          "inBudget",
+          "rewardXp",
+          "link",
+          "detail"
+        ]
+      },
+      "TodayItemKind": {
+        "type": "string",
+        "enum": [
+          "PARENT_TASK",
+          "HOMEWORK",
+          "EXAM_PREP",
+          "WEAK_PREREQUISITE",
+          "DUE_REVIEW",
+          "READING_GOAL",
+          "ACTIVITY_GOAL",
+          "NEXT_SKILL"
+        ]
+      },
+      "TodayReason": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "DUE_TODAY",
+              "EXAM_SOON",
+              "EXAM_RELEVANT",
+              "PREREQUISITE_GAP",
+              "REVIEW_DUE",
+              "NEXT_IN_CURRICULUM",
+              "PARENT_PRIORITY",
+              "WORKLOAD_TODAY"
+            ]
+          },
+          "points": {
+            "type": "number",
+            "description": "Points this term of the §11 formula adds to the priority (negative: takes)."
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "code",
+          "points"
+        ]
+      },
+      "TodayItemStatus": {
+        "type": "string",
+        "enum": [
+          "PLANNED",
+          "STARTED",
+          "PENDING_APPROVAL",
+          "DONE",
+          "SKIPPED",
+          "REMOVED"
+        ]
+      },
+      "TodayLink": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "TASK"
+                ]
+              },
+              "taskId": {
+                "type": "string",
+                "format": "uuid",
+                "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+              },
+              "occurrenceId": {
+                "type": "string",
+                "format": "uuid",
+                "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+              },
+              "verificationMode": {
+                "type": "string",
+                "enum": [
+                  "SELF_CHECK",
+                  "PHOTO_PROOF",
+                  "PARENT_APPROVAL",
+                  "SYSTEM_VERIFIED"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "taskId",
+              "occurrenceId",
+              "verificationMode"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "SESSION"
+                ]
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "PRACTICE",
+                  "REVIEW"
+                ]
+              },
+              "skillIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+                }
+              },
+              "subject": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "mode",
+              "skillIds",
+              "subject"
+            ]
+          }
+        ],
+        "description": "Where the item leads: a task to complete, or the body of POST /v1/learning/sessions."
+      },
+      "TodaySettings": {
+        "type": "object",
+        "properties": {
+          "dailyMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 10,
+            "maximum": 480
+          }
+        },
+        "required": [
+          "dailyMinutes"
+        ]
+      },
+      "TodayItemResponse": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/TodayItem"
+          },
+          "today": {
+            "$ref": "#/components/schemas/TodayResponse"
+          }
+        },
+        "required": [
+          "item",
+          "today"
+        ]
+      },
+      "TodayItemComplete": {
+        "type": "object",
+        "properties": {
+          "clientUuid": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "proofPath": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "clientUuid"
+        ],
+        "description": "Same body as POST /v1/tasks/{id}/complete (without `date`: always today)."
+      },
+      "TodayItemPin": {
+        "type": "object",
+        "properties": {
+          "pinned": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TodayItemRemove": {
+        "type": "object",
+        "properties": {
+          "removed": {
+            "type": "boolean"
+          }
+        }
       }
     },
     "parameters": {}
@@ -12994,6 +13383,742 @@
           },
           "404": {
             "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/today": {
+      "get": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Today plan of a child",
+        "description": "Parent: any child of the household (sees removed items too); child: only their own id (others 404). Items are ordered: pinned first, then by priority (§11: urgency + prerequisite gap + forgetting risk + curriculum importance + exam relevance + parent priority − recent workload), each with `reasons[]`. The plan is written at day start and regenerated when a task, an exam, the timetable, a finished session or a skill state changed since, so a finished session shows without a manual recalculation.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Today",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/today/recalculate": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Regenerate the Today plan now",
+        "description": "Parent or the child themself. Pins, removals and skips of the day are kept. `version` grows only when the plan changed.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Today",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/today/settings": {
+      "put": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Minutes a day for Today",
+        "description": "Parent only. `dailyMinutes: null` returns to the default of the grade (3 sessions). The budget is never above the free time left by school and calendar events. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TodaySettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Today with the new budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/today-items/{id}/start": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Start a Today item",
+        "description": "Child actor, own items of today. Marks the item STARTED. A learning item is then opened with POST /v1/learning/sessions using `link` (`mode`, `skillIds`, `subject`); it becomes DONE when a session covering it finishes (SYSTEM_VERIFIED).",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Today item id."
+            },
+            "required": true,
+            "description": "Today item id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item and the plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/today-items/{id}/skip": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Skip a Today item for today",
+        "description": "Child actor, own open items of today. Required tasks cannot be skipped (409 REQUIRED_ITEM). The item stays in the plan as SKIPPED and can still be started.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Today item id."
+            },
+            "required": true,
+            "description": "Today item id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item and the plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/today-items/{id}/complete": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Complete a task item of Today",
+        "description": "Child actor. For task items this is POST /v1/tasks/{id}/complete for today (same rules, same idempotency by `clientUuid`, same errors). Learning items are completed by the system when a session finishes: 409 SYSTEM_VERIFIED_ONLY.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Today item id."
+            },
+            "required": true,
+            "description": "Today item id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TodayItemComplete"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item and the plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/today-items/{id}/pin": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Pin (or unpin) a Today item",
+        "description": "Parent only. A pinned item is listed first and always fits the budget. `pinned: false` unpins. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Today item id."
+            },
+            "required": true,
+            "description": "Today item id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TodayItemPin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item and the plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/today-items/{id}/remove": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Remove an item from Today (or put it back)",
+        "description": "Parent only. The item is hidden from the child for the rest of the day; the task or skill itself is untouched. `removed: false` puts it back. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Today item id."
+            },
+            "required": true,
+            "description": "Today item id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TodayItemRemove"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item and the plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
             "content": {
               "application/json": {
                 "schema": {
