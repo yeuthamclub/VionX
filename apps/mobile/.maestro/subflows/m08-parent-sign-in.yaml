@@ -1,0 +1,51 @@
+# Sub-flow: parent signs in with a test OTP number and lands on the parent home (creating the
+# household on the first run). env: PHONE, HOUSEHOLD.
+appId: vn.vionx.app
+---
+- extendedWaitUntil:
+    visible: 'Phụ huynh'
+    timeout: 60000
+- tapOn:
+    id: 'role-parent'
+- tapOn:
+    id: 'phone-input'
+- inputText: ${PHONE}
+- tapOn:
+    id: 'send-code'
+- extendedWaitUntil:
+    visible:
+      id: 'otp-input'
+    timeout: 15000
+- tapOn:
+    id: 'otp-input'
+- inputText: '123456'
+- tapOn:
+    id: 'verify-code'
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục'
+    timeout: 20000
+- runFlow:
+    when:
+      visible:
+        id: 'policies-accept'
+    commands:
+      - tapOn:
+          id: 'policies-agree'
+      - tapOn:
+          id: 'policies-accept'
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình'
+    timeout: 20000
+- runFlow:
+    when:
+      visible: 'Tạo gia đình'
+    commands:
+      - tapOn:
+          id: 'household-name'
+      - inputText: ${HOUSEHOLD}
+      - tapOn:
+          id: 'household-create'
+- extendedWaitUntil:
+    visible:
+      id: 'add-child'
+    timeout: 15000

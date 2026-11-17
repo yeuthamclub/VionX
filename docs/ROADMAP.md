@@ -16,7 +16,7 @@ Status: TODO | IN_PROGRESS | DONE | BLOCKED.
 | X02 | Toán 2 library: 500 items (same scripts, read-aloud, SVG) | X01 | IN_PROGRESS (510 approved items exist as a package drafted by Codex and checked by Claude outside the X01 scripts; imported into the development project on 2026-11-17; no branch, PR or X02_REPORT yet) |
 | M06 | Practice sessions, mastery, T0 hints, template variants, Grade 1-3 mode | M04, M05, X01, X02 | DONE (acceptance green on the Supabase Cloud development project; Maestro flow, read-aloud voice and the Android build with the new native modules need an emulator; started on the owner's order before X01/X02 were DONE, see M06_REPORT) |
 | M07 | Today planner | M06 | DONE (`pnpm check` green on the test project, acceptance green on the development project; Maestro flow and every screen need an emulator, functions not deployed, see M07_REPORT) |
-| M08 | Parent dashboard & gradebook (in app) | M07 | TODO |
+| M08 | Parent dashboard & gradebook (in app) | M07 | DONE (`pnpm check` green on the test project, acceptance green on the development project; the Maestro suite on two emulators and every screen need emulators, chart drawn with react-native-svg instead of victory-native, functions not deployed, see M08_REPORT) |
 | M09 | Offline, push, ops, Play internal testing | M08 | TODO |
 | **GATE A** | §43 flow on real Android phones with 2-5 families, including at least one Grade 2 and one Grade 6 child | M00–M09, X01, X02 | TODO |
 

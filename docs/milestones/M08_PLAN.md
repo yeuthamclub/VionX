@@ -35,17 +35,22 @@ Scope: `TASK_PACKS/M08.md`, Master Spec §7, §12. No AI calls. Started on the o
 1. Migration `0014_dashboard_gradebook.sql` → applied on the test project. **Done.**
 2. `packages/domain/src/dashboard` → 16 tests, 4 fast-check properties. **Done.**
 3. Contracts, `api/dashboard` (7 routes), worker summary refresh, orphan attachment cleanup,
-   privacy export, `pnpm openapi` → typecheck green, 122 unit tests. **Done, not yet exercised
-   against a database.**
+   privacy export, `pnpm openapi` → typecheck green, 122 unit tests. **Done.**
 4. `tests/integration/dashboard.test.ts` (config, RLS/grants, gradebook CRUD + audit, child
-   cannot read or edit, dashboard numbers, side by side, cross-household 404). **To do.**
+   cannot read or edit, dashboard numbers, side by side, cross-household 404). **Done.**
 5. Mobile parent: home cards per child, child detail with 4 tabs, fast grade entry, trend chart;
-   i18n; Jest/Vitest. **To do.**
-6. `apps/mobile/.maestro/m08-*.yaml`, `scripts/acceptance/m08.ts`. **To do.**
+   i18n; Jest/Vitest. **Done.**
+6. `apps/mobile/.maestro/m08-*.yaml`, `scripts/acceptance/m08.ts`. **Done.**
 7. `pnpm check:static`; `pnpm check` on the test project; `pnpm db:migrate` +
-   `pnpm acceptance m08` on the development project. **To do.**
-8. `M08_REPORT.md`, ROADMAP. **To do.**
+   `pnpm acceptance m08` on the development project. **Done.**
+8. `M08_REPORT.md`, ROADMAP. **Done.**
 
 ## Out of scope
 Offline queue and push (M09), OCR of test photos (backlog), admin analytics (M14), AI summaries
 of progress, a child view of school grades.
+
+## Status (2026-11-17)
+All steps done on `m08-parent-dashboard`. Not built in the app: attachment picker, skill mapping
+and editing or deleting a grade (API only). What ran and what could not be verified (the Maestro
+suite, every screen, the Android build) is in `M08_REPORT.md`. Not pushed, no PR, functions not
+deployed.
