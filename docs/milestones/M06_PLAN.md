@@ -8,9 +8,9 @@ Branch `m06-practice` (from `main` at df9e0b3). Scope: `TASK_PACKS/M06.md`. No A
   `POST /v1/admin/library/import` (Toán 2: 510, Toán 5: 500, Toán 6: 500, Tiếng Việt 2: 500). M06
   reads whatever APPROVED/PUBLISHED items exist; it does not need PR #10 or `x02-math5-profile`.
 - **Migration number 0010.** `x02-math5-profile` (unmerged) already uses 0011, so 0010 is free.
-- **Never reset the local database** and never run `pnpm acceptance m05` on it: both clear the real
-  libraries. `pnpm acceptance m06` uses the libraries that are there and only creates throwaway
-  families.
+- **Tests must not delete reviewed libraries.** `pnpm acceptance m06` uses the libraries that are
+  there and only creates throwaway families. Since session 2 `resetLibraryScope` refuses a
+  grade-subject with more than 50 items (ADR-002).
 - **Clock.** Domain rules take `now` as an argument (unit tests inject it). The API tests and the
   acceptance script run against served functions, so they move time the M04 way: by shifting stored
   timestamps of their own throwaway student (`last_attempt_at`, `due_at`) back by a chosen amount.
@@ -67,18 +67,7 @@ Branch `m06-practice` (from `main` at df9e0b3). Scope: `TASK_PACKS/M06.md`. No A
 AI tutor T1-T3 (M15), `written` items (M17), Today planner (M07), parent dashboard/gradebook (M08),
 offline queue (M09), admin screens for item stats/reports (M14).
 
-## Status (2026-11-16, session 1)
-Done and committed on `m06-practice`: steps 1-5 as code; `pnpm check:static` green (lint, typecheck,
-unit tests: domain 169, functions 110, mobile 45 + 32, openapi up to date).
-
-Not run yet, because local Supabase stopped answering during the session (Docker engine not
-running; the session may not restart it):
-1. Apply `0010_learning.sql` to local Supabase.
-2. Serve the functions of this worktree and run `tests/integration/learning.test.ts`, then the other
-   integration files. **Do not run `tests/integration/library.test.ts` or `pnpm acceptance m05` on a
-   database that holds real libraries**: both call `resetLibraryScope` for Toán 6, Toán 2 and
-   Tiếng Việt 2 and delete those items. So `pnpm check` as a whole (it includes `pnpm test:api`) must
-   run on a database with fixtures only.
-3. `pnpm acceptance m06`; fix what the real library shows (e.g. `fill_blank` items in Toán 2 would
-   break the taps-only criterion).
-4. `M06_REPORT.md`, ROADMAP → DONE.
+## Status (2026-11-17, session 2)
+All steps done on `m06-practice`. Local Supabase never came back, and the owner dropped Docker for
+development (ADR-002), so steps 1, 3, 5 and 6 ran against the Supabase Cloud development project.
+What ran, what did not and what is left for the owner is in `M06_REPORT.md`.
