@@ -71,6 +71,9 @@ export type KnowledgeNode = components['schemas']['KnowledgeNode'];
 export type KnowledgeSubject = components['schemas']['KnowledgeSubject'];
 export type KnowledgeMapResponse = components['schemas']['KnowledgeMapResponse'];
 export type LearningPathStep = components['schemas']['LearningPathStep'];
+export type TodayResponse = components['schemas']['TodayResponse'];
+export type TodayItem = components['schemas']['TodayItem'];
+export type TodayReason = components['schemas']['TodayReason'];
 export const CHILD_SESSION_HEADER = 'x-vionx-child-session';
 
 export interface ApiClientOptions {

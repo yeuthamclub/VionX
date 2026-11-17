@@ -1,0 +1,228 @@
+# M07 main path: a parent adds an exam for today on Toán 6, opens the child's Today, reads the
+# reasons of the exam-prep item and pins it. The Grade 6 child then signs in: the home screen is
+# Today (cards with duration, reward hint, the time bar), the pinned exam-prep card is started,
+# the session is finished, and back on the home screen the card is under "Đã xong" without a
+# manual reload.
+# Ranking, budget, skips, removals and cross-household denial are covered by
+# `pnpm acceptance m07` and the API tests.
+# Prereqs: as m01-identity.yaml (development build on an emulator, functions with the Toán 6
+# library imported, `pnpm dev:mobile`). Uses the test OTP number 0900000006 / 123456.
+# Run: maestro test apps/mobile/.maestro/m07-today.yaml
+appId: vn.vionx.app
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Phụ huynh'
+    timeout: 60000
+- tapOn:
+    id: 'role-parent'
+- tapOn:
+    id: 'phone-input'
+- inputText: '0900000006'
+- tapOn:
+    id: 'send-code'
+- extendedWaitUntil:
+    visible:
+      id: 'otp-input'
+    timeout: 15000
+- tapOn:
+    id: 'otp-input'
+- inputText: '123456'
+- tapOn:
+    id: 'verify-code'
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục'
+    timeout: 20000
+- runFlow:
+    when:
+      visible:
+        id: 'policies-accept'
+    commands:
+      - tapOn:
+          id: 'policies-agree'
+      - tapOn:
+          id: 'policies-accept'
+- extendedWaitUntil:
+    visible: 'Thêm con|Tạo gia đình'
+    timeout: 20000
+- runFlow:
+    when:
+      visible: 'Tạo gia đình'
+    commands:
+      - tapOn:
+          id: 'household-name'
+      - inputText: 'Gia đình Hôm nay'
+      - tapOn:
+          id: 'household-create'
+- extendedWaitUntil:
+    visible:
+      id: 'add-child'
+    timeout: 15000
+
+# A grade-6 child for this run
+- runFlow:
+    file: subflows/m01-add-child.yaml
+    env:
+      NAME: 'Minh Hôm Nay'
+      YEAR: '2014'
+      GRADE: '6'
+      PIN: '2580'
+- evalScript: ${output.loginId = maestro.copiedText}
+
+# Parent: an exam today on Toán 6 (no topics chosen: the weakest skills of the subject)
+- tapOn: 'Minh Hôm Nay'
+- scrollUntilVisible:
+    element:
+      id: 'open-calendar'
+- tapOn:
+    id: 'open-calendar'
+- tapOn:
+    id: 'add-event'
+- tapOn:
+    id: 'event-type-EXAM'
+- tapOn:
+    id: 'event-title'
+- inputText: 'Kiem tra Toan'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'exam-subject-math'
+- tapOn:
+    id: 'exam-subject-math'
+- scrollUntilVisible:
+    element:
+      id: 'event-save'
+- tapOn:
+    id: 'event-save'
+- extendedWaitUntil:
+    visible:
+      id: 'screen-calendar'
+    timeout: 15000
+- back
+
+# Parent: the child's Today with reasons; pin the exam prep
+- scrollUntilVisible:
+    element:
+      id: 'open-today'
+- tapOn:
+    id: 'open-today'
+- extendedWaitUntil:
+    visible:
+      id: 'screen-parent-today'
+    timeout: 20000
+- assertVisible:
+    id: 'parent-today-summary'
+- assertVisible: 'Ôn thi · Kiem tra Toan'
+- assertVisible: '.*"Kiem tra Toan" diễn ra hôm nay.*'
+- takeScreenshot: m07-parent-today
+- tapOn:
+    text: 'Ghim lên đầu'
+    index: 0
+- extendedWaitUntil:
+    visible: 'Bỏ ghim'
+    timeout: 15000
+- back
+- back
+
+# Child device: home = Today
+- tapOn:
+    id: 'child-device'
+- tapOn: 'Tiếp tục'
+- extendedWaitUntil:
+    visible:
+      id: 'child-login-id'
+    timeout: 15000
+- tapOn:
+    id: 'child-login-id'
+- inputText: ${output.loginId}
+- runFlow:
+    file: subflows/m01-enter-pin.yaml
+    env:
+      DIGITS: '2,5,8,0'
+- tapOn:
+    id: 'child-login-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'today-now'
+    timeout: 20000
+- assertVisible:
+    id: 'today-time-bar'
+- assertVisible: '.*Ôn thi · Kiem tra Toan · Đã ghim.*'
+- assertVisible: '25 phút'
+- assertVisible: 'tới \+75 XP'
+- takeScreenshot: m07-child-today
+
+# Start the pinned card → practice session
+- tapOn:
+    text: 'Bắt đầu'
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: 'item-stem'
+    timeout: 20000
+
+# Answer with taps, whatever the item type (as in m06-practice.yaml)
+- repeat:
+    while:
+      notVisible:
+        id: 'practice-summary'
+    times: 17
+    commands:
+      - tapOn:
+          id: 'option-a'
+          optional: true
+      - tapOn:
+          id: 'option-b'
+          optional: true
+      - tapOn:
+          id: 'option-true'
+          optional: true
+      - tapOn:
+          id: 'key-5'
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'practice-submit'
+          optional: true
+      - tapOn:
+          id: 'practice-submit'
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: 'practice-continue'
+          timeout: 15000
+          optional: true
+      - tapOn:
+          id: 'practice-continue'
+          optional: true
+      - runFlow:
+          when:
+            notVisible:
+              id: 'practice-summary'
+            visible:
+              id: 'practice-submit'
+              enabled: false
+          commands:
+            - scrollUntilVisible:
+                element:
+                  id: 'practice-finish'
+            - tapOn:
+                id: 'practice-finish'
+- scrollUntilVisible:
+    element:
+      id: 'practice-done'
+- tapOn:
+    id: 'practice-done'
+
+# Back on Today without a manual reload: the card is done
+- extendedWaitUntil:
+    visible:
+      id: 'screen-child-home'
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: 'today-done'
+    timeout: 20000
+- assertVisible: 'Đã xong'
+- takeScreenshot: m07-child-today-done

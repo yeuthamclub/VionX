@@ -61,7 +61,13 @@ interface View_ {
 export default function Practice() {
   const theme = useTheme();
   const c = theme.colors;
-  const params = useLocalSearchParams<{ nodeId?: string; mode?: string; subject?: string }>();
+  // `skillIds` (comma-separated) comes from a Today item (M07).
+  const params = useLocalSearchParams<{
+    nodeId?: string;
+    mode?: string;
+    subject?: string;
+    skillIds?: string;
+  }>();
   const sessionUuid = useRef(Crypto.randomUUID());
   const answerUuid = useRef(Crypto.randomUUID());
   const shownAt = useRef(Date.now());
@@ -80,6 +86,7 @@ export default function Practice() {
           body: {
             clientUuid: sessionUuid.current,
             ...(params.nodeId ? { nodeId: params.nodeId } : {}),
+            ...(params.skillIds ? { skillIds: params.skillIds.split(',') } : {}),
             ...(params.mode === 'REVIEW' ? { mode: 'REVIEW' as const } : {}),
             ...(params.subject ? { subject: params.subject } : {}),
           },

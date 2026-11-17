@@ -9,7 +9,6 @@ import {
   householdToday,
   isoWeekday,
   LIBRARY_SUBJECT_OF,
-  masteryConfigFrom,
   newSkillState,
   freeMinutesOf,
   PLANNER_LOCK_CLASS,

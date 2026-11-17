@@ -80,6 +80,7 @@ describe('calendar helpers', () => {
           startsAt: '2026-10-20T17:30:00Z',
           endsAt: '2026-10-20T18:00:00Z',
           allDay: false,
+          skillIds: [],
         },
       ],
       tasks: [occurrence({ date: '2026-10-20' })],
