@@ -1,4 +1,5 @@
-import { PLANNER_EVENT_TYPES } from '@vionx/domain';
+import { isValidDay, PLANNER_EVENT_TYPES } from '@vionx/domain';
+import { refreshDaySummaries } from '../api/dashboard/build.ts';
 import { generateMissingPlans, regenerateToday } from '../api/planner/regenerate.ts';
 import type { TxSql } from '../_shared/db.ts';
 import type { EventHandlers } from '../_shared/queue.ts';
@@ -23,12 +24,22 @@ async function cancelConsentJobs(tx: TxSql, studentId: string, consentType: stri
  */
 export function createHandlers(deps: HandlerDeps): EventHandlers {
   const now = () => deps.now?.() ?? new Date();
-  // M07: a task or a finished session changes the child's Today plan.
+  // M07: a task or a finished session changes the child's Today plan. M08: and the daily
+  // summary of the day it belongs to (`date` of a task event, otherwise today).
   const refreshToday: EventHandlers[string] = async (event, tx) => {
     const studentId = String(event.payload.studentId ?? '');
-    if (event.householdId && UUID_RE.test(studentId)) {
-      await regenerateToday(tx, event.householdId, studentId, now());
-    }
+    if (!event.householdId || !UUID_RE.test(studentId)) return;
+    const stored = await regenerateToday(tx, event.householdId, studentId, now());
+    // No plan = the child no longer exists in that household.
+    if (!stored) return;
+    const [household] = await tx<{ timezone: string }[]>`
+      select timezone from app.households where id = ${event.householdId}`;
+    const date = String(event.payload.date ?? '');
+    await refreshDaySummaries(
+      tx,
+      { id: studentId, household_id: event.householdId, timezone: household!.timezone },
+      [...new Set([stored.plan.local_date, ...(isValidDay(date) ? [date] : [])])],
+    );
   };
   return {
     // Smoke event used by the M00 acceptance script; consuming it has no side effects.

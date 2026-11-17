@@ -7419,6 +7419,1062 @@
             "type": "boolean"
           }
         }
+      },
+      "SchoolAssessmentListResponse": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "assessments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SchoolAssessment"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "studentId",
+          "assessments",
+          "nextCursor"
+        ]
+      },
+      "SchoolAssessment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "assessedOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "type": {
+            "$ref": "#/components/schemas/AssessmentType"
+          },
+          "score": {
+            "type": "number"
+          },
+          "maxScore": {
+            "type": "number"
+          },
+          "percent": {
+            "type": "number",
+            "description": "score ÷ maxScore, 0-100 with one decimal."
+          },
+          "schoolYear": {
+            "type": "string"
+          },
+          "semester": {
+            "$ref": "#/components/schemas/Semester"
+          },
+          "topicTags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "teacherComment": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "description": "Curriculum skills the assessment covered."
+          },
+          "attachmentUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Signed link to the attached photo or PDF (15 minutes), or null."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "studentId",
+          "subjectCode",
+          "assessedOn",
+          "type",
+          "score",
+          "maxScore",
+          "percent",
+          "schoolYear",
+          "semester",
+          "topicTags",
+          "note",
+          "teacherComment",
+          "skillIds",
+          "attachmentUrl",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AssessmentType": {
+        "type": "string",
+        "enum": [
+          "ORAL",
+          "SHORT_QUIZ",
+          "HOMEWORK",
+          "PERIODIC_TEST",
+          "MIDTERM",
+          "FINAL",
+          "MOCK",
+          "CUSTOM"
+        ]
+      },
+      "Semester": {
+        "type": "string",
+        "enum": [
+          "HK1",
+          "HK2",
+          "SUMMER"
+        ]
+      },
+      "SchoolAssessmentResponse": {
+        "type": "object",
+        "properties": {
+          "assessment": {
+            "$ref": "#/components/schemas/SchoolAssessment"
+          }
+        },
+        "required": [
+          "assessment"
+        ]
+      },
+      "SchoolAssessmentCreate": {
+        "type": "object",
+        "properties": {
+          "subjectCode": {
+            "type": "string",
+            "example": "TOAN",
+            "description": "GDPT 2018 subject code (GET /v1/subjects)."
+          },
+          "assessedOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "type": {
+            "$ref": "#/components/schemas/AssessmentType"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "maxScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Default 10."
+          },
+          "schoolYear": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{4}$",
+            "example": "2026-2027",
+            "description": "Default: from assessedOn."
+          },
+          "semester": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Semester"
+              },
+              {
+                "description": "Default: from assessedOn."
+              }
+            ]
+          },
+          "topicTags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "maxItems": 10
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "teacherComment": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "maxItems": 20
+          },
+          "attachmentPath": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300,
+            "description": "`path` from POST /v1/students/{id}/school-assessments/upload-sign."
+          }
+        },
+        "required": [
+          "subjectCode",
+          "assessedOn",
+          "type",
+          "score"
+        ]
+      },
+      "SchoolAssessmentUpdate": {
+        "type": "object",
+        "properties": {
+          "subjectCode": {
+            "type": "string",
+            "example": "TOAN",
+            "description": "GDPT 2018 subject code (GET /v1/subjects)."
+          },
+          "assessedOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "type": {
+            "$ref": "#/components/schemas/AssessmentType"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "maxScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Default 10."
+          },
+          "schoolYear": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{4}$",
+            "example": "2026-2027",
+            "description": "Default: from assessedOn."
+          },
+          "semester": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Semester"
+              },
+              {
+                "description": "Default: from assessedOn."
+              }
+            ]
+          },
+          "topicTags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "maxItems": 10
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "teacherComment": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "maxItems": 20
+          },
+          "attachmentPath": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300,
+            "description": "`path` from POST /v1/students/{id}/school-assessments/upload-sign."
+          }
+        }
+      },
+      "AssessmentUploadSignResponse": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Pass as `attachmentPath` when saving the grade."
+          },
+          "uploadUrl": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "maxBytes": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "uploadUrl",
+          "expiresAt",
+          "maxBytes"
+        ]
+      },
+      "AssessmentUploadSign": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+              "application/pdf"
+            ]
+          }
+        },
+        "required": [
+          "contentType"
+        ]
+      },
+      "DashboardResponse": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "integer"
+          },
+          "range": {
+            "type": "string",
+            "enum": [
+              "7d",
+              "30d",
+              "90d"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "today": {
+            "$ref": "#/components/schemas/DashboardToday"
+          },
+          "streak": {
+            "$ref": "#/components/schemas/DashboardStreak"
+          },
+          "rewards": {
+            "$ref": "#/components/schemas/DashboardRewards"
+          },
+          "tasks": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer"
+              },
+              "done": {
+                "type": "integer"
+              },
+              "requiredTotal": {
+                "type": "integer"
+              },
+              "requiredDone": {
+                "type": "integer"
+              },
+              "completion": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "sufficiency": {
+                "$ref": "#/components/schemas/DataSufficiency"
+              }
+            },
+            "required": [
+              "total",
+              "done",
+              "requiredTotal",
+              "requiredDone",
+              "completion",
+              "sufficiency"
+            ]
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardDay"
+            },
+            "description": "One entry per day of the range."
+          },
+          "learning": {
+            "type": "object",
+            "properties": {
+              "sessions": {
+                "type": "integer"
+              },
+              "minutes": {
+                "type": "integer"
+              },
+              "answers": {
+                "type": "integer"
+              },
+              "accuracy": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "sufficiency": {
+                "$ref": "#/components/schemas/DataSufficiency"
+              },
+              "improving": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SkillInsight"
+                }
+              },
+              "atRisk": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SkillInsight"
+                }
+              },
+              "subjects": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DashboardSubjectMastery"
+                }
+              }
+            },
+            "required": [
+              "sessions",
+              "minutes",
+              "answers",
+              "accuracy",
+              "sufficiency",
+              "improving",
+              "atRisk",
+              "subjects"
+            ]
+          },
+          "school": {
+            "type": "object",
+            "properties": {
+              "schoolYear": {
+                "type": "string"
+              },
+              "subjects": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DashboardSchoolSubject"
+                }
+              }
+            },
+            "required": [
+              "schoolYear",
+              "subjects"
+            ]
+          },
+          "sideBySide": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "subjectCode": {
+                  "type": "string"
+                },
+                "librarySubject": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "school": {
+                  "type": "object",
+                  "properties": {
+                    "averagePercent": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "sufficiency": {
+                      "$ref": "#/components/schemas/DataSufficiency"
+                    }
+                  },
+                  "required": [
+                    "averagePercent",
+                    "count",
+                    "sufficiency"
+                  ]
+                },
+                "mastery": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "meanScore": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "practised": {
+                      "type": "integer"
+                    },
+                    "skills": {
+                      "type": "integer"
+                    },
+                    "sufficiency": {
+                      "$ref": "#/components/schemas/DataSufficiency"
+                    }
+                  },
+                  "required": [
+                    "meanScore",
+                    "practised",
+                    "skills",
+                    "sufficiency"
+                  ]
+                }
+              },
+              "required": [
+                "subjectCode",
+                "librarySubject",
+                "school",
+                "mastery"
+              ]
+            },
+            "description": "School grades and app mastery of the same subject, side by side. They are different measures and are never combined into one number."
+          },
+          "upcomingExams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpcomingExam"
+            }
+          }
+        },
+        "required": [
+          "studentId",
+          "displayName",
+          "grade",
+          "range",
+          "from",
+          "to",
+          "today",
+          "streak",
+          "rewards",
+          "tasks",
+          "days",
+          "learning",
+          "school",
+          "sideBySide",
+          "upcomingExams"
+        ]
+      },
+      "DashboardToday": {
+        "type": "object",
+        "properties": {
+          "itemsTotal": {
+            "type": "integer"
+          },
+          "itemsDone": {
+            "type": "integer"
+          },
+          "plannedMinutes": {
+            "type": "integer"
+          },
+          "doneMinutes": {
+            "type": "integer"
+          },
+          "budgetMinutes": {
+            "type": "integer"
+          },
+          "completion": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "itemsDone ÷ itemsTotal, 0-1."
+          }
+        },
+        "required": [
+          "itemsTotal",
+          "itemsDone",
+          "plannedMinutes",
+          "doneMinutes",
+          "budgetMinutes",
+          "completion"
+        ]
+      },
+      "DashboardStreak": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "integer",
+            "description": "Consecutive days with a finished task or practice session, ending today."
+          },
+          "activeDays": {
+            "type": "integer",
+            "description": "Active days in the last 30 days."
+          },
+          "sufficiency": {
+            "$ref": "#/components/schemas/DataSufficiency"
+          }
+        },
+        "required": [
+          "days",
+          "activeDays",
+          "sufficiency"
+        ]
+      },
+      "DataSufficiency": {
+        "type": "string",
+        "enum": [
+          "INSUFFICIENT",
+          "LOW",
+          "OK"
+        ],
+        "description": "How much data an interpretive figure stands on (Master Spec §7): INSUFFICIENT = do not read anything into it, LOW = a first indication, OK = enough."
+      },
+      "DashboardRewards": {
+        "type": "object",
+        "properties": {
+          "coinBalance": {
+            "type": "integer"
+          },
+          "coinsToday": {
+            "type": "integer",
+            "description": "Coin today converts to at day end (projected)."
+          },
+          "capCoinsToday": {
+            "type": "integer"
+          },
+          "coinsWeek": {
+            "type": "integer",
+            "description": "Coin granted for the last 7 settled days."
+          },
+          "coinsInRange": {
+            "type": "integer"
+          },
+          "xpInRange": {
+            "type": "integer"
+          },
+          "lifetimeXp": {
+            "type": "integer"
+          },
+          "level": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "coinBalance",
+          "coinsToday",
+          "capCoinsToday",
+          "coinsWeek",
+          "coinsInRange",
+          "xpInRange",
+          "lifetimeXp",
+          "level"
+        ]
+      },
+      "DashboardDay": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "tasksTotal": {
+            "type": "integer"
+          },
+          "tasksDone": {
+            "type": "integer"
+          },
+          "sessions": {
+            "type": "integer"
+          },
+          "learningMinutes": {
+            "type": "integer"
+          },
+          "xpEarned": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "tasksTotal",
+          "tasksDone",
+          "sessions",
+          "learningMinutes",
+          "xpEarned"
+        ]
+      },
+      "SkillInsight": {
+        "type": "object",
+        "properties": {
+          "skillId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "NOT_LEARNED",
+              "INTRODUCED",
+              "LEARNING",
+              "PROFICIENT",
+              "MASTERED",
+              "RETAINED"
+            ]
+          },
+          "masteryScore": {
+            "type": "number"
+          },
+          "signal": {
+            "type": "string",
+            "enum": [
+              "IMPROVING",
+              "AT_RISK"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "RECENT_ABOVE_AVERAGE",
+              "RECENT_BELOW_AVERAGE",
+              "FORGETTING"
+            ]
+          },
+          "sufficiency": {
+            "$ref": "#/components/schemas/DataSufficiency"
+          }
+        },
+        "required": [
+          "skillId",
+          "subject",
+          "title",
+          "state",
+          "masteryScore",
+          "signal",
+          "reason",
+          "sufficiency"
+        ]
+      },
+      "DashboardSubjectMastery": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "description": "Library subject, e.g. `math`."
+          },
+          "title": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "integer"
+          },
+          "practised": {
+            "type": "integer"
+          },
+          "proficient": {
+            "type": "integer"
+          },
+          "meanScore": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "attempts": {
+            "type": "integer"
+          },
+          "sufficiency": {
+            "$ref": "#/components/schemas/DataSufficiency"
+          }
+        },
+        "required": [
+          "subject",
+          "title",
+          "skills",
+          "practised",
+          "proficient",
+          "meanScore",
+          "attempts",
+          "sufficiency"
+        ]
+      },
+      "DashboardSchoolSubject": {
+        "type": "object",
+        "properties": {
+          "subjectCode": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "averagePercent": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "direction": {
+            "$ref": "#/components/schemas/TrendDirection"
+          },
+          "deltaPercent": {
+            "type": "number"
+          },
+          "sufficiency": {
+            "$ref": "#/components/schemas/DataSufficiency"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "day": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                  "example": "2026-11-17",
+                  "description": "Household-local day (YYYY-MM-DD)."
+                },
+                "percent": {
+                  "type": "number"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/AssessmentType"
+                }
+              },
+              "required": [
+                "day",
+                "percent",
+                "type"
+              ]
+            }
+          }
+        },
+        "required": [
+          "subjectCode",
+          "count",
+          "averagePercent",
+          "direction",
+          "deltaPercent",
+          "sufficiency",
+          "points"
+        ]
+      },
+      "TrendDirection": {
+        "type": "string",
+        "enum": [
+          "UP",
+          "DOWN",
+          "FLAT"
+        ]
+      },
+      "UpcomingExam": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subjectCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "daysUntil": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "eventId",
+          "title",
+          "subjectCode",
+          "startsAt",
+          "daysUntil"
+        ]
+      },
+      "HouseholdOverviewResponse": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChildOverview"
+            }
+          }
+        },
+        "required": [
+          "children"
+        ]
+      },
+      "ChildOverview": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "integer"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "today": {
+            "$ref": "#/components/schemas/DashboardToday"
+          },
+          "streak": {
+            "$ref": "#/components/schemas/DashboardStreak"
+          },
+          "coinBalance": {
+            "type": "integer"
+          },
+          "coinsToday": {
+            "type": "integer"
+          },
+          "coinsWeek": {
+            "type": "integer"
+          },
+          "skillsImproving": {
+            "type": "integer"
+          },
+          "skillsAtRisk": {
+            "type": "integer"
+          },
+          "skillsSufficiency": {
+            "$ref": "#/components/schemas/DataSufficiency"
+          },
+          "upcomingExams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpcomingExam"
+            }
+          }
+        },
+        "required": [
+          "studentId",
+          "displayName",
+          "grade",
+          "avatar",
+          "today",
+          "streak",
+          "coinBalance",
+          "coinsToday",
+          "coinsWeek",
+          "skillsImproving",
+          "skillsAtRisk",
+          "skillsSufficiency",
+          "upcomingExams"
+        ]
       }
     },
     "parameters": {}
@@ -14119,6 +15175,628 @@
           },
           "409": {
             "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/school-assessments": {
+      "get": {
+        "tags": [
+          "gradebook"
+        ],
+        "summary": "School grades of a child",
+        "description": "Parent only. Newest first; filter by subject, school year or semester. `attachmentUrl` is a signed link valid for 15 minutes.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "example": "TOAN",
+              "description": "GDPT 2018 subject code (GET /v1/subjects)."
+            },
+            "required": false,
+            "description": "GDPT 2018 subject code (GET /v1/subjects).",
+            "name": "subjectCode",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{4}$",
+              "example": "2026-2027"
+            },
+            "required": false,
+            "name": "schoolYear",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/Semester"
+            },
+            "required": false,
+            "name": "semester",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 60,
+              "description": "`nextCursor` of the previous page."
+            },
+            "required": false,
+            "description": "`nextCursor` of the previous page.",
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Grades",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolAssessmentListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "gradebook"
+        ],
+        "summary": "Enter a school grade",
+        "description": "Parent only. `maxScore` defaults to 10; school year and semester default from `assessedOn` (year from September, HK1 to mid January, HK2 to May). `skillIds` map the assessment to curriculum skills. Audited. The grade is shown beside app mastery and never changes it.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchoolAssessmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolAssessmentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/school-assessments/{id}": {
+      "patch": {
+        "tags": [
+          "gradebook"
+        ],
+        "summary": "Correct a school grade",
+        "description": "Parent only. Audited with the names of the changed fields.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "School assessment id."
+            },
+            "required": true,
+            "description": "School assessment id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchoolAssessmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolAssessmentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "gradebook"
+        ],
+        "summary": "Delete a school grade",
+        "description": "Parent only. Removes the grade, its skill mappings and its attachment. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "School assessment id."
+            },
+            "required": true,
+            "description": "School assessment id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/school-assessments/upload-sign": {
+      "post": {
+        "tags": [
+          "gradebook"
+        ],
+        "summary": "Signed upload for a photo or PDF of a school test",
+        "description": "Parent only. PUT the file to `uploadUrl` (valid 2 hours, max 10 MB, JPEG/PNG/WebP/PDF) into a private bucket, then send `path` as `attachmentPath`. No OCR: the file is only stored.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentUploadSign"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upload target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentUploadSignResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable (SERVICE_UNAVAILABLE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/dashboard": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Dashboard of one child",
+        "description": "Parent only. Today, streak, Coin and XP, tasks and practice of the range (`7d`, `30d`, `90d`), skills improving or at risk, mastery per subject, school grades of the current school year with their trend, and upcoming exams. Every interpretive figure carries a `sufficiency` label. School grades and app mastery are listed side by side and never merged.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "7d",
+                "30d",
+                "90d"
+              ],
+              "default": "7d",
+              "description": "Days up to today."
+            },
+            "required": false,
+            "description": "Days up to today.",
+            "name": "range",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/household/overview": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "One card per child for the parent home",
+        "description": "Parent only. Per child: Today completion, streak, Coin today and this week, number of skills improving and at risk (last 7 days), upcoming exams.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Overview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HouseholdOverviewResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
             "content": {
               "application/json": {
                 "schema": {

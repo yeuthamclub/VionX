@@ -179,6 +179,25 @@ export const EXPORT_SECTIONS: ExportSection[] = [
       from app.student_item_history where household_id = ${h} order by student_id, last_seen_at`,
   },
   {
+    file: 'school_assessments.json',
+    query: (db, h) => db`
+      select a.id, a.student_id, a.subject_code, a.assessed_on, a.type, a.score, a.max_score,
+             a.school_year, a.semester, a.topic_tags, a.note, a.teacher_comment,
+             a.attachment_path, a.created_at, a.updated_at,
+             coalesce((select array_agg(m.skill_id) from app.school_assessment_skill_mappings m
+                       where m.assessment_id = a.id), '{}') as skill_ids
+      from app.school_assessments a where a.household_id = ${h}
+      order by a.student_id, a.assessed_on`,
+  },
+  {
+    file: 'day_summaries.json',
+    query: (db, h) => db`
+      select student_id, local_day, tasks_total, tasks_done, required_total, required_done,
+             sessions, learning_minutes, answers, correct, xp_earned
+      from app.student_day_summaries where household_id = ${h}
+      order by student_id, local_day`,
+  },
+  {
     file: 'today_plans.json',
     query: (db, h) => db`
       select p.student_id, p.local_date, p.version, p.budget_minutes, p.free_minutes,

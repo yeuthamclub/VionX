@@ -20,14 +20,7 @@ import type { ApiDeps } from '../deps.ts';
 import { writeAudit } from '../identity/repo.ts';
 import { learningStudent } from '../learning/repo.ts';
 import { body, CHILD, errorResponses, iso, json, PARENT } from '../route-helpers.ts';
-import {
-  loadPlannerConfig,
-  planIsStale,
-  regenerateToday,
-  storedPlan,
-  type ItemRow,
-  type StoredPlan,
-} from './regenerate.ts';
+import { freshPlan, regenerateToday, type ItemRow, type StoredPlan } from './regenerate.ts';
 import {
   TodayItemCompleteSchema,
   TodayItemIdParamSchema,
@@ -228,13 +221,7 @@ export function registerPlannerRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps): 
     const { id } = c.req.valid('param');
     const actor = c.get('actor');
     const student = await studentOr404(await readScope(actor, id), id);
-    const at = now();
-    const today = householdToday(at, student.timezone);
-    let stored = await storedPlan(sql, student.household_id, id, today);
-    if (!stored || (await planIsStale(sql, stored.plan, await loadPlannerConfig(sql), at))) {
-      stored = await regenerate(student.household_id, id, at);
-    }
-    return c.json(toToday(stored, actor.kind), 200);
+    return c.json(toToday(await freshPlan(sql, student, now()), actor.kind), 200);
   });
 
   app.openapi(recalculateRoute, async (c) => {

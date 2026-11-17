@@ -13,7 +13,9 @@ const rewards = vi.hoisted(() => ({
   grantSessionXp: vi.fn(async () => ({ granted: false })),
   settleDueDays: vi.fn(async () => ({ settled: 0 })),
 }));
+const dashboard = vi.hoisted(() => ({ refreshDaySummaries: vi.fn(async () => {}) }));
 vi.mock('../api/planner/regenerate.ts', () => planner);
+vi.mock('../api/dashboard/build.ts', () => dashboard);
 vi.mock('../_shared/rewards.ts', () => rewards);
 
 const { createHandlers } = await import('../worker/handlers.ts');
@@ -27,7 +29,7 @@ function fakeTx() {
   const statements: string[] = [];
   const tx = ((strings: TemplateStringsArray) => {
     statements.push(strings.join('?'));
-    return Promise.resolve([]);
+    return Promise.resolve([{ timezone: 'Asia/Ho_Chi_Minh' }]);
   }) as unknown as TxSql;
   (tx as unknown as { json: (v: unknown) => unknown }).json = (v) => v;
   return { tx, statements };
@@ -60,6 +62,29 @@ describe('Today regeneration on events', () => {
     await handlers[type]!(event(type), tx);
     expect(planner.regenerateToday).toHaveBeenCalledTimes(1);
     expect(planner.regenerateToday).toHaveBeenCalledWith(tx, HOUSEHOLD, STUDENT, NOW);
+  });
+
+  it('M08: also rebuilds the daily summary of today and of the task day', async () => {
+    planner.regenerateToday.mockResolvedValue({ plan: { local_date: '2026-11-17' } } as never);
+    const { tx } = fakeTx();
+    await handlers['task.approved']!(
+      event('task.approved', { payload: { studentId: STUDENT, date: '2026-11-16' } }),
+      tx,
+    );
+    await handlers['learning.session_finished']!(event('learning.session_finished'), tx);
+    const student = { id: STUDENT, household_id: HOUSEHOLD, timezone: 'Asia/Ho_Chi_Minh' };
+    expect(dashboard.refreshDaySummaries.mock.calls).toEqual([
+      [tx, student, ['2026-11-17', '2026-11-16']],
+      [tx, student, ['2026-11-17']],
+    ]);
+    planner.regenerateToday.mockResolvedValue(null);
+  });
+
+  it('M08: writes no summary for a child that no longer exists', async () => {
+    const { tx, statements } = fakeTx();
+    await handlers['task.completed']!(event('task.completed'), tx);
+    expect(dashboard.refreshDaySummaries).not.toHaveBeenCalled();
+    expect(statements).toHaveLength(0);
   });
 
   it('keeps granting XP for approved tasks and finished sessions', async () => {

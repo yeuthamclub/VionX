@@ -13,7 +13,7 @@ import { liveDeps } from './api/live-deps.ts';
 import { createWorkerHandler } from './worker/app.ts';
 import { createHandlers } from './worker/handlers.ts';
 import { expireExports } from './worker/privacy-export.ts';
-import { removeOrphanProofs } from './worker/task-proofs.ts';
+import { removeOrphanAssessmentFiles, removeOrphanProofs } from './worker/task-proofs.ts';
 
 const env = readEnv((name) => Deno.env.get(name));
 const sql = getSql(env.dbUrl);
@@ -30,6 +30,7 @@ const worker = createWorkerHandler({
   maintenance: async () => ({
     expiredExports: await expireExports(sql, storage),
     removedOrphanProofs: await removeOrphanProofs(sql, storage),
+    removedOrphanAssessmentFiles: await removeOrphanAssessmentFiles(sql, storage),
   }),
 });
 const aiBatch = createAiBatchHandler({

@@ -350,6 +350,20 @@ export async function regenerateToday(
   return storedPlan(tx, householdId, studentId, today);
 }
 
+/** Today's plan as a reader should see it: the stored one, regenerated first when stale. */
+export async function freshPlan(
+  sql: Sql,
+  student: { id: string; household_id: string; timezone: string },
+  at: Date,
+): Promise<StoredPlan> {
+  const today = householdToday(at, student.timezone);
+  const stored = await storedPlan(sql, student.household_id, student.id, today);
+  if (stored && !(await planIsStale(sql, stored.plan, await loadPlannerConfig(sql), at))) {
+    return stored;
+  }
+  return (await sql.begin((tx) => regenerateToday(tx, student.household_id, student.id, at)))!;
+}
+
 /**
  * Day start (`planner.day_start_requested`): every child whose household-local day has no plan
  * yet. Returns the number of plans written.

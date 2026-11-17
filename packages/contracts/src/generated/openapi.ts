@@ -6170,6 +6170,529 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/students/{id}/school-assessments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * School grades of a child
+     * @description Parent only. Newest first; filter by subject, school year or semester. `attachmentUrl` is a signed link valid for 15 minutes.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description GDPT 2018 subject code (GET /v1/subjects). */
+          subjectCode?: string;
+          schoolYear?: string;
+          semester?: components['schemas']['Semester'];
+          /** @description `nextCursor` of the previous page. */
+          cursor?: string;
+          limit?: number;
+        };
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Grades */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SchoolAssessmentListResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Enter a school grade
+     * @description Parent only. `maxScore` defaults to 10; school year and semester default from `assessedOn` (year from September, HK1 to mid January, HK2 to May). `skillIds` map the assessment to curriculum skills. Audited. The grade is shown beside app mastery and never changes it.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['SchoolAssessmentCreate'];
+        };
+      };
+      responses: {
+        /** @description Saved */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SchoolAssessmentResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/school-assessments/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete a school grade
+     * @description Parent only. Removes the grade, its skill mappings and its attachment. Audited.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description School assessment id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Deleted */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /**
+     * Correct a school grade
+     * @description Parent only. Audited with the names of the changed fields.
+     */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description School assessment id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['SchoolAssessmentUpdate'];
+        };
+      };
+      responses: {
+        /** @description Saved */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SchoolAssessmentResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/api/v1/students/{id}/school-assessments/upload-sign': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Signed upload for a photo or PDF of a school test
+     * @description Parent only. PUT the file to `uploadUrl` (valid 2 hours, max 10 MB, JPEG/PNG/WebP/PDF) into a private bucket, then send `path` as `attachmentPath`. No OCR: the file is only stored.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['AssessmentUploadSign'];
+        };
+      };
+      responses: {
+        /** @description Upload target */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssessmentUploadSignResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description A dependency is unavailable (SERVICE_UNAVAILABLE) */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/dashboard': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Dashboard of one child
+     * @description Parent only. Today, streak, Coin and XP, tasks and practice of the range (`7d`, `30d`, `90d`), skills improving or at risk, mastery per subject, school grades of the current school year with their trend, and upcoming exams. Every interpretive figure carries a `sufficiency` label. School grades and app mastery are listed side by side and never merged.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Days up to today. */
+          range?: '7d' | '30d' | '90d';
+        };
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Dashboard */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['DashboardResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/household/overview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * One card per child for the parent home
+     * @description Parent only. Per child: Today completion, streak, Coin today and this week, number of skills improving and at risk (last 7 days), upcoming exams.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Overview */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['HouseholdOverviewResponse'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -8535,6 +9058,325 @@ export interface components {
     };
     TodayItemRemove: {
       removed?: boolean;
+    };
+    SchoolAssessmentListResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      assessments: components['schemas']['SchoolAssessment'][];
+      nextCursor: string | null;
+    };
+    SchoolAssessment: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      subjectCode: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      assessedOn: string;
+      type: components['schemas']['AssessmentType'];
+      score: number;
+      maxScore: number;
+      /** @description score ÷ maxScore, 0-100 with one decimal. */
+      percent: number;
+      schoolYear: string;
+      semester: components['schemas']['Semester'];
+      topicTags: string[];
+      note: string | null;
+      teacherComment: string | null;
+      /** @description Curriculum skills the assessment covered. */
+      skillIds: string[];
+      /** @description Signed link to the attached photo or PDF (15 minutes), or null. */
+      attachmentUrl: string | null;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    /** @enum {string} */
+    AssessmentType:
+      | 'ORAL'
+      | 'SHORT_QUIZ'
+      | 'HOMEWORK'
+      | 'PERIODIC_TEST'
+      | 'MIDTERM'
+      | 'FINAL'
+      | 'MOCK'
+      | 'CUSTOM';
+    /** @enum {string} */
+    Semester: 'HK1' | 'HK2' | 'SUMMER';
+    SchoolAssessmentResponse: {
+      assessment: components['schemas']['SchoolAssessment'];
+    };
+    SchoolAssessmentCreate: {
+      /**
+       * @description GDPT 2018 subject code (GET /v1/subjects).
+       * @example TOAN
+       */
+      subjectCode: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      assessedOn: string;
+      type: components['schemas']['AssessmentType'];
+      score: number;
+      /** @description Default 10. */
+      maxScore?: number;
+      /**
+       * @description Default: from assessedOn.
+       * @example 2026-2027
+       */
+      schoolYear?: string;
+      semester?: components['schemas']['Semester'] & unknown;
+      topicTags?: string[];
+      note?: string | null;
+      teacherComment?: string | null;
+      skillIds?: string[];
+      /** @description `path` from POST /v1/students/{id}/school-assessments/upload-sign. */
+      attachmentPath?: string | null;
+    };
+    SchoolAssessmentUpdate: {
+      /**
+       * @description GDPT 2018 subject code (GET /v1/subjects).
+       * @example TOAN
+       */
+      subjectCode?: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      assessedOn?: string;
+      type?: components['schemas']['AssessmentType'];
+      score?: number;
+      /** @description Default 10. */
+      maxScore?: number;
+      /**
+       * @description Default: from assessedOn.
+       * @example 2026-2027
+       */
+      schoolYear?: string;
+      semester?: components['schemas']['Semester'] & unknown;
+      topicTags?: string[];
+      note?: string | null;
+      teacherComment?: string | null;
+      skillIds?: string[];
+      /** @description `path` from POST /v1/students/{id}/school-assessments/upload-sign. */
+      attachmentPath?: string | null;
+    };
+    AssessmentUploadSignResponse: {
+      /** @description Pass as `attachmentPath` when saving the grade. */
+      path: string;
+      uploadUrl: string;
+      /** Format: date-time */
+      expiresAt: string;
+      maxBytes: number;
+    };
+    AssessmentUploadSign: {
+      /** @enum {string} */
+      contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';
+    };
+    DashboardResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      displayName: string;
+      grade: number;
+      /** @enum {string} */
+      range: '7d' | '30d' | '90d';
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      from: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      to: string;
+      today: components['schemas']['DashboardToday'];
+      streak: components['schemas']['DashboardStreak'];
+      rewards: components['schemas']['DashboardRewards'];
+      tasks: {
+        total: number;
+        done: number;
+        requiredTotal: number;
+        requiredDone: number;
+        completion: number | null;
+        sufficiency: components['schemas']['DataSufficiency'];
+      };
+      /** @description One entry per day of the range. */
+      days: components['schemas']['DashboardDay'][];
+      learning: {
+        sessions: number;
+        minutes: number;
+        answers: number;
+        accuracy: number | null;
+        sufficiency: components['schemas']['DataSufficiency'];
+        improving: components['schemas']['SkillInsight'][];
+        atRisk: components['schemas']['SkillInsight'][];
+        subjects: components['schemas']['DashboardSubjectMastery'][];
+      };
+      school: {
+        schoolYear: string;
+        subjects: components['schemas']['DashboardSchoolSubject'][];
+      };
+      /** @description School grades and app mastery of the same subject, side by side. They are different measures and are never combined into one number. */
+      sideBySide: {
+        subjectCode: string;
+        librarySubject: string | null;
+        school: {
+          averagePercent: number | null;
+          count: number;
+          sufficiency: components['schemas']['DataSufficiency'];
+        };
+        mastery: {
+          meanScore: number | null;
+          practised: number;
+          skills: number;
+          sufficiency: components['schemas']['DataSufficiency'];
+        } | null;
+      }[];
+      upcomingExams: components['schemas']['UpcomingExam'][];
+    };
+    DashboardToday: {
+      itemsTotal: number;
+      itemsDone: number;
+      plannedMinutes: number;
+      doneMinutes: number;
+      budgetMinutes: number;
+      /** @description itemsDone ÷ itemsTotal, 0-1. */
+      completion: number | null;
+    };
+    DashboardStreak: {
+      /** @description Consecutive days with a finished task or practice session, ending today. */
+      days: number;
+      /** @description Active days in the last 30 days. */
+      activeDays: number;
+      sufficiency: components['schemas']['DataSufficiency'];
+    };
+    /**
+     * @description How much data an interpretive figure stands on (Master Spec §7): INSUFFICIENT = do not read anything into it, LOW = a first indication, OK = enough.
+     * @enum {string}
+     */
+    DataSufficiency: 'INSUFFICIENT' | 'LOW' | 'OK';
+    DashboardRewards: {
+      coinBalance: number;
+      /** @description Coin today converts to at day end (projected). */
+      coinsToday: number;
+      capCoinsToday: number;
+      /** @description Coin granted for the last 7 settled days. */
+      coinsWeek: number;
+      coinsInRange: number;
+      xpInRange: number;
+      lifetimeXp: number;
+      level: number;
+    };
+    DashboardDay: {
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      day: string;
+      tasksTotal: number;
+      tasksDone: number;
+      sessions: number;
+      learningMinutes: number;
+      xpEarned: number;
+    };
+    SkillInsight: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      skillId: string;
+      subject: string;
+      title: string;
+      /** @enum {string} */
+      state: 'NOT_LEARNED' | 'INTRODUCED' | 'LEARNING' | 'PROFICIENT' | 'MASTERED' | 'RETAINED';
+      masteryScore: number;
+      /** @enum {string} */
+      signal: 'IMPROVING' | 'AT_RISK';
+      /** @enum {string} */
+      reason: 'RECENT_ABOVE_AVERAGE' | 'RECENT_BELOW_AVERAGE' | 'FORGETTING';
+      sufficiency: components['schemas']['DataSufficiency'];
+    };
+    DashboardSubjectMastery: {
+      /** @description Library subject, e.g. `math`. */
+      subject: string;
+      title: string;
+      skills: number;
+      practised: number;
+      proficient: number;
+      meanScore: number | null;
+      attempts: number;
+      sufficiency: components['schemas']['DataSufficiency'];
+    };
+    DashboardSchoolSubject: {
+      subjectCode: string;
+      count: number;
+      averagePercent: number | null;
+      direction: components['schemas']['TrendDirection'];
+      deltaPercent: number;
+      sufficiency: components['schemas']['DataSufficiency'];
+      points: {
+        /**
+         * @description Household-local day (YYYY-MM-DD).
+         * @example 2026-11-17
+         */
+        day: string;
+        percent: number;
+        type: components['schemas']['AssessmentType'];
+      }[];
+    };
+    /** @enum {string} */
+    TrendDirection: 'UP' | 'DOWN' | 'FLAT';
+    UpcomingExam: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      eventId: string;
+      title: string;
+      subjectCode: string | null;
+      /** Format: date-time */
+      startsAt: string;
+      daysUntil: number;
+    };
+    HouseholdOverviewResponse: {
+      children: components['schemas']['ChildOverview'][];
+    };
+    ChildOverview: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      displayName: string;
+      grade: number;
+      avatar: string;
+      today: components['schemas']['DashboardToday'];
+      streak: components['schemas']['DashboardStreak'];
+      coinBalance: number;
+      coinsToday: number;
+      coinsWeek: number;
+      skillsImproving: number;
+      skillsAtRisk: number;
+      skillsSufficiency: components['schemas']['DataSufficiency'];
+      upcomingExams: components['schemas']['UpcomingExam'][];
     };
   };
   responses: never;
