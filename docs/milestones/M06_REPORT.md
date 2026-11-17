@@ -98,6 +98,12 @@ The database content changed during the day, so each result says what it ran on:
   pass; the one failure is the phone-OTP sign-in test, which needs a setting of the cloud project
   (below). `tests/integration/library.test.ts` and `pnpm acceptance m05` import fixtures into
   Toán 6, Toán 2 and Tiếng Việt 2, so they only run on a database without those reviewed libraries.
+- `pnpm check` on a second, empty cloud project made for tests (`.env.test`, migrations and seed
+  applied with `pnpm db:migrate` / `db:seed`): the first run showed a real defect, since
+  `learning.test.ts` runs before `library.test.ts` and found no Toán 6 items on a fresh database (15
+  tests skipped; CI would have hit the same). The test now imports the M05 Toán 6 fixture when the
+  library is empty. Second run from an empty library: again 140 of 141, only the phone-OTP test
+  fails. Duration 553.72 s.
 - Guard: with content 3 in place, `resetLibraryScope(sql, 6, 'math')` was called once. It refused
   ("holds 500 items, more than a test fixture (50)") and the counts did not change.
 - Maestro `m06-practice.yaml`: written, **not run** (no emulator). No evidence.

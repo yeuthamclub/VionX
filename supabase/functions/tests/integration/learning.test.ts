@@ -1,8 +1,9 @@
-// M06 practice sessions against local Supabase (`pnpm db:start && pnpm fn:serve`). Uses whatever
-// approved Toán 6 items the library holds (the M05 fixtures in CI) and never changes library content.
+// M06 practice sessions (`pnpm cloud pnpm test:api`, or CI's local Supabase). Uses whatever approved
+// Toán 6 items the library holds and never changes them; an empty library gets the M05 fixture.
 // Session lifecycle, T0 hints, idempotency, consent (EDUCATION_ANALYTICS), the nightly aggregate,
 // session XP through the worker, and cross-household denial (404) on every child-data route.
 import { randomUUID } from 'node:crypto';
+import { resolve } from 'node:path';
 import postgres from 'postgres';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -18,6 +19,7 @@ import {
 } from '@vionx/contracts';
 import { DEFAULT_MASTERY_CONFIG, forgettingRisk } from '@vionx/domain';
 import { ageLearning, findTopic, solve } from '../../../../scripts/lib/learning-solver.ts';
+import { zipPackageDir } from '../../../../scripts/lib/library-files.ts';
 import { signUpWithEmail, type AuthSession } from '../../../../scripts/lib/local-supabase.ts';
 
 const FUNCTIONS_URL = (process.env.FUNCTIONS_URL ?? 'http://127.0.0.1:54321/functions/v1').replace(
@@ -138,6 +140,28 @@ const next = async (f: Family, id: string) => {
 const answer = (f: Family, id: string, body: Record<string, unknown>) =>
   api('POST', `/learning/sessions/${id}/answers`, { child: f.child }, body);
 
+async function importMath6Fixture() {
+  const admin = await signUpWithEmail(`m06-lib-${randomUUID()}@vionx.test`, `pw-${randomUUID()}`);
+  try {
+    await sql`insert into ops.admin_permissions (user_id, permission) values (${admin.userId}, 'CONTENT_ADMIN')`;
+    const zip = zipPackageDir(
+      resolve(import.meta.dirname, '../../../../scripts/acceptance/fixtures/m05/gdpt2018/6-math'),
+    );
+    const res = await fetch(`${API}/admin/library/import?mode=apply`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${admin.accessToken}`,
+        'content-type': 'application/zip',
+      },
+      body: zip as Uint8Array<ArrayBuffer>,
+    });
+    expect(res.status).toBe(200);
+  } finally {
+    await sql`delete from ops.admin_permissions where user_id = ${admin.userId}`;
+    await sql`delete from auth.users where id = ${admin.userId}`;
+  }
+}
+
 let a: Family; // Grade 6, EDUCATION_ANALYTICS granted
 let b: Family; // Grade 6, another household, no analytics consent
 let topic: { topicId: string; skillIds: string[] };
@@ -146,13 +170,18 @@ let skillId: string;
 beforeAll(async () => {
   const policies = PoliciesResponseSchema.parse((await api('GET', '/policies/current')).body);
   policyVersion = policies.policies.find((p) => p.type === 'PRIVACY_POLICY')!.version;
-  const found = await findTopic(sql, 6, 'math', null, 1);
-  if (!found) throw new Error('No approved Toán 6 items: import a library (pnpm acceptance m05)');
+  let found = await findTopic(sql, 6, 'math', null, 1);
+  if (!found) {
+    // A fresh database (CI): this file runs before library.test.ts, so bring the fixture in.
+    await importMath6Fixture();
+    found = await findTopic(sql, 6, 'math', null, 1);
+  }
+  if (!found) throw new Error('No approved Toán 6 items after importing the M05 fixture');
   topic = found;
   skillId = topic.skillIds[0]!;
   a = await newFamily(6, true);
   b = await newFamily(6, false);
-}, 60_000);
+}, 180_000);
 
 afterAll(async () => {
   if (createdUsers.length > 0) {
