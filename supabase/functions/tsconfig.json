@@ -6,5 +6,5 @@
   },
   "include": ["**/*.ts"],
   // Deno entrypoints (Deno.serve / Deno.env) are checked by `deno check` instead.
-  "exclude": ["api/index.ts", "worker/index.ts", "ai-batch/index.ts", "node_modules"]
+  "exclude": ["api/index.ts", "worker/index.ts", "ai-batch/index.ts", "serve.ts", "node_modules"]
 }

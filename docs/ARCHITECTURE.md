@@ -124,6 +124,6 @@ T0 pre-generated help on every item, at zero runtime cost → T1 approved Q&A li
 ## 7. Environments
 | Env | App | Backend | AI |
 |---|---|---|---|
-| local | Expo dev build on emulator/phone | `supabase start` (Docker) + `supabase functions serve` | `FakeAiProvider`, or a real key with a low spend limit |
+| development (ADR-002) | Expo dev build on emulator/phone | Supabase Cloud development project (Singapore) + functions on the developer's machine (`pnpm fn:serve`, Deno). No Docker. CI alone starts a throwaway local Supabase. | `FakeAiProvider`, or a real key with a low spend limit |
 | staging | EAS preview build (internal track) | Supabase staging project | Real, low limits |
 | production | Play internal → closed → production tracks | Supabase production project | Real, Anthropic workspace spend limit |

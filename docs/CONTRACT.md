@@ -73,7 +73,7 @@ When relevant: consent check, audit log, domain event, analytics event.
 
 ## 8. Testing
 - `packages/domain`: Vitest, property tests (fast-check) for rewards/mastery/planner.
-- API: Vitest against local Supabase (`supabase start`, `supabase functions serve`).
+- API: Vitest against the Supabase development project with functions served by `pnpm fn:serve` (ADR-002); CI uses a throwaway local Supabase.
 - Mobile: Jest for components/hooks, Maestro e2e on an Android emulator.
 - Admin: Vitest + Playwright smoke.
 

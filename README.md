@@ -77,22 +77,53 @@ supabase db push && supabase functions deploy api worker ai-batch
 - Legal drafts: `docs/legal/` (vi + en, DRAFT, need legal review); version 1 is loaded by migration
   `0004_policy_v1.sql`.
 
-## Local development
+## Development
 
-Prerequisites: Node 22, pnpm 10, Docker, Android Studio (emulator), optionally Maestro.
+Development uses a Supabase Cloud project, not Docker
+([ADR-002](docs/adr/0002-develop-against-supabase-cloud.md)). The functions you are editing run on
+your machine with Deno and talk to that project.
+
+Prerequisites: Node 22, pnpm 10, Android Studio (emulator), optionally Maestro. No Docker.
 
 ```sh
 pnpm install
-cp supabase/functions/.env.example supabase/functions/.env
-pnpm db:start          # supabase start (Postgres, Auth, Storage, Edge Runtime) + migrations + seed
-pnpm fn:serve          # serves api, worker, ai-batch on http://127.0.0.1:54321/functions/v1
-curl http://127.0.0.1:54321/functions/v1/api/v1/health
-pnpm dev:admin         # http://localhost:5173
+cp .env.example .env.cloud   # fill in the 4 values from the Supabase dashboard; never commit it
+pnpm db:migrate              # applies supabase/migrations/*.sql that the project does not have yet
+pnpm db:seed                 # first time only: supabase/seed.sql (demo accounts, Vault entries)
+pnpm fn:serve                # api, worker, ai-batch on http://127.0.0.1:54331/functions/v1
+curl http://127.0.0.1:54331/functions/v1/api/v1/health
+pnpm dev:admin               # http://localhost:5173
 ```
 
-pg_cron calls the worker every minute through pg_net (local URL from `seed.sql`).
+Tests and acceptance scenarios read the same file through `pnpm cloud`:
 
-### Local accounts (seed, local only)
+```sh
+pnpm cloud pnpm test:api          # needs `pnpm fn:serve` in another terminal
+pnpm cloud pnpm acceptance m06
+```
+
+- Each query crosses the network (about 0.2 s), so these runs take minutes.
+- Tests create throwaway families (`…@vionx.test`) and remove them. In the dashboard, Authentication →
+  Sign In / Providers → Email: turn "Confirm email" off for the development project, or sign-up
+  returns no session.
+- `library.test.ts` and `pnpm acceptance m05` import fixtures into Toán 6, Toán 2 and Tiếng Việt 2.
+  They refuse to run when one of those holds a reviewed library (more than 50 items). Use a second
+  project with fixtures only (another `.env` file: `node --env-file=.env.test scripts/cloud.mjs pnpm check`), or CI.
+- Tests that sign in by phone need Authentication → Phone → "Test phone numbers" for the numbers
+  below (OTP `123456`); otherwise they fail at sign-in.
+- pg_cron calls the worker through pg_net at the Vault entry `vionx_worker_url`. That only works once
+  the worker is deployed; with functions on your machine the tests call the worker directly.
+- Free plan: the project pauses after about a week without activity (resume it in the dashboard);
+  500 MB database; no backups.
+
+Deploy to the project (needs `supabase login` and `supabase link --project-ref <ref>` once):
+
+```sh
+pnpm exec supabase secrets set VIONX_SERVICE_SECRET=... ALLOWED_ORIGINS=... VIONX_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
+pnpm exec supabase functions deploy api worker ai-batch
+```
+
+### Seed accounts (development project only)
 
 | Who | Sign in |
 |---|---|
@@ -101,8 +132,10 @@ pg_cron calls the worker every minute through pg_net (local URL from `seed.sql`)
 | Demo children | `vx-demy22` (grade 2), `vx-demy66` (grade 6), `vx-demy99` (grade 9), PIN `2468` |
 | Test parents | `+84900000002` (acceptance), `+84900000003` (integration tests, Maestro M01), `+84900000004` (Maestro M02), OTP `123456` |
 
-Test OTPs and the placeholder SMS provider live in `supabase/config.toml` and must never be configured
-on staging/production.
+These passwords, the test OTPs and the seed value of `vionx_service_secret` are in this repository.
+They are acceptable only while the project holds no real family: before any real user, set a new
+service secret, delete the seed accounts and remove the test phone numbers. `supabase/config.toml`
+is only used by CI (a throwaway local Supabase per run).
 
 ### Parent Google sign-in (staging/production)
 
@@ -122,9 +155,8 @@ on staging/production.
 1. Create a Pixel emulator in Android Studio and start it.
 2. Build and install the development client once: `cd apps/mobile && npx expo run:android`
    (local Gradle), or `eas build --profile development --platform android` and install the APK.
-3. `cp apps/mobile/.env.example apps/mobile/.env.local` (the emulator reaches the host's Supabase
-   at `10.0.2.2`) and paste the publishable key from `pnpm exec supabase status` into
-   `EXPO_PUBLIC_SUPABASE_ANON_KEY`, then `pnpm dev:mobile` and open the app. The first screen shows
+3. `cp apps/mobile/.env.example apps/mobile/.env.local` (the emulator reaches `pnpm fn:serve` on the
+   host at `10.0.2.2`) and fill in the project URL and publishable key from `.env.cloud`, then `pnpm dev:mobile` and open the app. The first screen shows
    "Phụ huynh / Con" and the API health status.
 4. On a physical phone use your machine's LAN IP in `EXPO_PUBLIC_API_URL`.
 5. e2e: `maestro test apps/mobile/.maestro`.
@@ -135,14 +167,9 @@ on staging/production.
 |---|---|
 | `pnpm lint` / `typecheck` / `test` | ESLint + Prettier, `tsc` (+ `deno check` for functions), Vitest |
 | `pnpm openapi` | Regenerate `docs/api/openapi.json` and the typed client types |
-| `pnpm check` | lint, typecheck, unit tests, OpenAPI diff, API integration tests (needs local Supabase) |
-| `pnpm acceptance m00` / `m01` / `m02` | Module acceptance scenario against local Supabase |
+| `pnpm check:static` | lint, typecheck, unit tests, OpenAPI diff (no database) |
+| `pnpm cloud pnpm check` | The above plus API integration tests against the project of `.env.cloud` |
+| `pnpm cloud pnpm acceptance <module>` | Module acceptance scenario against that project |
 | `pnpm ai:check` | One tiny real Claude call (needs `ANTHROPIC_API_KEY`) |
-| `pnpm db:start` / `db:reset` / `db:migrate` / `db:seed` | Local database |
+| `pnpm db:migrate` / `db:seed` | Apply new migrations / `seed.sql` to that project. There is no reset command. |
 | `pnpm dev:mobile` / `dev:admin` / `fn:serve` | Dev servers |
-
-### Behind a TLS-intercepting proxy
-
-If `supabase start` cannot pull from `public.ecr.aws`, set `SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io`.
-If the Edge Runtime cannot download npm packages (certificate errors), pre-fill its Deno cache from
-the host: `cd supabase/functions && DENO_CERT=<proxy-ca.pem> DENO_DIR=$(docker volume inspect -f '{{.Mountpoint}}' supabase_edge_runtime_vionx) ./node_modules/.bin/deno install --node-modules-dir=none --config deno.json --entrypoint api/index.ts worker/index.ts ai-batch/index.ts`.
