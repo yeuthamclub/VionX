@@ -541,6 +541,51 @@ describe('parent', () => {
   });
 });
 
+describe('deleted sources', () => {
+  it('a deleted exam or timetable entry changes Today on the next read', async () => {
+    const startsAt = new Date(Date.now() + 2 * 86_400_000);
+    const exam = await api(
+      'POST',
+      `/students/${b.studentId}/events`,
+      { parent: b.parent },
+      {
+        type: 'EXAM',
+        title: 'Kiểm tra 15 phút',
+        subjectCode: 'TOAN',
+        startsAt: startsAt.toISOString(),
+        endsAt: new Date(startsAt.getTime() + 900_000).toISOString(),
+      },
+    );
+    expect(exam.status, JSON.stringify(exam.body)).toBe(201);
+    // ISO weekday of today in Asia/Ho_Chi_Minh (UTC+7, no daylight saving).
+    const weekday = new Date(Date.now() + 7 * 3_600_000).getUTCDay() || 7;
+    const entry = await api(
+      'POST',
+      `/students/${b.studentId}/timetable`,
+      { parent: b.parent },
+      { weekday, startTime: '07:00', endTime: '11:30', subjectCode: 'TOAN' },
+    );
+    expect(entry.status, JSON.stringify(entry.body)).toBe(201);
+
+    const withBoth = await today(b);
+    // Without a skill list the exam prepares the 2 weakest skills of the subject.
+    expect(withBoth.items.filter((i) => i.kind === 'EXAM_PREP')).toHaveLength(2);
+    expect(withBoth.freeMinutes).toBe(930 - 270);
+
+    expect(
+      (await api('DELETE', `/events/${exam.body.event.id}`, { parent: b.parent })).status,
+    ).toBe(204);
+    const withoutExam = await today(b);
+    expect(withoutExam.items.filter((i) => i.kind === 'EXAM_PREP')).toHaveLength(0);
+    expect(withoutExam.version).toBeGreaterThan(withBoth.version);
+
+    expect(
+      (await api('DELETE', `/timetable/${entry.body.entry.id}`, { parent: b.parent })).status,
+    ).toBe(204);
+    expect((await today(b)).freeMinutes).toBe(930);
+  });
+});
+
 describe('day start', () => {
   it('writes the plan of a child that has none today', async () => {
     await today(b);

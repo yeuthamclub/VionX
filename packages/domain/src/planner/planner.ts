@@ -345,7 +345,6 @@ const isOpen = (i: PlanItem) => i.status === 'PLANNED' || i.status === 'STARTED'
 export function planToday(input: PlannerInput, config: PlannerConfig): TodayPlan {
   const minutes = sessionMinutesFor(config, input.grade);
   const budget = dailyBudget(config, input.grade, input.freeMinutes, input.parentDailyMinutes);
-  const workload = budget > 0 ? clamp01(input.finished.minutes / budget) : 1;
   const xp = input.sessionXp;
   const existing = new Map(input.existing.map((i) => [i.refKey, i]));
   const finishedSkills = new Set(input.finished.skillIds);
@@ -367,6 +366,20 @@ export function planToday(input: PlannerInput, config: PlannerConfig): TodayPlan
       perSkill.set(c.refId!, c);
     }
   }
+  const learningCandidates = [
+    ...perSkill.values(),
+    ...dueReviewCandidates(input.skills, input.now, minutes, xp),
+  ];
+  // Workload = card minutes of the learning items done today over the budget: the same minutes
+  // the day's time bar shows, not the clock time of the sessions.
+  const candidateKeys = new Set(learningCandidates.map((c) => c.refKey));
+  const doneLearning = [
+    ...learningCandidates,
+    ...input.existing.filter((i) => !isTaskKind(i.kind) && !candidateKeys.has(i.refKey)),
+  ]
+    .filter(covered)
+    .reduce((sum, i) => sum + i.minutes, 0);
+  const workload = budget > 0 ? clamp01(doneLearning / budget) : 1;
   const toItem = (c: PlanCandidate): PlanItem => {
     const old = existing.get(c.refKey);
     const fact = !isTaskKind(c.kind) && covered(c) ? 'DONE' : c.fact;
@@ -389,12 +402,7 @@ export function planToday(input: PlannerInput, config: PlannerConfig): TodayPlan
       detail: c.detail,
     };
   };
-  const learning = [
-    ...perSkill.values(),
-    ...dueReviewCandidates(input.skills, input.now, minutes, xp),
-  ]
-    .map(toItem)
-    .sort(compareItems);
+  const learning = learningCandidates.map(toItem).sort(compareItems);
   // The best `maxLearningItems`; an item the day already touched never falls off because of the cap.
   const items = [
     ...taskCandidates(input.tasks, config).map(toItem),

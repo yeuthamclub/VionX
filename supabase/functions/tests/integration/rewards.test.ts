@@ -87,7 +87,8 @@ async function tickWorker() {
  * time and hold some messages; wait for it).
  */
 async function drain(eventIds: string[]) {
-  const deadline = Date.now() + 30_000;
+  // 120 s: see learning.test.ts (M07 regenerates Today on task events).
+  const deadline = Date.now() + 120_000;
   for (;;) {
     await tickWorker();
     const [row] = await sql<{ n: number }[]>`

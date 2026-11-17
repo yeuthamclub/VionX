@@ -52,7 +52,9 @@ async function api(method: string, path: string, auth: Auth = {}, body?: unknown
 }
 
 async function drain(eventIds: string[]) {
-  const deadline = Date.now() + 30_000;
+  // Since M07 every task and session event also regenerates a Today plan (about 3 s per event
+  // on a remote database), and the queue may hold events of the files that ran before.
+  const deadline = Date.now() + 120_000;
   for (;;) {
     const res = await fetch(`${FUNCTIONS_URL}/worker`, {
       method: 'POST',

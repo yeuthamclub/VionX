@@ -53,7 +53,7 @@ async function ok(method: string, path: string, auth?: Auth, body?: unknown, sta
 }
 
 async function drain(eventIds: string[]): Promise<void> {
-  const deadline = Date.now() + 30_000;
+  const deadline = Date.now() + 120_000;
   for (;;) {
     const res = await fetch(`${env.functionsUrl}/worker`, {
       method: 'POST',

@@ -15,6 +15,8 @@ top, remove one for the day and set how many minutes a day Today may ask for.
   per child), `app.today_plans`, `app.today_plan_items`; `app.calendar_events.skill_ids`;
   `ops.request_today_plans()` + pg_cron `vionx-today-plans` (minute 10 of every hour). Household
   id + index, cascade from the student, RLS on, no client grants.
+- Migration `0013_today_invalidation.sql`: deleting a calendar event or a timetable entry marks the
+  child's plan stale (trigger), so the next read regenerates it.
 - Domain (`packages/domain/src/planner`): config, the §11 priority with `reasons[]`, 8 candidate
   generators (ParentTasks, Homework, ReadingGoal, ActivityGoal, ExamPrep, WeakPrerequisite,
   DueReview, NextSkill), session length by grade, free time and daily budget, the merge with the
@@ -41,7 +43,7 @@ top, remove one for the day and set how many minutes a day Today may ask for.
 
 ## Evidence
 Everything ran on 2026-11-17 on the two Supabase Cloud projects in Singapore, with the functions
-of this branch served on the Mac by Deno. Migration 0012 was applied to both with
+of this branch served on the Mac by Deno. Migrations 0012 and 0013 were applied to both with
 `scripts/db-migrate.ts`.
 
 - `pnpm check:static` (lint, typecheck incl. `deno check`, unit tests, openapi diff): exit code 0,
@@ -56,7 +58,8 @@ of this branch served on the Mac by Deno. Migration 0012 was applied to both wit
 
 - `PORT=54341 node --env-file=.env.test scripts/cloud.mjs pnpm check` on the **test project**:
   exit code 0. Integration: 8 files, 158 tests (141 before, +17 in the new
-  `tests/integration/planner.test.ts`).
+  `tests/integration/planner.test.ts`). This run was on commit e0adf02, before the follow-up
+  changes below.
 - `pnpm cloud pnpm acceptance m07` on the **development project** (real Toán 6, 500 items):
   9 passed, 0 failed, 1 skipped (Maestro). The first run had 1 failure caused by the scenario
   itself (it read a column `amount` that `app.xp_ledger` does not have); the query was corrected
@@ -68,6 +71,36 @@ of this branch served on the Mac by Deno. Migration 0012 was applied to both wit
 - Android build: **not built.** No evidence. (M07 adds no native module.)
 - The M07 functions are **not deployed**; the development project still runs the M06 build.
 - AI cost: US$0. The module makes no model call.
+
+### After the follow-up changes (same day, later)
+Three follow-ups were made after the runs above: workload from card minutes, migration 0013
+(deletes invalidate the plan), unit tests for the worker handlers
+(`tests/planner-worker.test.ts`, 10 tests), plus the 120 s worker waits. Evidence for that state:
+
+- `pnpm check:static`: exit code 0 (functions unit tests 110 → 120).
+- `pnpm cloud pnpm acceptance m07` on the development project: `9 passed, 0 failed, 1 skipped`
+  again; step B now reads `other exam skill now 61 (-5 workload)`.
+- `pnpm check` on the test project: **not green after these changes.** Four full runs, exit code
+  1 each time:
+
+  | Run | Result | Failing tests |
+  |---|---|---|
+  | 2 | 158 of 159 | `learning.test.ts`: the worker did not reach a replayed event in 30 s (real: the wait was too short for M07, now 120 s) |
+  | 3 | 155 passed, 1 failed, 3 skipped | `privacy.test.ts`, API answered 500 |
+  | 4 | 157 passed, 2 failed | `identity.test.ts`, API answered 500 |
+  | 5 | 101 passed, 2 failed, 56 skipped | `planner.test.ts`, and `privacy`/`rewards` setup, API answered 500 |
+
+  Every 500 in runs 3-5 is a lost database connection in the server log (`Error: read ETIMEDOUT`
+  or `write CONNECTION_CLOSED db.…supabase.co:5432`), in a different test each run. A script
+  outside the app (240 transactions on a pool of 3 against the test project) lost 3 of them the
+  same way: all three connections at once, each after about 18.4 s. So the path between this Mac
+  and the cloud database stalls for about 18 s now and then; it did not during the green run at
+  18:10. This is also the likely cause of the unexplained consent failures noted in M06.
+- Files run alone afterwards: `planner.test.ts` 18 of 18 and `learning.test.ts` 15 of 15 in one
+  run; `rewards.test.ts` 16 of 17, the one failure again `read ETIMEDOUT` (in the test's own
+  database connection).
+- **A full green `pnpm check` for the final commit does not exist.** It has to be run again when
+  the connection is stable.
 
 ### Result lines (copied from the runs)
 
@@ -150,6 +183,9 @@ SKIP  Maestro flow apps/mobile/.maestro/m07-today.yaml (child home = Today, pare
 - **A learning item is done when a session finished today covers its skill** (at least one
   answer; a review item: a REVIEW session of the subject). There is no link column between a
   session and an item, so a session started from the Learn screen completes the item too.
+- **Workload** is the card minutes of the learning items done today over the day's budget, the
+  same minutes the time bar shows (one finished 25-minute card of 75 lowers the other learning
+  items by 5 points). It was the clock time of the sessions in the first version.
 - **Budget.** Parent setting or 3 sessions (G1-3 45', G4-6 75', G7-9 105', G10-12 135'), never
   above the free time of 06:00-21:30 minus timetable and timed calendar events. Required and
   pinned items always fit; the others fit in priority order. Items beyond the budget stay in the
@@ -184,20 +220,20 @@ SKIP  Maestro flow apps/mobile/.maestro/m07-today.yaml (child home = Today, pare
 - `m06-practice` and `m07-today-planner` are local branches: not pushed, no PR.
 
 ## Known issues / follow-ups
-- The workload penalty counts the real minutes of finished sessions (a 1-minute test session lowers
-  the other items by 0.2), while `doneMinutes` counts the planned 25 minutes of the card. Both are
-  defensible; they should be shown to the owner before parents read the numbers.
-- A plan kept by `maxAgeMinutes` only: deleting a calendar event or a timetable entry leaves no
-  changed row, so Today can show its exam prep for up to 15 minutes.
+- A session on a whole topic covers all its skills, so it can mark several learning cards done
+  (25 minutes each) although the child sat one session.
+- Since M07 every task and session event regenerates a plan in the worker (about 3 s per event on
+  the remote database). The 30 s waits for the worker in `learning.test.ts`, `rewards.test.ts`,
+  `acceptance/m04.ts` and `m06.ts` are now 120 s.
 - On a project whose deployed worker is older than M07, that worker can take a
   `planner.day_start_requested` event before the local one; the acceptance step sends the request
   again in that case (it needed 1 request in the run above).
 - Skipped items come back the next day with no memory of the skip.
-- The worker handlers of M07 have no unit test of their own; the integration test and the
-  acceptance cover day start and the session event through the served worker.
 - English plan, Health Connect activity and reading logs are task-based here (M16/M18).
-- Still open from M06: `pnpm acceptance m05` fails one step on this Mac (`pnpm -s`); the one-off of
-  three failing consent tests in `privacy.test.ts` did not show in this run (158 of 158).
+- The connection from this Mac to the cloud databases stalls for about 18 s now and then (see
+  Evidence). The API answers 500 for the request that hits it; there is no retry. Worth knowing
+  before real phones use a cloud project from Vietnam, and worth measuring from a second network.
+- Still open from M06: `pnpm acceptance m05` fails one step on this Mac (`pnpm -s`).
 
 ## What the next module can rely on
 - `GET /v1/students/{id}/today` for the parent dashboard (M08): items with `kind`, `status`,

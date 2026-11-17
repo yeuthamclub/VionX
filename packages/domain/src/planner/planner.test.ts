@@ -62,7 +62,7 @@ const input = (over: Partial<PlannerInput> = {}): PlannerInput => ({
   tasks: [],
   exams: [],
   skills: [],
-  finished: { skillIds: [], reviewSubjects: [], minutes: 0 },
+  finished: { skillIds: [], reviewSubjects: [] },
   freeMinutes: 300,
   parentDailyMinutes: null,
   sessionXp: 75,
@@ -329,7 +329,6 @@ const arbInput = fc
     ),
     freeMinutes: fc.integer({ min: 0, max: 930 }),
     parentDailyMinutes: fc.option(fc.integer({ min: 10, max: 480 }), { nil: null }),
-    finishedMinutes: fc.integer({ min: 0, max: 200 }),
     finishedPicks: fc.array(fc.nat(), { maxLength: 3 }),
   })
   .map((r): PlannerInput => {
@@ -361,7 +360,6 @@ const arbInput = fc
       finished: {
         skillIds: [...new Set(r.finishedPicks.flatMap(pick))],
         reviewSubjects: [],
-        minutes: r.finishedMinutes,
       },
     });
   });
@@ -410,14 +408,24 @@ describe('planToday', () => {
         fc.integer({ min: 0, max: 3 }),
         fc.array(arbTask, { maxLength: 6 }),
         fc.integer({ min: 0, max: 100 }),
-        fc.integer({ min: 0, max: 400 }),
+        fc.integer({ min: 0, max: 4 }),
         (daysUntil, tasks, masteryScore, done) => {
+          // `done` other skills of the exam were practised today (25 minutes each).
+          const others = Array.from({ length: done }, (_, i) => `s${i + 2}`);
           const plan = planToday(
             input({
               tasks: tasks.map((t, i) => task(`t${i}`, { ...t, required: false })),
-              skills: [skill('s1', { masteryScore })],
-              exams: [{ eventId: 'e', title: 'Thi', daysUntil, subject: 'math', skillIds: ['s1'] }],
-              finished: { skillIds: [], reviewSubjects: [], minutes: done },
+              skills: [skill('s1', { masteryScore }), ...others.map((id) => skill(id))],
+              exams: [
+                {
+                  eventId: 'e',
+                  title: 'Thi',
+                  daysUntil,
+                  subject: 'math',
+                  skillIds: ['s1', ...others],
+                },
+              ],
+              finished: { skillIds: others, reviewSubjects: [] },
             }),
             C,
           );
@@ -544,14 +552,18 @@ describe('planToday', () => {
     const after = planToday(
       input({
         skills: [skill('s1', { state: 'PROFICIENT', masteryScore: 65 }), skill('s2')],
-        finished: { skillIds: ['s1'], reviewSubjects: [], minutes: 20 },
+        finished: { skillIds: ['s1'], reviewSubjects: [] },
         existing: first.items,
       }),
       C,
     );
     expect(byKey(after.items, 'NEXT_SKILL:s1')?.status).toBe('DONE');
     expect(byKey(after.items, 'NEXT_SKILL:s2')?.status).toBe('PLANNED');
-    expect(byKey(after.items, 'NEXT_SKILL:s2')!.reasons.at(-1)!.code).toBe('WORKLOAD_TODAY');
+    // Workload uses the card minutes that are done (25 of a 75-minute budget), as the time bar.
+    expect(byKey(after.items, 'NEXT_SKILL:s2')!.reasons.at(-1)).toEqual({
+      code: 'WORKLOAD_TODAY',
+      points: -5,
+    });
   });
 
   it('a finished review completes the review item of its subject', () => {
@@ -561,7 +573,7 @@ describe('planToday', () => {
     const after = planToday(
       input({
         skills: [skill('s1', { dueAt: NOW + 86_400_000, state: 'PROFICIENT', masteryScore: 72 })],
-        finished: { skillIds: ['s1'], reviewSubjects: ['math'], minutes: 10 },
+        finished: { skillIds: ['s1'], reviewSubjects: ['math'] },
         existing: first.items,
       }),
       C,

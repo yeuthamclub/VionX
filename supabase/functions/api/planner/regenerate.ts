@@ -194,18 +194,8 @@ export async function regenerateToday(
       ),
       learning.curriculumTree(tx, student.grade),
       learning.states(tx, scope, studentId),
-      tx<
-        {
-          skill_ids: string[];
-          mode: string;
-          subject: string;
-          max_minutes: number;
-          started_at: Date;
-          finished_at: Date;
-        }[]
-      >`
-        select skill_ids, mode, subject, max_minutes, started_at, finished_at
-        from app.learning_sessions
+      tx<{ skill_ids: string[]; mode: string; subject: string }[]>`
+        select skill_ids, mode, subject from app.learning_sessions
         where student_id = ${studentId} and household_id = ${householdId}
           and status = 'FINISHED' and answered_count > 0
           and finished_at >= ${dayStart} and finished_at < ${dayEnd}`,
@@ -293,17 +283,6 @@ export async function regenerateToday(
         reviewSubjects: [
           ...new Set(sessions.filter((s) => s.mode === 'REVIEW').map((s) => s.subject)),
         ],
-        minutes: sessions.reduce(
-          (sum, s) =>
-            sum +
-            Math.min(
-              s.max_minutes,
-              Math.ceil(
-                (new Date(s.finished_at).getTime() - new Date(s.started_at).getTime()) / 60_000,
-              ),
-            ),
-          0,
-        ),
       },
       freeMinutes,
       parentDailyMinutes: settings[0]?.daily_minutes ?? null,

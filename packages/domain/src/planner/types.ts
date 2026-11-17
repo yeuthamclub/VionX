@@ -190,7 +190,7 @@ export interface PlannerInput {
   exams: readonly PlannerExam[];
   skills: readonly PlannerSkill[];
   /** Learning already done today (finished sessions with at least one answer). */
-  finished: { skillIds: readonly string[]; reviewSubjects: readonly string[]; minutes: number };
+  finished: { skillIds: readonly string[]; reviewSubjects: readonly string[] };
   /** Minutes of the day window not taken by school or calendar events. */
   freeMinutes: number;
   /** Parent setting, or null for the default of the grade. */
