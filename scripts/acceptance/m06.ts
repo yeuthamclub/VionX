@@ -601,8 +601,11 @@ export const scenario: Scenario = {
           assert(s.next.group!.total >= 3, `group total ${s.next.group!.total}`);
         }
         assert(
-          new Set(linked.map((s) => s.next.group!.position)).size === linked.length,
-          'positions repeat',
+          same(
+            linked.map((s) => s.next.group!.position),
+            linked.map((_, i) => i + 1),
+          ),
+          `positions ${linked.map((s) => s.next.group!.position).join(',')}`,
         );
         return `"${group.title}" (${group.body_md.length} characters): ${linked.length} linked items served consecutively, each with the passage (positions ${linked.map((s) => s.next.group!.position).join(', ')} of ${linked[0]!.next.group!.total})`;
       },

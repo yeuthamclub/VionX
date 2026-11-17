@@ -564,7 +564,19 @@ export function registerLearningRoutes(app: OpenAPIHono<AppEnv>, deps: ApiDeps):
           );
           if (!picked) break;
           const row = rows.find((r) => r.id === picked.itemId)!;
-          const item = await repo.fullItem(tx, picked.itemId);
+          let item = await repo.fullItem(tx, picked.itemId);
+          // A passage group is read from its first question, whichever of its items was picked.
+          const head = item?.group_id
+            ? await repo.nextInGroup(tx, picked.itemId, [...served])
+            : null;
+          if (head && head.id !== picked.itemId) {
+            item = await repo.fullItem(tx, head.id);
+            const rendered = item ? render(item, null) : null;
+            if (item && rendered) {
+              return { current: make(item.id, skillId, null, slotKindOf), rendered };
+            }
+            item = await repo.fullItem(tx, picked.itemId);
+          }
           const usedSeeds = [
             ...row.seeds.map(Number),
             ...s.served.flatMap((x) => (x.itemId === row.id && x.seed != null ? [x.seed] : [])),
