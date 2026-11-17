@@ -135,6 +135,17 @@ export default function StudentDetail() {
               onPress={() => resetPin(s)}
             />
             <Button
+              testID="open-dashboard"
+              label={t('student.dashboard')}
+              color={c.parent}
+              onPress={() =>
+                router.push({
+                  pathname: '/dashboard/[id]',
+                  params: { id: s.id, name: s.displayName },
+                })
+              }
+            />
+            <Button
               testID="open-today"
               label={t('student.today')}
               color={c.parent}
