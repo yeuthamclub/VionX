@@ -12,8 +12,8 @@ Status: TODO | IN_PROGRESS | DONE | BLOCKED.
 | M03 | Calendar, timetable & tasks | M02 | DONE (runnable acceptance green; Maestro flow needs an emulator, see M03_REPORT) |
 | M04 | Reward engine | M03 | DONE (runnable acceptance green; Maestro flow needs an emulator, see M04_REPORT) |
 | M05 | Curriculum & shared content library core (+ import) | M02 | DONE (acceptance green; no mobile screen, so no Maestro flow, see M05_REPORT) |
-| X01 | Toán 6 library: 500 items (build scripts, Claude batch + review) | M05 | IN_PROGRESS (live run done: package `6-math.zip` with 500 approved items, 200 TEMPLATE, imported into the development project on 2026-11-17; the follow-up branches `x01-live-run-fixes` / `x01-retry-rejected` and the X01 report update are not merged) |
-| X02 | Toán 2 library: 500 items (same scripts, read-aloud, SVG) | X01 | IN_PROGRESS (510 approved items exist as a package drafted by Codex and checked by Claude outside the X01 scripts; imported into the development project on 2026-11-17; no branch, PR or X02_REPORT yet) |
+| X01 | Toán 6 library: 500 items (build scripts, Claude batch + review) | M05 | DONE (`6-math.zip`, 500 approved, 200 TEMPLATE, passes `library:validate --acceptance`; imported into the development project; follow-up fixes merged in #10, see X01_REPORT and LIBRARIES_REPORT) |
+| X02 | Toán 2 library: 500 items (same scripts, read-aloud, SVG) | X01 | DONE (510 approved, drafted by Codex and checked by Claude outside the X01 scripts; passes `--acceptance`; imported, see LIBRARIES_REPORT) |
 | M06 | Practice sessions, mastery, T0 hints, template variants, Grade 1-3 mode | M04, M05, X01, X02 | DONE (acceptance green on the Supabase Cloud development project; Maestro flow, read-aloud voice and the Android build with the new native modules need an emulator; started on the owner's order before X01/X02 were DONE, see M06_REPORT) |
 | M07 | Today planner | M06 | DONE (`pnpm check` green on the test project, acceptance green on the development project; Maestro flow and every screen need an emulator, functions not deployed, see M07_REPORT) |
 | M08 | Parent dashboard & gradebook (in app) | M07 | DONE (`pnpm check` green on the test project, acceptance green on the development project; the Maestro suite on two emulators and every screen need emulators, chart drawn with react-native-svg instead of victory-native (owner confirmed), functions not deployed, see M08_REPORT) |
@@ -23,12 +23,14 @@ Status: TODO | IN_PROGRESS | DONE | BLOCKED.
 ## Library rollout after GATE A (runs alongside Phase B, one library at a time)
 | ID | Library | Depends on | Status |
 |---|---|---|---|
-| X03 | Tiếng Việt 2 | GATE A | TODO |
-| X04 | Ngữ văn 6 | X03 | TODO |
-| X05 | Tiếng Anh 6 | X04 | TODO |
-| X06 | Tiếng Anh 2 | X05 | TODO |
-| X07 | Khoa học tự nhiên 6 | X06 | TODO |
-| X08 | Tự nhiên và Xã hội 2 | X07 | TODO |
+| X03 | Tiếng Việt 2 | GATE A | DONE early (500 approved, passes `--acceptance`, imported 2026-11-17; built before GATE A on the owner's order, see LIBRARIES_REPORT) |
+| X04 | Ngữ văn 6 | X03 | DONE early (500 approved, passes `--acceptance`, imported 2026-11-18) |
+| X05 | Tiếng Anh 6 | X04 | IN_PROGRESS (500 approved and imported 2026-11-18; `--acceptance` fails one rule: read-aloud 100%, profile 0%) |
+| X06 | Tiếng Anh 2 | X05 | IN_PROGRESS (500 approved and imported 2026-11-18; `--acceptance` fails one rule: 50 grammar/phonics skills have one TEMPLATE item each, need ≥2) |
+| X07 | Khoa học tự nhiên 6 | X06 | DONE early (500 approved, passes `--acceptance`, imported 2026-11-18) |
+| X08 | Tự nhiên và Xã hội 2 | X07 | DONE early (500 approved, passes `--acceptance`, imported 2026-11-18) |
+
+Also built outside the launch scope: Toán 5 (500 approved, passes `--acceptance`, imported 2026-11-17). The language libraries were reviewed by the product owner; the language reviewer the plan asks for has not reviewed them yet.
 
 All use `TASK_PACKS/X01.md` scripts with the subject profile from `docs/CONTENT_PLAN_vi.md`. Language libraries need a language reviewer.
 
