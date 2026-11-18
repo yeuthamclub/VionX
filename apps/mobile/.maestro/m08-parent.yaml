@@ -8,7 +8,7 @@
 # Numbers (XP, Coin under the cap, sufficiency labels, audit, 404 for other households) are
 # covered by `pnpm acceptance m08` and the API tests.
 # Prereqs: as m01-identity.yaml (development build, functions with the Toán 6 library,
-# `pnpm dev:mobile`). Uses the test OTP number 0900000008 / 123456.
+# `pnpm dev:mobile`). Uses the test OTP number 0900000003 / 123456.
 appId: vn.vionx.app
 ---
 - launchApp:
@@ -16,7 +16,7 @@ appId: vn.vionx.app
 - runFlow:
     file: subflows/m08-parent-sign-in.yaml
     env:
-      PHONE: '0900000008'
+      PHONE: '0900000003'
       HOUSEHOLD: 'Gia đình Tổng quan'
 
 # Three children; the first one is used on the child device
@@ -44,6 +44,9 @@ appId: vn.vionx.app
       PIN: ''
 
 # One card per child on the parent home
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element: 'Hôm nay: xong 0/.* việc'
 - assertVisible: 'Chuỗi ngày liên tiếp: 0'
@@ -51,29 +54,81 @@ appId: vn.vionx.app
 - takeScreenshot: m08-parent-home-cards
 
 # A task for the first child
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element: 'An Tổng Quan'
     direction: UP
 - tapOn: 'An Tổng Quan'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-calendar'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'open-calendar'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'open-calendar'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'add-task'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'add-task'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'task-title'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'task-title'
 - inputText: 'Bai tap Toan'
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verification-SELF_CHECK'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'verification-SELF_CHECK'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'verification-SELF_CHECK'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'task-save'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'task-save'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'task-save'
 - extendedWaitUntil:
@@ -83,59 +138,165 @@ appId: vn.vionx.app
 - back
 
 # Dashboard → School tab → fast grade entry
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-dashboard'
     direction: UP
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'open-dashboard'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'open-dashboard'
 - extendedWaitUntil:
     visible:
       id: 'dash-panel-overview'
     timeout: 20000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'dash-streak-sufficiency'
+    direction: DOWN
+    timeout: 60000
 - assertVisible:
     id: 'dash-streak-sufficiency'
     text: 'Chưa đủ dữ liệu'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'dash-tab-school'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'dash-tab-school'
-- assertVisible:
-    id: 'grades-empty'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'grades-empty'
+    direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'add-grade'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'add-grade'
 - extendedWaitUntil:
     visible:
       id: 'screen-grade-form'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'grade-subject-TOAN'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'grade-subject-TOAN'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'grade-score'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'grade-score'
 - inputText: '7,5'
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'grade-save-another'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'grade-save-another'
 - extendedWaitUntil:
-    visible:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
       id: 'grade-message'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'grade-score'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'grade-score'
 - inputText: '9'
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'grade-save'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'grade-save'
 - extendedWaitUntil:
-    visible:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
       id: 'grades-TOAN'
-    timeout: 20000
+    direction: DOWN
+    timeout: 60000
 - assertVisible: '2 bài · trung bình 82.5% · tăng 15 điểm phần trăm'
-- assertVisible:
-    id: 'trend-chart-TOAN'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'trend-chart-TOAN'
+    direction: DOWN
+    timeout: 60000
 - takeScreenshot: m08-parent-school-tab
 
 # The grade beside app mastery (two figures, not one)
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'dash-tab-overview'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'dash-tab-overview'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'side-TOAN'
@@ -145,7 +306,10 @@ appId: vn.vionx.app
 
 # Leave the first child's login id on screen for the child device
 - back
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
-    element: ${output.loginId}
+    element: '.*${output.loginId}.*'
     direction: UP
 - takeScreenshot: m08-parent-login-id

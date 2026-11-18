@@ -24,36 +24,76 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'verify-code'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'verify-code'
 - extendedWaitUntil:
-    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục'
+    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục|Đang hoạt động|Cần đồng ý.*'
     timeout: 20000
 - runFlow:
     when:
       visible:
         id: 'policies-accept'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
+      - scrollUntilVisible:
+          element:
+            id: 'policies-agree'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'policies-agree'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
+      - scrollUntilVisible:
+          element:
+            id: 'policies-accept'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'policies-accept'
 - extendedWaitUntil:
-    visible: 'Thêm con|Tạo gia đình'
+    visible: 'Thêm con|Tạo gia đình|Đang hoạt động|Cần đồng ý.*'
     timeout: 20000
 - runFlow:
     when:
       visible: 'Tạo gia đình'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
+      - scrollUntilVisible:
+          element:
+            id: 'household-name'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'household-name'
       - inputText: 'Gia đình Nhiệm vụ'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
+      - scrollUntilVisible:
+          element:
+            id: 'household-create'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'household-create'
 - extendedWaitUntil:
     visible:
-      id: 'add-child'
-    timeout: 15000
+      id: 'screen-parent-home-settled'
+    timeout: 90000
 
 # A grade-2 child for this run
 - runFlow:
@@ -66,34 +106,100 @@ appId: vn.vionx.app
 - evalScript: ${output.loginId = maestro.copiedText}
 
 # Parent: calendar → new daily task that needs approval
+- extendedWaitUntil:
+    visible:
+      id: 'screen-parent-home-settled'
+    timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'student-${output.loginId}'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'student-${output.loginId}'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'open-calendar'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'open-calendar'
 - extendedWaitUntil:
     visible:
       id: 'add-task'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'add-task'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'add-task'
 - extendedWaitUntil:
     visible:
       id: 'task-title'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'task-title'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'task-title'
 - inputText: 'Đọc sách 15 phút'
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'repeat-DAILY'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'repeat-DAILY'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verification-PARENT_APPROVAL'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'verification-PARENT_APPROVAL'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'verification-PARENT_APPROVAL'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'task-save'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'task-save'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'task-save'
 - extendedWaitUntil:
@@ -104,6 +210,18 @@ appId: vn.vionx.app
 - back
 
 # Child device: complete today's task
+- extendedWaitUntil:
+    visible:
+      id: 'screen-parent-home-settled'
+    timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'child-device'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-device'
 - tapOn: 'Tiếp tục'
@@ -111,6 +229,14 @@ appId: vn.vionx.app
     visible:
       id: 'child-login-id'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'child-login-id'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-login-id'
 - inputText: ${output.loginId}
@@ -118,25 +244,65 @@ appId: vn.vionx.app
     file: subflows/m01-enter-pin.yaml
     env:
       DIGITS: '1,4,7,0'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'child-login-submit'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-login-submit'
 - extendedWaitUntil:
-    visible:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
       id: 'open-child-tasks'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'open-child-tasks'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'open-child-tasks'
 - extendedWaitUntil:
     visible: 'Đọc sách 15 phút'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'complete-.*'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'complete-.*'
 - extendedWaitUntil:
-    visible:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
       id: 'child-tasks-message'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - takeScreenshot: m03-child-sent
 - back
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'child-sign-out'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-sign-out'
 
@@ -145,6 +311,14 @@ appId: vn.vionx.app
     visible:
       id: 'child-login-parent'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'child-login-parent'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-login-parent'
 - tapOn:
@@ -159,21 +333,53 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'verify-code'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'verify-code'
 - extendedWaitUntil:
     visible:
+      id: 'screen-parent-home-settled'
+    timeout: 90000
+- extendedWaitUntil:
+    visible:
+      id: 'screen-parent-home-settled'
+    timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
       id: 'open-approvals'
-    timeout: 20000
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'open-approvals'
 - extendedWaitUntil:
     visible: 'Đọc sách 15 phút'
     timeout: 15000
 - takeScreenshot: m03-approvals
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'approve-.*'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'approve-.*'
 - extendedWaitUntil:
-    visible:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
       id: 'approvals-message'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000

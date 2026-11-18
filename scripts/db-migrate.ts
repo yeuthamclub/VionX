@@ -18,7 +18,8 @@ try {
     select version from supabase_migrations.schema_migrations`;
   const done = new Set(rows.map((r) => r.version));
   for (const file of readdirSync(dir)
-    .filter((f) => f.endsWith('.sql'))
+    // Not dotfiles: macOS writes AppleDouble `._*.sql` copies on ExFAT drives.
+    .filter((f) => f.endsWith('.sql') && !f.startsWith('.'))
     .sort()) {
     const [version = '', ...name] = file.replace(/\.sql$/, '').split('_');
     if (done.has(version)) continue;

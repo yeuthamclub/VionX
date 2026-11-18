@@ -18,6 +18,9 @@ export default function RewardRules() {
   const { state, reload, setState } = useLoad(() =>
     unwrap(parentApi.GET('/api/v1/household/reward-rules')),
   );
+  // A save changes the version, which remounts the editor (key below); the "saved" note has to
+  // live here to survive that.
+  const [savedVersion, setSavedVersion] = useState<number | null>(null);
   return (
     <Screen title={t('rules.title')} subtitle={t('rules.intro')} testID="screen-reward-rules">
       <StateView state={state} reload={reload}>
@@ -25,7 +28,11 @@ export default function RewardRules() {
           <RulesEditor
             key={`${data.version}`}
             data={data}
-            onSaved={(next) => setState({ kind: 'ready', data: next })}
+            justSaved={savedVersion === data.version}
+            onSaved={(next) => {
+              setSavedVersion(next.version);
+              setState({ kind: 'ready', data: next });
+            }}
           />
         )}
       </StateView>
@@ -35,6 +42,7 @@ export default function RewardRules() {
 
 function RulesEditor(props: {
   data: RewardRulesResponse;
+  justSaved: boolean;
   onSaved: (data: RewardRulesResponse) => void;
 }) {
   const theme = useTheme();
@@ -43,7 +51,9 @@ function RulesEditor(props: {
   const [form, setForm] = useState<RulesForm>(() => rulesToForm(props.data.rules));
   const [errors, setErrors] = useState<Partial<Record<keyof RulesForm, string>>>({});
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<{ text: string; tone: 'error' | 'info' } | null>(null);
+  const [message, setMessage] = useState<{ text: string; tone: 'error' | 'info' } | null>(
+    props.justSaved ? { text: t('rules.saved'), tone: 'info' } : null,
+  );
 
   const field = (key: keyof RulesForm, label: string, cap: number | null) => (
     <TextField

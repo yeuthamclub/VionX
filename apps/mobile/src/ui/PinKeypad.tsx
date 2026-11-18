@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
+import { Keyboard, Pressable, Text, View } from 'react-native';
 import { t } from '../i18n/index.ts';
 import { PIN_PAD_ROWS, pressPinKey, type PinPadKey } from '../lib/pin-pad.ts';
 import { useTheme } from '../theme.ts';
@@ -43,7 +43,11 @@ export function PinKeypad(props: {
               accessibilityRole="button"
               accessibilityLabel={key}
               disabled={props.disabled}
-              onPress={() => props.onChange(pressPinKey(props.value, key))}
+              onPress={() => {
+                // On a phone the system keyboard of the field above covers the button below the pad.
+                Keyboard.dismiss();
+                props.onChange(pressPinKey(props.value, key));
+              }}
               style={({ pressed }) => ({
                 width: theme.touchTarget.child * 1.4,
                 height: theme.touchTarget.child * 1.2,

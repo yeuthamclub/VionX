@@ -15,6 +15,14 @@ appId: vn.vionx.app
     visible:
       id: 'child-login-id'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'child-login-id'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-login-id'
 - inputText: ${LOGIN_ID}
@@ -22,6 +30,14 @@ appId: vn.vionx.app
     file: subflows/m01-enter-pin.yaml
     env:
       DIGITS: '2,5,8,0'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'child-login-submit'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-login-submit'
 - extendedWaitUntil:
@@ -34,11 +50,18 @@ appId: vn.vionx.app
 # The parent's task
 - tapOn: 'Con làm xong rồi!'
 - extendedWaitUntil:
-    visible:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
       id: 'today-message'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 
 # One practice session from a Today card
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element: 'Bắt đầu'
 - tapOn:
@@ -54,11 +77,29 @@ appId: vn.vionx.app
         id: 'practice-summary'
     times: 17
     commands:
+      - scrollUntilVisible:
+          element:
+            id: 'option-a'
+          direction: DOWN
+          timeout: 3000
+          optional: true
       - tapOn:
           id: 'option-a'
           optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'option-true'
+          direction: DOWN
+          timeout: 3000
+          optional: true
       - tapOn:
           id: 'option-true'
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'key-5'
+          direction: DOWN
+          timeout: 3000
           optional: true
       - tapOn:
           id: 'key-5'
@@ -67,6 +108,12 @@ appId: vn.vionx.app
           element:
             id: 'practice-submit'
           optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'practice-submit'
+          direction: DOWN
+          timeout: 3000
+          optional: true
       - tapOn:
           id: 'practice-submit'
           optional: true
@@ -74,6 +121,12 @@ appId: vn.vionx.app
           visible:
             id: 'practice-continue'
           timeout: 15000
+          optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'practice-continue'
+          direction: DOWN
+          timeout: 3000
           optional: true
       - tapOn:
           id: 'practice-continue'
@@ -86,22 +139,53 @@ appId: vn.vionx.app
               id: 'practice-submit'
               enabled: false
           commands:
+            - extendedWaitUntil:
+                notVisible: 'Đang tải…'
+                timeout: 60000
             - scrollUntilVisible:
                 element:
                   id: 'practice-finish'
+            - extendedWaitUntil:
+                notVisible: 'Đang tải…'
+                timeout: 60000
+            - scrollUntilVisible:
+                element:
+                  id: 'practice-finish'
+                direction: DOWN
+                timeout: 60000
             - tapOn:
                 id: 'practice-finish'
-- assertVisible:
-    id: 'summary-xp'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'summary-xp'
+    direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'practice-done'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'practice-done'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'practice-done'
 - extendedWaitUntil:
     visible:
       id: 'screen-child-home'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'today-done'

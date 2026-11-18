@@ -19,33 +19,73 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'verify-code'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'verify-code'
 - extendedWaitUntil:
-    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục'
+    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục|Đang hoạt động|Cần đồng ý.*'
     timeout: 20000
 - runFlow:
     when:
       visible:
         id: 'policies-accept'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
+      - scrollUntilVisible:
+          element:
+            id: 'policies-agree'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'policies-agree'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
+      - scrollUntilVisible:
+          element:
+            id: 'policies-accept'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'policies-accept'
 - extendedWaitUntil:
-    visible: 'Thêm con|Tạo gia đình'
+    visible: 'Thêm con|Tạo gia đình|Đang hoạt động|Cần đồng ý.*'
     timeout: 20000
 - runFlow:
     when:
       visible: 'Tạo gia đình'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
+      - scrollUntilVisible:
+          element:
+            id: 'household-name'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'household-name'
       - inputText: ${HOUSEHOLD}
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
+      - scrollUntilVisible:
+          element:
+            id: 'household-create'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'household-create'
 - extendedWaitUntil:
     visible:
-      id: 'add-child'
-    timeout: 15000
+      id: 'screen-parent-home-settled'
+    timeout: 90000

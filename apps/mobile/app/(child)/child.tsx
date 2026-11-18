@@ -83,6 +83,9 @@ export default function ChildLogin() {
           placeholder={t('childLogin.loginIdPlaceholder')}
           autoCapitalize="none"
           autoCorrect={false}
+          // Vietnamese Telex/VNI keyboards compose letters ("ee" → "ê", "x" → tone), which
+          // mangles the login id. This keyboard type switches composition off on Android.
+          keyboardType="visible-password"
           maxLength={12}
           value={loginId}
           onChangeText={setLoginId}
