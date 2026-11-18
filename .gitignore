@@ -20,3 +20,8 @@ apps/mobile/dist/
 
 # Library build work dirs (TASK_PACKS/X01.md): per-run state, batches, review files, packages.
 .library-build/
+
+# Device runs
+.maestro-results/
+.build-android.log
+.gradle-err.log
