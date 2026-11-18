@@ -12,11 +12,11 @@ Status: TODO | IN_PROGRESS | DONE | BLOCKED.
 | M03 | Calendar, timetable & tasks | M02 | DONE (runnable acceptance green; Maestro flow needs an emulator, see M03_REPORT) |
 | M04 | Reward engine | M03 | DONE (runnable acceptance green; Maestro flow needs an emulator, see M04_REPORT) |
 | M05 | Curriculum & shared content library core (+ import) | M02 | DONE (acceptance green; no mobile screen, so no Maestro flow, see M05_REPORT) |
-| X01 | Toán 6 library: 500 items (build scripts, Claude batch + review) | M05 | IN_PROGRESS (scripts done, fake acceptance green; live 500-item run pending, see X01_REPORT runbook) |
-| X02 | Toán 2 library: 500 items (same scripts, read-aloud, SVG) | X01 | TODO |
-| M06 | Practice sessions, mastery, T0 hints, template variants, Grade 1-3 mode | M04, M05, X01, X02 | TODO |
-| M07 | Today planner | M06 | TODO |
-| M08 | Parent dashboard & gradebook (in app) | M07 | TODO |
+| X01 | Toán 6 library: 500 items (build scripts, Claude batch + review) | M05 | IN_PROGRESS (live run done: package `6-math.zip` with 500 approved items, 200 TEMPLATE, imported into the development project on 2026-11-17; the follow-up branches `x01-live-run-fixes` / `x01-retry-rejected` and the X01 report update are not merged) |
+| X02 | Toán 2 library: 500 items (same scripts, read-aloud, SVG) | X01 | IN_PROGRESS (510 approved items exist as a package drafted by Codex and checked by Claude outside the X01 scripts; imported into the development project on 2026-11-17; no branch, PR or X02_REPORT yet) |
+| M06 | Practice sessions, mastery, T0 hints, template variants, Grade 1-3 mode | M04, M05, X01, X02 | DONE (acceptance green on the Supabase Cloud development project; Maestro flow, read-aloud voice and the Android build with the new native modules need an emulator; started on the owner's order before X01/X02 were DONE, see M06_REPORT) |
+| M07 | Today planner | M06 | DONE (`pnpm check` green on the test project, acceptance green on the development project; Maestro flow and every screen need an emulator, functions not deployed, see M07_REPORT) |
+| M08 | Parent dashboard & gradebook (in app) | M07 | DONE (`pnpm check` green on the test project, acceptance green on the development project; the Maestro suite on two emulators and every screen need emulators, chart drawn with react-native-svg instead of victory-native (owner confirmed), functions not deployed, see M08_REPORT) |
 | M09 | Offline, push, ops, Play internal testing | M08 | TODO |
 | **GATE A** | §43 flow on real Android phones with 2-5 families, including at least one Grade 2 and one Grade 6 child | M00–M09, X01, X02 | TODO |
 

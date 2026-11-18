@@ -1,7 +1,7 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
-import type { HouseholdResponse, Student } from '@vionx/contracts/client';
+import type { ChildOverview, HouseholdResponse, Student } from '@vionx/contracts/client';
 import { parentApi } from '../../src/api.ts';
 import { t, type MessageKey } from '../../src/i18n/index.ts';
 import { AppError, isAccountDeletionPending, unwrap } from '../../src/lib/api-error.ts';
@@ -13,6 +13,7 @@ import { signOutParent } from '../../src/state/supabase.ts';
 import { useTheme } from '../../src/theme.ts';
 import { AVATAR_GLYPHS } from '../../src/ui/avatars.ts';
 import { Button } from '../../src/ui/Button.tsx';
+import { ChildOverviewCard } from '../../src/ui/dashboard.tsx';
 import { Screen } from '../../src/ui/Screen.tsx';
 import { StateView } from '../../src/ui/StateView.tsx';
 import { useLoad } from '../../src/ui/useLoad.ts';
@@ -23,6 +24,8 @@ export default function ParentHome() {
   const c = theme.colors;
   const [pending, setPending] = useState(0);
   const [redemptions, setRedemptions] = useState(0);
+  // M08: one card per child (Today, streak, Coin, skills, exams); the list works without it.
+  const [overview, setOverview] = useState<ChildOverview[]>([]);
   const { state, reload } = useLoad(async (): Promise<HouseholdResponse | null> => {
     try {
       const household = await unwrap(parentApi.GET('/api/v1/household'));
@@ -36,6 +39,10 @@ export default function ParentHome() {
       ).then(
         (r) => setRedemptions(r.pendingCount),
         () => setRedemptions(0),
+      );
+      void unwrap(parentApi.GET('/api/v1/household/overview')).then(
+        (o) => setOverview(o.children),
+        () => setOverview([]),
       );
       return household;
     } catch (e) {
@@ -139,9 +146,25 @@ export default function ParentHome() {
       >
         {(data) => (
           <View style={{ gap: theme.spacing.md }}>
-            {data!.students.map((s) => (
-              <StudentRow key={s.id} s={s} />
-            ))}
+            {data!.students.map((s) => {
+              const card = overview.find((o) => o.studentId === s.id);
+              return (
+                <View key={s.id} style={{ gap: theme.spacing.xs }}>
+                  <StudentRow s={s} />
+                  {card && (
+                    <ChildOverviewCard
+                      card={card}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/dashboard/[id]',
+                          params: { id: s.id, name: s.displayName },
+                        })
+                      }
+                    />
+                  )}
+                </View>
+              );
+            })}
           </View>
         )}
       </StateView>

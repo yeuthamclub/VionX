@@ -4828,6 +4828,1871 @@ export interface paths {
     };
     trace?: never;
   };
+  '/api/v1/learning/sessions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start a practice, review or diagnostic session
+     * @description Child actor. Covers the practicable skills of `nodeId` (or `skillIds`) of the child’s grade. Without `mode` the first session on a topic is a DIAGNOSTIC (8-12 adaptive items), later ones PRACTICE (70% current skills, 30% due reviews). REVIEW serves the skills whose review is due (409 when none). Idempotent by `clientUuid`. Without EDUCATION_ANALYTICS consent the session works and only aggregates are stored (`analytics: false`).
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['LearningSessionCreate'];
+        };
+      };
+      responses: {
+        /** @description Started (or replayed) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LearningSessionCreateResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/learning/sessions/{id}/next': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The item to answer now
+     * @description Child actor. Returns the same item until it is answered. Selection: target difficulty ±1, unseen items first, a new seed for TEMPLATE items, the rest of a passage group after its first item. The answer is never included. `done` when the target, the time limit or the item pool is reached.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Learning session id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Next item */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['NextItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/learning/sessions/{id}/answers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Answer the current item
+     * @description Child actor. Judged against the stored item, or the variant of the stored seed for a TEMPLATE item. Updates the skill’s mastery (hints and rushed answers count less) and its review schedule. A wrong option returns its pre-written feedback. Idempotent by `clientUuid`; 409 when `itemId` is not the current item.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Learning session id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['AnswerCreate'];
+        };
+      };
+      responses: {
+        /** @description Judged (or replayed) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AnswerResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/learning/sessions/{id}/hint': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Next hint of the current item (tutor tier T0)
+     * @description Child actor. Returns the next of the 4 pre-generated hints; the last level also returns the worked solution. Each hint lowers the weight of the answer. No AI call.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Learning session id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Hint */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['HintResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/learning/sessions/{id}/finish': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Finish the session
+     * @description Child actor. Places the skills of a diagnostic, returns the summary with the worked solutions of wrong answers and emits `learning.session_finished` (LearningSessionFinished); the worker grants XP once per session (rule LEARNING_CORRECT_ANSWER). Calling it again returns the stored summary.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Learning session id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Finished (or replayed) */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LearningSessionFinishResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/knowledge-map': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Knowledge map: curriculum of the child’s grade with mastery states
+     * @description Parent: any child of the household; child: only their own id (others 404). Nodes come parents first; a skill carries its state (Master Spec §10.2), a higher node the mean of its skills.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description One subject (e.g. math). */
+          subject?: string;
+        };
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Knowledge map */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['KnowledgeMapResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/learning-path': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * What to practise next
+     * @description Due reviews first, then skills in progress (weakest first), then new skills whose prerequisites are at least Proficient. Parent or the child themself; others 404.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description One subject (e.g. math). */
+          subject?: string;
+        };
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Learning path */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LearningPathResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/items/{id}/report': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Report a problem with a question
+     * @description Parent or child. Stores the reason and, for a TEMPLATE item, the seed. Never stores who reported.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Library item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['ItemReportCreate'];
+        };
+      };
+      responses: {
+        /** @description Reported */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ItemReportResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/today': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Today plan of a child
+     * @description Parent: any child of the household (sees removed items too); child: only their own id (others 404). Items are ordered: pinned first, then by priority (§11: urgency + prerequisite gap + forgetting risk + curriculum importance + exam relevance + parent priority − recent workload), each with `reasons[]`. The plan is written at day start and regenerated when a task, an exam, the timetable, a finished session or a skill state changed since, so a finished session shows without a manual recalculation.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Today */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/today/recalculate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Regenerate the Today plan now
+     * @description Parent or the child themself. Pins, removals and skips of the day are kept. `version` grows only when the plan changed.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Today */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/today/settings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Minutes a day for Today
+     * @description Parent only. `dailyMinutes: null` returns to the default of the grade (3 sessions). The budget is never above the free time left by school and calendar events. Audited.
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['TodaySettings'];
+        };
+      };
+      responses: {
+        /** @description Today with the new budget */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/today-items/{id}/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start a Today item
+     * @description Child actor, own items of today. Marks the item STARTED. A learning item is then opened with POST /v1/learning/sessions using `link` (`mode`, `skillIds`, `subject`); it becomes DONE when a session covering it finishes (SYSTEM_VERIFIED).
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Today item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Item and the plan */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/today-items/{id}/skip': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Skip a Today item for today
+     * @description Child actor, own open items of today. Required tasks cannot be skipped (409 REQUIRED_ITEM). The item stays in the plan as SKIPPED and can still be started.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Today item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Item and the plan */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/today-items/{id}/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Complete a task item of Today
+     * @description Child actor. For task items this is POST /v1/tasks/{id}/complete for today (same rules, same idempotency by `clientUuid`, same errors). Learning items are completed by the system when a session finishes: 409 SYSTEM_VERIFIED_ONLY.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Today item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['TodayItemComplete'];
+        };
+      };
+      responses: {
+        /** @description Item and the plan */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/today-items/{id}/pin': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Pin (or unpin) a Today item
+     * @description Parent only. A pinned item is listed first and always fits the budget. `pinned: false` unpins. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Today item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['TodayItemPin'];
+        };
+      };
+      responses: {
+        /** @description Item and the plan */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/today-items/{id}/remove': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Remove an item from Today (or put it back)
+     * @description Parent only. The item is hidden from the child for the rest of the day; the task or skill itself is untouched. `removed: false` puts it back. Audited.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Today item id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['TodayItemRemove'];
+        };
+      };
+      responses: {
+        /** @description Item and the plan */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TodayItemResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Conflict (CONFLICT) */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/school-assessments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * School grades of a child
+     * @description Parent only. Newest first; filter by subject, school year or semester. `attachmentUrl` is a signed link valid for 15 minutes.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description GDPT 2018 subject code (GET /v1/subjects). */
+          subjectCode?: string;
+          schoolYear?: string;
+          semester?: components['schemas']['Semester'];
+          /** @description `nextCursor` of the previous page. */
+          cursor?: string;
+          limit?: number;
+        };
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Grades */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SchoolAssessmentListResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Enter a school grade
+     * @description Parent only. `maxScore` defaults to 10; school year and semester default from `assessedOn` (year from September, HK1 to mid January, HK2 to May). `skillIds` map the assessment to curriculum skills. Audited. The grade is shown beside app mastery and never changes it.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['SchoolAssessmentCreate'];
+        };
+      };
+      responses: {
+        /** @description Saved */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SchoolAssessmentResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/school-assessments/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete a school grade
+     * @description Parent only. Removes the grade, its skill mappings and its attachment. Audited.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description School assessment id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Deleted */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /**
+     * Correct a school grade
+     * @description Parent only. Audited with the names of the changed fields.
+     */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description School assessment id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['SchoolAssessmentUpdate'];
+        };
+      };
+      responses: {
+        /** @description Saved */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SchoolAssessmentResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/api/v1/students/{id}/school-assessments/upload-sign': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Signed upload for a photo or PDF of a school test
+     * @description Parent only. PUT the file to `uploadUrl` (valid 2 hours, max 10 MB, JPEG/PNG/WebP/PDF) into a private bucket, then send `path` as `attachmentPath`. No OCR: the file is only stored.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['AssessmentUploadSign'];
+        };
+      };
+      responses: {
+        /** @description Upload target */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssessmentUploadSignResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description A dependency is unavailable (SERVICE_UNAVAILABLE) */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/students/{id}/dashboard': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Dashboard of one child
+     * @description Parent only. Today, streak, Coin and XP, tasks and practice of the range (`7d`, `30d`, `90d`), skills improving or at risk, mastery per subject, school grades of the current school year with their trend, and upcoming exams. Every interpretive figure carries a `sufficiency` label. School grades and app mastery are listed side by side and never merged.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Days up to today. */
+          range?: '7d' | '30d' | '90d';
+        };
+        header?: never;
+        path: {
+          /** @description Student id. */
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Dashboard */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['DashboardResponse'];
+          };
+        };
+        /** @description Invalid request (VALIDATION_FAILED) */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not found, or not in your household (NOT_FOUND) */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/household/overview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * One card per child for the parent home
+     * @description Parent only. Per child: Today completion, streak, Coin today and this week, number of skills improving and at risk (last 7 days), upcoming exams.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Overview */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['HouseholdOverviewResponse'];
+          };
+        };
+        /** @description Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS) */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED) */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5426,6 +7291,8 @@ export interface components {
       /** Format: date-time */
       endsAt: string;
       allDay: boolean;
+      /** @description Skills an EXAM covers (M07 exam prep); empty = the weakest of the subject. */
+      skillIds: string[];
     };
     /** @enum {string} */
     CalendarEventType:
@@ -5636,6 +7503,7 @@ export interface components {
       /** Format: date-time */
       endsAt: string;
       allDay?: boolean;
+      skillIds?: string[];
     };
     CalendarEventUpdate: {
       type?: components['schemas']['CalendarEventType'];
@@ -5652,6 +7520,7 @@ export interface components {
       /** Format: date-time */
       endsAt?: string;
       allDay?: boolean;
+      skillIds?: string[];
     };
     TaskResponse: {
       task: components['schemas']['Task'];
@@ -6716,6 +8585,798 @@ export interface components {
       sourceKind?: 'ORIGINAL_AI' | 'PUBLIC_DOMAIN' | 'LICENSED';
       sourceNote?: string | null;
       status?: components['schemas']['ContentStatus'];
+    };
+    LearningSessionCreateResponse: {
+      session: components['schemas']['LearningSession'];
+      replayed: boolean;
+    };
+    LearningSession: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      mode: components['schemas']['SessionMode'];
+      /** @enum {string} */
+      status: 'ACTIVE' | 'FINISHED';
+      grade: number;
+      subject: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      nodeId: string | null;
+      skillIds: string[];
+      targetItems: number;
+      /** @description The session ends after this long (~15 for Grade 1-3). */
+      maxMinutes: number;
+      answeredCount: number;
+      correctCount: number;
+      hintsCount: number;
+      /** @description Grade 1-3 mode: large touch targets, minimal typing, encouraging feedback. */
+      youngMode: boolean;
+      /** @description Read stems, options and hints aloud by default (subject profile or Grade ≤ 3). */
+      readAloud: boolean;
+      /** @enum {string} */
+      ttsLang: 'vi' | 'en';
+      /** @description EDUCATION_ANALYTICS was in force at start. When false only aggregates are stored (no per-answer rows). */
+      analytics: boolean;
+      /** Format: date-time */
+      startedAt: string;
+      /** Format: date-time */
+      finishedAt: string | null;
+    };
+    /** @enum {string} */
+    SessionMode: 'PRACTICE' | 'REVIEW' | 'DIAGNOSTIC';
+    LearningSessionCreate: {
+      /**
+       * Format: uuid
+       * @description Client-generated id; a retry returns the session.
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      clientUuid: string;
+      mode?: components['schemas']['SessionMode'] & unknown;
+      /**
+       * Format: uuid
+       * @description Curriculum node (topic, lesson… or one skill): the session covers its skills.
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      nodeId?: string;
+      skillIds?: string[];
+      /** @description REVIEW without a node: the subject to review. */
+      subject?: string;
+      /** @description Number of items; a diagnostic is clamped to 8-12 (default 10). */
+      targetItems?: number;
+    };
+    NextItemResponse: {
+      done: boolean;
+      /** @enum {string|null} */
+      reason: 'TARGET_REACHED' | 'TIME_UP' | 'NO_ITEMS' | 'FINISHED' | null;
+      progress: components['schemas']['LearningSessionProgress'];
+      item: components['schemas']['PracticeItem'] | null;
+      group: components['schemas']['PracticeGroup'] | null;
+    };
+    LearningSessionProgress: {
+      answered: number;
+      correct: number;
+      target: number;
+    };
+    PracticeItem: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** @enum {string} */
+      type:
+        | 'single_choice'
+        | 'multi_choice'
+        | 'numeric'
+        | 'fill_blank'
+        | 'word_bank'
+        | 'picture_choice'
+        | 'ordering'
+        | 'matching'
+        | 'true_false'
+        | 'spelling_choice';
+      /** @enum {string} */
+      kind: 'STATIC' | 'TEMPLATE';
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      skillId: string;
+      /** @enum {string} */
+      slotKind: 'CURRENT' | 'REVIEW';
+      difficulty: number;
+      stemMd: string;
+      media: components['schemas']['PracticeMedia'][];
+      options: components['schemas']['PracticeOption'][];
+      /** @description fill_blank / word_bank: number of gaps to fill. */
+      blanks: number;
+      ttsText: string | null;
+      /** @enum {string} */
+      ttsLang: 'vi' | 'en';
+      /** @description TEMPLATE: seed of the variant shown; the answer is judged against it. */
+      seed: number | null;
+      hintsTotal: number;
+      /** @description Hints already taken. */
+      hints: components['schemas']['PracticeHint'][];
+    };
+    PracticeMedia: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** @enum {string} */
+      kind: 'ICON' | 'SVG' | 'IMAGE';
+      /** @description Sanitised inline SVG (kind SVG). */
+      svg: string | null;
+      storagePath: string | null;
+      alt: string;
+    };
+    PracticeOption: {
+      id: string;
+      text: string | null;
+      media: components['schemas']['PracticeMedia'] | null;
+      ttsText: string | null;
+      /**
+       * @description matching: column.
+       * @enum {string|null}
+       */
+      side: 'left' | 'right' | null;
+    };
+    PracticeHint: {
+      md: string;
+      ttsText: string | null;
+    };
+    /** @description Shared stimulus (passage, poem…) that stays visible while its items are answered. */
+    PracticeGroup: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /** @enum {string} */
+      stimulusKind: 'PASSAGE' | 'POEM' | 'DIALOGUE' | 'PICTURE_SCENE' | 'EXPERIMENT';
+      title: string;
+      bodyMd: string;
+      ttsText: string | null;
+      /** @enum {string} */
+      ttsLang: 'vi' | 'en';
+      media: components['schemas']['PracticeMedia'][];
+      /** @description 1-based place of the item in its group. */
+      position: number;
+      total: number;
+    };
+    AnswerResponse: {
+      isCorrect: boolean;
+      replayed: boolean;
+      correctAnswer: {
+        [key: string]: unknown;
+      };
+      /** @description Pre-written feedback for the wrong option chosen (tutor tier T0). */
+      feedback: {
+        md: string;
+        misconception: string | null;
+      } | null;
+      explanationMd: string;
+      /** @description Only after hint level 4; otherwise at session end. */
+      workedSolutionMd: string | null;
+      /** @description Change of the skill score (0 in a diagnostic: placement happens at finish). */
+      masteryDelta: number;
+      skill: components['schemas']['SkillProgress'];
+      progress: components['schemas']['LearningSessionProgress'];
+    };
+    SkillProgress: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      skillId: string;
+      title: string;
+      state: components['schemas']['MasteryState'];
+      masteryScore: number;
+    };
+    /**
+     * @description Display state of a skill or topic (Master Spec §10.2). XP is not mastery.
+     * @enum {string}
+     */
+    MasteryState:
+      'NOT_LEARNED' | 'INTRODUCED' | 'LEARNING' | 'PROFICIENT' | 'MASTERED' | 'RETAINED';
+    AnswerCreate: {
+      /**
+       * Format: uuid
+       * @description A retry with the same id returns the stored result.
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      clientUuid: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      itemId: string;
+      /**
+       * @description By item type: {optionId} | {optionIds} | {value} | {blanks} | {blankOptionIds} | {order} | {pairs}.
+       * @example {
+       *       "optionId": "b"
+       *     }
+       */
+      response: {
+        [key: string]: unknown;
+      };
+      responseMs?: number;
+    };
+    HintResponse: {
+      level: number;
+      total: number;
+      hint: components['schemas']['PracticeHint'];
+      /** @description Shown with the last hint. */
+      workedSolutionMd: string | null;
+    };
+    LearningSessionFinishResponse: {
+      session: components['schemas']['LearningSession'];
+      summary: components['schemas']['LearningSessionSummary'];
+      replayed: boolean;
+    };
+    LearningSessionSummary: {
+      answered: number;
+      correct: number;
+      accuracy: number;
+      hintsUsed: number;
+      durationSec: number;
+      /** @description XP the session is worth (granted once by the worker). */
+      xp: number;
+      skills: components['schemas']['SkillProgress'][];
+      /** @description Worked solutions of the items answered wrong. */
+      solutions: components['schemas']['SessionSolution'][];
+    };
+    SessionSolution: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      itemId: string;
+      stemMd: string;
+      workedSolutionMd: string;
+      correctAnswer: {
+        [key: string]: unknown;
+      };
+    };
+    KnowledgeMapResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      grade: number;
+      subjects: components['schemas']['KnowledgeSubject'][];
+    };
+    KnowledgeSubject: {
+      subject: string;
+      title: string;
+      readAloud: boolean;
+      /** @enum {string} */
+      ttsLang: 'vi' | 'en';
+      nodes: components['schemas']['KnowledgeNode'][];
+    };
+    KnowledgeNode: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      parentId: string | null;
+      level: string;
+      title: string;
+      sortOrder: number;
+      /** @description Practicable skills under the node (1 for a skill). */
+      skillCount: number;
+      state: components['schemas']['MasteryState'];
+      /** @description Skill score, or the mean of the skills below. */
+      masteryScore: number;
+      confidenceScore: number | null;
+      attemptCount: number;
+      recentAccuracy: number | null;
+      /** Format: date-time */
+      lastAttemptAt: string | null;
+      /** Format: date-time */
+      nextReviewAt: string | null;
+      forgettingRisk: number | null;
+    };
+    LearningPathResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      steps: components['schemas']['LearningPathStep'][];
+    };
+    LearningPathStep: {
+      /** @enum {string} */
+      kind: 'REVIEW_DUE' | 'CONTINUE' | 'START';
+      subject: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      skillId: string;
+      skillTitle: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      topicId: string;
+      topicTitle: string;
+      state: components['schemas']['MasteryState'];
+      masteryScore: number;
+      /** Format: date-time */
+      dueAt: string | null;
+    };
+    ItemReportResponse: {
+      /** @enum {boolean} */
+      reported: true;
+    };
+    ItemReportCreate: {
+      /** @enum {string} */
+      reason:
+        'WRONG_ANSWER' | 'UNCLEAR' | 'TYPO' | 'BAD_MEDIA' | 'BAD_AUDIO' | 'TOO_HARD' | 'OTHER';
+      variantSeed?: number;
+    };
+    TodayResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      /** @example 2026-11-17 */
+      localDate: string;
+      /** @description Grows by one each time the plan changes. */
+      version: number;
+      /** Format: date-time */
+      generatedAt: string;
+      budgetMinutes: number;
+      freeMinutes: number;
+      /** @description Length of one learning item at this grade. */
+      sessionMinutes: number;
+      /** @description Parent setting; null = default. */
+      dailyMinutes: number | null;
+      /** @description Open items that fit in the budget. */
+      plannedMinutes: number;
+      doneMinutes: number;
+      items: components['schemas']['TodayItem'][];
+    };
+    TodayItem: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      kind: components['schemas']['TodayItemKind'];
+      /** @description Task or skill title; empty for DUE_REVIEW. */
+      title: string;
+      /** @description Library subject, e.g. `math`. */
+      subject: string | null;
+      minutes: number;
+      priority: number;
+      reasons: components['schemas']['TodayReason'][];
+      status: components['schemas']['TodayItemStatus'];
+      pinned: boolean;
+      required: boolean;
+      /** @description Fits in the minutes left today. */
+      inBudget: boolean;
+      /** @description Reward hint: XP this item can give at most. */
+      rewardXp: number;
+      link: components['schemas']['TodayLink'];
+      detail: {
+        [key: string]: string | number | boolean;
+      };
+    };
+    /** @enum {string} */
+    TodayItemKind:
+      | 'PARENT_TASK'
+      | 'HOMEWORK'
+      | 'EXAM_PREP'
+      | 'WEAK_PREREQUISITE'
+      | 'DUE_REVIEW'
+      | 'READING_GOAL'
+      | 'ACTIVITY_GOAL'
+      | 'NEXT_SKILL';
+    TodayReason: {
+      /** @enum {string} */
+      code:
+        | 'DUE_TODAY'
+        | 'EXAM_SOON'
+        | 'EXAM_RELEVANT'
+        | 'PREREQUISITE_GAP'
+        | 'REVIEW_DUE'
+        | 'NEXT_IN_CURRICULUM'
+        | 'PARENT_PRIORITY'
+        | 'WORKLOAD_TODAY';
+      /** @description Points this term of the §11 formula adds to the priority (negative: takes). */
+      points: number;
+      params?: {
+        [key: string]: string | number | boolean;
+      };
+    };
+    /** @enum {string} */
+    TodayItemStatus: 'PLANNED' | 'STARTED' | 'PENDING_APPROVAL' | 'DONE' | 'SKIPPED' | 'REMOVED';
+    /** @description Where the item leads: a task to complete, or the body of POST /v1/learning/sessions. */
+    TodayLink:
+      | {
+          /** @enum {string} */
+          type: 'TASK';
+          /**
+           * Format: uuid
+           * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+           */
+          taskId: string;
+          /**
+           * Format: uuid
+           * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+           */
+          occurrenceId: string;
+          /** @enum {string} */
+          verificationMode: 'SELF_CHECK' | 'PHOTO_PROOF' | 'PARENT_APPROVAL' | 'SYSTEM_VERIFIED';
+        }
+      | {
+          /** @enum {string} */
+          type: 'SESSION';
+          /** @enum {string} */
+          mode: 'PRACTICE' | 'REVIEW';
+          skillIds: string[];
+          subject: string;
+        };
+    TodaySettings: {
+      dailyMinutes: number | null;
+    };
+    TodayItemResponse: {
+      item: components['schemas']['TodayItem'];
+      today: components['schemas']['TodayResponse'];
+    };
+    /** @description Same body as POST /v1/tasks/{id}/complete (without `date`: always today). */
+    TodayItemComplete: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      clientUuid: string;
+      proofPath?: string;
+    };
+    TodayItemPin: {
+      pinned?: boolean;
+    };
+    TodayItemRemove: {
+      removed?: boolean;
+    };
+    SchoolAssessmentListResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      assessments: components['schemas']['SchoolAssessment'][];
+      nextCursor: string | null;
+    };
+    SchoolAssessment: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      subjectCode: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      assessedOn: string;
+      type: components['schemas']['AssessmentType'];
+      score: number;
+      maxScore: number;
+      /** @description score ÷ maxScore, 0-100 with one decimal. */
+      percent: number;
+      schoolYear: string;
+      semester: components['schemas']['Semester'];
+      topicTags: string[];
+      note: string | null;
+      teacherComment: string | null;
+      /** @description Curriculum skills the assessment covered. */
+      skillIds: string[];
+      /** @description Signed link to the attached photo or PDF (15 minutes), or null. */
+      attachmentUrl: string | null;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    /** @enum {string} */
+    AssessmentType:
+      | 'ORAL'
+      | 'SHORT_QUIZ'
+      | 'HOMEWORK'
+      | 'PERIODIC_TEST'
+      | 'MIDTERM'
+      | 'FINAL'
+      | 'MOCK'
+      | 'CUSTOM';
+    /** @enum {string} */
+    Semester: 'HK1' | 'HK2' | 'SUMMER';
+    SchoolAssessmentResponse: {
+      assessment: components['schemas']['SchoolAssessment'];
+    };
+    SchoolAssessmentCreate: {
+      /**
+       * @description GDPT 2018 subject code (GET /v1/subjects).
+       * @example TOAN
+       */
+      subjectCode: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      assessedOn: string;
+      type: components['schemas']['AssessmentType'];
+      score: number;
+      /** @description Default 10. */
+      maxScore?: number;
+      /**
+       * @description Default: from assessedOn.
+       * @example 2026-2027
+       */
+      schoolYear?: string;
+      semester?: components['schemas']['Semester'] & unknown;
+      topicTags?: string[];
+      note?: string | null;
+      teacherComment?: string | null;
+      skillIds?: string[];
+      /** @description `path` from POST /v1/students/{id}/school-assessments/upload-sign. */
+      attachmentPath?: string | null;
+    };
+    SchoolAssessmentUpdate: {
+      /**
+       * @description GDPT 2018 subject code (GET /v1/subjects).
+       * @example TOAN
+       */
+      subjectCode?: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      assessedOn?: string;
+      type?: components['schemas']['AssessmentType'];
+      score?: number;
+      /** @description Default 10. */
+      maxScore?: number;
+      /**
+       * @description Default: from assessedOn.
+       * @example 2026-2027
+       */
+      schoolYear?: string;
+      semester?: components['schemas']['Semester'] & unknown;
+      topicTags?: string[];
+      note?: string | null;
+      teacherComment?: string | null;
+      skillIds?: string[];
+      /** @description `path` from POST /v1/students/{id}/school-assessments/upload-sign. */
+      attachmentPath?: string | null;
+    };
+    AssessmentUploadSignResponse: {
+      /** @description Pass as `attachmentPath` when saving the grade. */
+      path: string;
+      uploadUrl: string;
+      /** Format: date-time */
+      expiresAt: string;
+      maxBytes: number;
+    };
+    AssessmentUploadSign: {
+      /** @enum {string} */
+      contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';
+    };
+    DashboardResponse: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      displayName: string;
+      grade: number;
+      /** @enum {string} */
+      range: '7d' | '30d' | '90d';
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      from: string;
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      to: string;
+      today: components['schemas']['DashboardToday'];
+      streak: components['schemas']['DashboardStreak'];
+      rewards: components['schemas']['DashboardRewards'];
+      tasks: {
+        total: number;
+        done: number;
+        requiredTotal: number;
+        requiredDone: number;
+        completion: number | null;
+        sufficiency: components['schemas']['DataSufficiency'];
+      };
+      /** @description One entry per day of the range. */
+      days: components['schemas']['DashboardDay'][];
+      learning: {
+        sessions: number;
+        minutes: number;
+        answers: number;
+        accuracy: number | null;
+        sufficiency: components['schemas']['DataSufficiency'];
+        improving: components['schemas']['SkillInsight'][];
+        atRisk: components['schemas']['SkillInsight'][];
+        subjects: components['schemas']['DashboardSubjectMastery'][];
+      };
+      school: {
+        schoolYear: string;
+        subjects: components['schemas']['DashboardSchoolSubject'][];
+      };
+      /** @description School grades and app mastery of the same subject, side by side. They are different measures and are never combined into one number. */
+      sideBySide: {
+        subjectCode: string;
+        librarySubject: string | null;
+        school: {
+          averagePercent: number | null;
+          count: number;
+          sufficiency: components['schemas']['DataSufficiency'];
+        };
+        mastery: {
+          meanScore: number | null;
+          practised: number;
+          skills: number;
+          sufficiency: components['schemas']['DataSufficiency'];
+        } | null;
+      }[];
+      upcomingExams: components['schemas']['UpcomingExam'][];
+    };
+    DashboardToday: {
+      itemsTotal: number;
+      itemsDone: number;
+      plannedMinutes: number;
+      doneMinutes: number;
+      budgetMinutes: number;
+      /** @description itemsDone ÷ itemsTotal, 0-1. */
+      completion: number | null;
+    };
+    DashboardStreak: {
+      /** @description Consecutive days with a finished task or practice session, ending today. */
+      days: number;
+      /** @description Active days in the last 30 days. */
+      activeDays: number;
+      sufficiency: components['schemas']['DataSufficiency'];
+    };
+    /**
+     * @description How much data an interpretive figure stands on (Master Spec §7): INSUFFICIENT = do not read anything into it, LOW = a first indication, OK = enough.
+     * @enum {string}
+     */
+    DataSufficiency: 'INSUFFICIENT' | 'LOW' | 'OK';
+    DashboardRewards: {
+      coinBalance: number;
+      /** @description Coin today converts to at day end (projected). */
+      coinsToday: number;
+      capCoinsToday: number;
+      /** @description Coin granted for the last 7 settled days. */
+      coinsWeek: number;
+      coinsInRange: number;
+      xpInRange: number;
+      lifetimeXp: number;
+      level: number;
+    };
+    DashboardDay: {
+      /**
+       * @description Household-local day (YYYY-MM-DD).
+       * @example 2026-11-17
+       */
+      day: string;
+      tasksTotal: number;
+      tasksDone: number;
+      sessions: number;
+      learningMinutes: number;
+      xpEarned: number;
+    };
+    SkillInsight: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      skillId: string;
+      subject: string;
+      title: string;
+      /** @enum {string} */
+      state: 'NOT_LEARNED' | 'INTRODUCED' | 'LEARNING' | 'PROFICIENT' | 'MASTERED' | 'RETAINED';
+      masteryScore: number;
+      /** @enum {string} */
+      signal: 'IMPROVING' | 'AT_RISK';
+      /** @enum {string} */
+      reason: 'RECENT_ABOVE_AVERAGE' | 'RECENT_BELOW_AVERAGE' | 'FORGETTING';
+      sufficiency: components['schemas']['DataSufficiency'];
+    };
+    DashboardSubjectMastery: {
+      /** @description Library subject, e.g. `math`. */
+      subject: string;
+      title: string;
+      skills: number;
+      practised: number;
+      proficient: number;
+      meanScore: number | null;
+      attempts: number;
+      sufficiency: components['schemas']['DataSufficiency'];
+    };
+    DashboardSchoolSubject: {
+      subjectCode: string;
+      count: number;
+      averagePercent: number | null;
+      direction: components['schemas']['TrendDirection'];
+      deltaPercent: number;
+      sufficiency: components['schemas']['DataSufficiency'];
+      points: {
+        /**
+         * @description Household-local day (YYYY-MM-DD).
+         * @example 2026-11-17
+         */
+        day: string;
+        percent: number;
+        type: components['schemas']['AssessmentType'];
+      }[];
+    };
+    /** @enum {string} */
+    TrendDirection: 'UP' | 'DOWN' | 'FLAT';
+    UpcomingExam: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      eventId: string;
+      title: string;
+      subjectCode: string | null;
+      /** Format: date-time */
+      startsAt: string;
+      daysUntil: number;
+    };
+    HouseholdOverviewResponse: {
+      children: components['schemas']['ChildOverview'][];
+    };
+    ChildOverview: {
+      /**
+       * Format: uuid
+       * @example 3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c
+       */
+      studentId: string;
+      displayName: string;
+      grade: number;
+      avatar: string;
+      today: components['schemas']['DashboardToday'];
+      streak: components['schemas']['DashboardStreak'];
+      coinBalance: number;
+      coinsToday: number;
+      coinsWeek: number;
+      skillsImproving: number;
+      skillsAtRisk: number;
+      skillsSufficiency: components['schemas']['DataSufficiency'];
+      upcomingExams: components['schemas']['UpcomingExam'][];
     };
   };
   responses: never;

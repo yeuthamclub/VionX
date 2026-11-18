@@ -12,6 +12,9 @@ import {
   ledgerKey,
   LEDGER_SOURCE_TYPES,
   COIN_RULE_IDS,
+  LEARNING_XP_RULE_ID,
+  LEARNING_XP_SOURCE_TYPE,
+  masteryConfigFrom,
   maxRewardableXp,
   planXpGrant,
   REWARD_EVENT_NAMES,
@@ -160,10 +163,86 @@ export async function grantTaskXp(tx: TxSql, event: GrantEvent): Promise<GrantOu
   if (!completion || completion.status !== 'APPROVED')
     return { granted: false, reason: 'NOT_APPROVED' };
 
+  return grantXp(tx, {
+    event,
+    householdId,
+    studentId,
+    timezone: completion.timezone,
+    sourceType: LEDGER_SOURCE_TYPES.taskCompletion,
+    sourceId: completionId,
+    rule: 'TASK_APPROVED' satisfies XpRuleId,
+    xp,
+    day,
+    extra: { taskId: typeof p.taskId === 'string' ? p.taskId : null },
+  });
+}
+
+/**
+ * XP for a finished practice session (LearningSessionFinished, M06): `xp` of the event, at most
+ * `maxSessionGrantsPerDay` sessions a day (app.mastery_config). One ledger row per session, so a
+ * replayed event grants nothing. The reward day is the household-local day of the finish.
+ */
+export async function grantSessionXp(tx: TxSql, event: GrantEvent): Promise<GrantOutcome> {
+  const p = event.payload;
+  const studentId = String(p.studentId ?? '');
+  const sessionId = String(p.sessionId ?? '');
+  const xp = Number(p.xp ?? 0);
+  if (
+    !event.householdId ||
+    !UUID_RE.test(studentId) ||
+    !UUID_RE.test(sessionId) ||
+    !Number.isInteger(xp) ||
+    xp <= 0
+  ) {
+    return { granted: false, reason: 'INVALID_PAYLOAD' };
+  }
+  const [session] = await tx<{ timezone: string; config: unknown }[]>`
+    select h.timezone,
+           (select config from app.mastery_config order by version desc limit 1) as config
+    from app.learning_sessions s
+    join app.households h on h.id = s.household_id
+    where s.id = ${sessionId} and s.household_id = ${event.householdId}
+      and s.student_id = ${studentId} and s.status = 'FINISHED'`;
+  if (!session) return { granted: false, reason: 'NOT_APPROVED' };
+  const config = masteryConfigFrom(session.config);
+  return grantXp(tx, {
+    event,
+    householdId: event.householdId,
+    studentId,
+    timezone: session.timezone,
+    sourceType: LEARNING_XP_SOURCE_TYPE,
+    sourceId: sessionId,
+    rule: LEARNING_XP_RULE_ID,
+    // The session's own counters decide, not the event payload.
+    xp: Math.min(xp, config.xp.maxPerSession),
+    day: householdToday(new Date(event.occurredAt), session.timezone),
+    maxGrantsPerDay: config.xp.maxSessionGrantsPerDay,
+    extra: { sessionId },
+  });
+}
+
+interface XpGrant {
+  event: GrantEvent;
+  householdId: string;
+  studentId: string;
+  timezone: string;
+  sourceType: string;
+  sourceId: string;
+  rule: string;
+  xp: number;
+  /** Household-local reward day. */
+  day: string;
+  /** Micro cap of the rule; default: the household's reward rules. */
+  maxGrantsPerDay?: number;
+  /** Extra fields of the `xp.granted` payload. */
+  extra: Record<string, unknown>;
+}
+
+/** Plans and inserts one XP grant under the child's reward lock; unique per source and rule. */
+async function grantXp(tx: TxSql, g: XpGrant): Promise<GrantOutcome> {
+  const { event, householdId, studentId, sourceType, sourceId, rule, day } = g;
   await lockStudentRewards(tx, studentId);
-  const rule: XpRuleId = 'TASK_APPROVED';
-  const sourceType = LEDGER_SOURCE_TYPES.taskCompletion;
-  const key = ledgerKey(sourceType, completionId, rule);
+  const key = ledgerKey(sourceType, sourceId, rule);
   const [existing] = await tx<{ id: string }[]>`
     select id from app.xp_ledger where idempotency_key = ${key}`;
   if (existing) return { granted: false, reason: 'DUPLICATE' };
@@ -177,14 +256,14 @@ export async function grantTaskXp(tx: TxSql, event: GrantEvent): Promise<GrantOu
     from app.xp_ledger
     where household_id = ${householdId} and student_id = ${studentId} and reward_day = ${day}::date`;
   const occurredAt = new Date(event.occurredAt);
-  const grantDay = householdToday(occurredAt, completion.timezone);
+  const grantDay = householdToday(occurredAt, g.timezone);
   const plan = planXpGrant({
-    xp,
+    xp: g.xp,
     rewardDay: day,
     grantDay,
     rewardableSoFar: counts!.rewardable,
     grantsSoFar: counts!.grants,
-    maxGrantsPerDay: rules.micro[rule].maxGrantsPerDay,
+    maxGrantsPerDay: g.maxGrantsPerDay ?? rules.micro[rule as XpRuleId].maxGrantsPerDay,
     maxRewardableXp: maxRewardableXp(day, rules, caps),
     lateGrantDays: caps.lateGrantDays,
   });
@@ -193,7 +272,7 @@ export async function grantTaskXp(tx: TxSql, event: GrantEvent): Promise<GrantOu
       rewardable_xp_delta, source_type, source_id, rule_id, rule_version, capped_reason, event_id,
       idempotency_key)
     values (${householdId}, ${studentId}, ${day}::date, ${plan.lifetimeXp}, ${plan.rewardableXp},
-      ${sourceType}, ${completionId}, ${rule}, ${version}, ${plan.cappedReason}, ${event.id}, ${key})
+      ${sourceType}, ${sourceId}, ${rule}, ${version}, ${plan.cappedReason}, ${event.id}, ${key})
     on conflict do nothing
     returning id`;
   if (!entry) return { granted: false, reason: 'DUPLICATE' };
@@ -210,9 +289,9 @@ export async function grantTaskXp(tx: TxSql, event: GrantEvent): Promise<GrantOu
           rewardableXp: plan.rewardableXp,
           cappedReason: plan.cappedReason,
           sourceType,
-          sourceId: completionId,
+          sourceId,
           ruleId: rule,
-          taskId: typeof p.taskId === 'string' ? p.taskId : null,
+          ...g.extra,
           causationId: event.id,
         } as never)}, ${entry.id})`;
   }

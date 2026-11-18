@@ -1729,6 +1729,15 @@
           },
           "allDay": {
             "type": "boolean"
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "description": "Skills an EXAM covers (M07 exam prep); empty = the weakest of the subject."
           }
         },
         "required": [
@@ -1741,7 +1750,8 @@
           "subjectCode",
           "startsAt",
           "endsAt",
-          "allDay"
+          "allDay",
+          "skillIds"
         ]
       },
       "CalendarEventType": {
@@ -2238,6 +2248,15 @@
           },
           "allDay": {
             "type": "boolean"
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "maxItems": 50
           }
         },
         "required": [
@@ -2290,6 +2309,15 @@
           },
           "allDay": {
             "type": "boolean"
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "maxItems": 50
           }
         }
       },
@@ -5966,6 +5994,2486 @@
         },
         "required": [
           "version"
+        ]
+      },
+      "LearningSessionCreateResponse": {
+        "type": "object",
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/LearningSession"
+          },
+          "replayed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "session",
+          "replayed"
+        ]
+      },
+      "LearningSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/SessionMode"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "FINISHED"
+            ]
+          },
+          "grade": {
+            "type": "integer"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "nodeId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            }
+          },
+          "targetItems": {
+            "type": "integer"
+          },
+          "maxMinutes": {
+            "type": "integer",
+            "description": "The session ends after this long (~15 for Grade 1-3)."
+          },
+          "answeredCount": {
+            "type": "integer"
+          },
+          "correctCount": {
+            "type": "integer"
+          },
+          "hintsCount": {
+            "type": "integer"
+          },
+          "youngMode": {
+            "type": "boolean",
+            "description": "Grade 1-3 mode: large touch targets, minimal typing, encouraging feedback."
+          },
+          "readAloud": {
+            "type": "boolean",
+            "description": "Read stems, options and hints aloud by default (subject profile or Grade ≤ 3)."
+          },
+          "ttsLang": {
+            "type": "string",
+            "enum": [
+              "vi",
+              "en"
+            ]
+          },
+          "analytics": {
+            "type": "boolean",
+            "description": "EDUCATION_ANALYTICS was in force at start. When false only aggregates are stored (no per-answer rows)."
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "studentId",
+          "mode",
+          "status",
+          "grade",
+          "subject",
+          "nodeId",
+          "skillIds",
+          "targetItems",
+          "maxMinutes",
+          "answeredCount",
+          "correctCount",
+          "hintsCount",
+          "youngMode",
+          "readAloud",
+          "ttsLang",
+          "analytics",
+          "startedAt",
+          "finishedAt"
+        ]
+      },
+      "SessionMode": {
+        "type": "string",
+        "enum": [
+          "PRACTICE",
+          "REVIEW",
+          "DIAGNOSTIC"
+        ]
+      },
+      "LearningSessionCreate": {
+        "type": "object",
+        "properties": {
+          "clientUuid": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+            "description": "Client-generated id; a retry returns the session."
+          },
+          "mode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SessionMode"
+              },
+              {
+                "description": "Omitted: DIAGNOSTIC for the first session on a topic, otherwise PRACTICE. REVIEW serves the skills whose review is due."
+              }
+            ]
+          },
+          "nodeId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+            "description": "Curriculum node (topic, lesson… or one skill): the session covers its skills."
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "minItems": 1,
+            "maxItems": 30
+          },
+          "subject": {
+            "type": "string",
+            "pattern": "^[a-z]+$",
+            "description": "REVIEW without a node: the subject to review."
+          },
+          "targetItems": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Number of items; a diagnostic is clamped to 8-12 (default 10)."
+          }
+        },
+        "required": [
+          "clientUuid"
+        ]
+      },
+      "NextItemResponse": {
+        "type": "object",
+        "properties": {
+          "done": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "TARGET_REACHED",
+              "TIME_UP",
+              "NO_ITEMS",
+              "FINISHED",
+              null
+            ]
+          },
+          "progress": {
+            "$ref": "#/components/schemas/LearningSessionProgress"
+          },
+          "item": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PracticeItem"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "group": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PracticeGroup"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "done",
+          "reason",
+          "progress",
+          "item",
+          "group"
+        ]
+      },
+      "LearningSessionProgress": {
+        "type": "object",
+        "properties": {
+          "answered": {
+            "type": "integer"
+          },
+          "correct": {
+            "type": "integer"
+          },
+          "target": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "answered",
+          "correct",
+          "target"
+        ]
+      },
+      "PracticeItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "single_choice",
+              "multi_choice",
+              "numeric",
+              "fill_blank",
+              "word_bank",
+              "picture_choice",
+              "ordering",
+              "matching",
+              "true_false",
+              "spelling_choice"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "STATIC",
+              "TEMPLATE"
+            ]
+          },
+          "skillId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "slotKind": {
+            "type": "string",
+            "enum": [
+              "CURRENT",
+              "REVIEW"
+            ]
+          },
+          "difficulty": {
+            "type": "integer"
+          },
+          "stemMd": {
+            "type": "string"
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PracticeMedia"
+            }
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PracticeOption"
+            }
+          },
+          "blanks": {
+            "type": "integer",
+            "description": "fill_blank / word_bank: number of gaps to fill."
+          },
+          "ttsText": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ttsLang": {
+            "type": "string",
+            "enum": [
+              "vi",
+              "en"
+            ]
+          },
+          "seed": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "TEMPLATE: seed of the variant shown; the answer is judged against it."
+          },
+          "hintsTotal": {
+            "type": "integer"
+          },
+          "hints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PracticeHint"
+            },
+            "description": "Hints already taken."
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "kind",
+          "skillId",
+          "slotKind",
+          "difficulty",
+          "stemMd",
+          "media",
+          "options",
+          "blanks",
+          "ttsText",
+          "ttsLang",
+          "seed",
+          "hintsTotal",
+          "hints"
+        ]
+      },
+      "PracticeMedia": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ICON",
+              "SVG",
+              "IMAGE"
+            ]
+          },
+          "svg": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Sanitised inline SVG (kind SVG)."
+          },
+          "storagePath": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "alt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "svg",
+          "storagePath",
+          "alt"
+        ]
+      },
+      "PracticeOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "media": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PracticeMedia"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ttsText": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "side": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "left",
+              "right",
+              null
+            ],
+            "description": "matching: column."
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "media",
+          "ttsText",
+          "side"
+        ]
+      },
+      "PracticeHint": {
+        "type": "object",
+        "properties": {
+          "md": {
+            "type": "string"
+          },
+          "ttsText": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "md",
+          "ttsText"
+        ]
+      },
+      "PracticeGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "stimulusKind": {
+            "type": "string",
+            "enum": [
+              "PASSAGE",
+              "POEM",
+              "DIALOGUE",
+              "PICTURE_SCENE",
+              "EXPERIMENT"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "bodyMd": {
+            "type": "string"
+          },
+          "ttsText": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ttsLang": {
+            "type": "string",
+            "enum": [
+              "vi",
+              "en"
+            ]
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PracticeMedia"
+            }
+          },
+          "position": {
+            "type": "integer",
+            "description": "1-based place of the item in its group."
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "stimulusKind",
+          "title",
+          "bodyMd",
+          "ttsText",
+          "ttsLang",
+          "media",
+          "position",
+          "total"
+        ],
+        "description": "Shared stimulus (passage, poem…) that stays visible while its items are answered."
+      },
+      "AnswerResponse": {
+        "type": "object",
+        "properties": {
+          "isCorrect": {
+            "type": "boolean"
+          },
+          "replayed": {
+            "type": "boolean"
+          },
+          "correctAnswer": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "feedback": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "md": {
+                "type": "string"
+              },
+              "misconception": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "md",
+              "misconception"
+            ],
+            "description": "Pre-written feedback for the wrong option chosen (tutor tier T0)."
+          },
+          "explanationMd": {
+            "type": "string"
+          },
+          "workedSolutionMd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Only after hint level 4; otherwise at session end."
+          },
+          "masteryDelta": {
+            "type": "number",
+            "description": "Change of the skill score (0 in a diagnostic: placement happens at finish)."
+          },
+          "skill": {
+            "$ref": "#/components/schemas/SkillProgress"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/LearningSessionProgress"
+          }
+        },
+        "required": [
+          "isCorrect",
+          "replayed",
+          "correctAnswer",
+          "feedback",
+          "explanationMd",
+          "workedSolutionMd",
+          "masteryDelta",
+          "skill",
+          "progress"
+        ]
+      },
+      "SkillProgress": {
+        "type": "object",
+        "properties": {
+          "skillId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "title": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/MasteryState"
+          },
+          "masteryScore": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "skillId",
+          "title",
+          "state",
+          "masteryScore"
+        ]
+      },
+      "MasteryState": {
+        "type": "string",
+        "enum": [
+          "NOT_LEARNED",
+          "INTRODUCED",
+          "LEARNING",
+          "PROFICIENT",
+          "MASTERED",
+          "RETAINED"
+        ],
+        "description": "Display state of a skill or topic (Master Spec §10.2). XP is not mastery."
+      },
+      "AnswerCreate": {
+        "type": "object",
+        "properties": {
+          "clientUuid": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+            "description": "A retry with the same id returns the stored result."
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "response": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "By item type: {optionId} | {optionIds} | {value} | {blanks} | {blankOptionIds} | {order} | {pairs}.",
+            "example": {
+              "optionId": "b"
+            }
+          },
+          "responseMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3600000
+          }
+        },
+        "required": [
+          "clientUuid",
+          "itemId",
+          "response"
+        ]
+      },
+      "HintResponse": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "hint": {
+            "$ref": "#/components/schemas/PracticeHint"
+          },
+          "workedSolutionMd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Shown with the last hint."
+          }
+        },
+        "required": [
+          "level",
+          "total",
+          "hint",
+          "workedSolutionMd"
+        ]
+      },
+      "LearningSessionFinishResponse": {
+        "type": "object",
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/LearningSession"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/LearningSessionSummary"
+          },
+          "replayed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "session",
+          "summary",
+          "replayed"
+        ]
+      },
+      "LearningSessionSummary": {
+        "type": "object",
+        "properties": {
+          "answered": {
+            "type": "integer"
+          },
+          "correct": {
+            "type": "integer"
+          },
+          "accuracy": {
+            "type": "number"
+          },
+          "hintsUsed": {
+            "type": "integer"
+          },
+          "durationSec": {
+            "type": "integer"
+          },
+          "xp": {
+            "type": "integer",
+            "description": "XP the session is worth (granted once by the worker)."
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillProgress"
+            }
+          },
+          "solutions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionSolution"
+            },
+            "description": "Worked solutions of the items answered wrong."
+          }
+        },
+        "required": [
+          "answered",
+          "correct",
+          "accuracy",
+          "hintsUsed",
+          "durationSec",
+          "xp",
+          "skills",
+          "solutions"
+        ]
+      },
+      "SessionSolution": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "stemMd": {
+            "type": "string"
+          },
+          "workedSolutionMd": {
+            "type": "string"
+          },
+          "correctAnswer": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "itemId",
+          "stemMd",
+          "workedSolutionMd",
+          "correctAnswer"
+        ]
+      },
+      "KnowledgeMapResponse": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "grade": {
+            "type": "integer"
+          },
+          "subjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeSubject"
+            }
+          }
+        },
+        "required": [
+          "studentId",
+          "grade",
+          "subjects"
+        ]
+      },
+      "KnowledgeSubject": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "readAloud": {
+            "type": "boolean"
+          },
+          "ttsLang": {
+            "type": "string",
+            "enum": [
+              "vi",
+              "en"
+            ]
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeNode"
+            }
+          }
+        },
+        "required": [
+          "subject",
+          "title",
+          "readAloud",
+          "ttsLang",
+          "nodes"
+        ]
+      },
+      "KnowledgeNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "parentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "level": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "integer"
+          },
+          "skillCount": {
+            "type": "integer",
+            "description": "Practicable skills under the node (1 for a skill)."
+          },
+          "state": {
+            "$ref": "#/components/schemas/MasteryState"
+          },
+          "masteryScore": {
+            "type": "number",
+            "description": "Skill score, or the mean of the skills below."
+          },
+          "confidenceScore": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "attemptCount": {
+            "type": "integer"
+          },
+          "recentAccuracy": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "lastAttemptAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "nextReviewAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "forgettingRisk": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "parentId",
+          "level",
+          "title",
+          "sortOrder",
+          "skillCount",
+          "state",
+          "masteryScore",
+          "confidenceScore",
+          "attemptCount",
+          "recentAccuracy",
+          "lastAttemptAt",
+          "nextReviewAt",
+          "forgettingRisk"
+        ]
+      },
+      "LearningPathResponse": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LearningPathStep"
+            }
+          }
+        },
+        "required": [
+          "studentId",
+          "steps"
+        ]
+      },
+      "LearningPathStep": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "REVIEW_DUE",
+              "CONTINUE",
+              "START"
+            ]
+          },
+          "subject": {
+            "type": "string"
+          },
+          "skillId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "skillTitle": {
+            "type": "string"
+          },
+          "topicId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "topicTitle": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/MasteryState"
+          },
+          "masteryScore": {
+            "type": "number"
+          },
+          "dueAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "kind",
+          "subject",
+          "skillId",
+          "skillTitle",
+          "topicId",
+          "topicTitle",
+          "state",
+          "masteryScore",
+          "dueAt"
+        ]
+      },
+      "ItemReportResponse": {
+        "type": "object",
+        "properties": {
+          "reported": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "reported"
+        ]
+      },
+      "ItemReportCreate": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "WRONG_ANSWER",
+              "UNCLEAR",
+              "TYPO",
+              "BAD_MEDIA",
+              "BAD_AUDIO",
+              "TOO_HARD",
+              "OTHER"
+            ]
+          },
+          "variantSeed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "TodayResponse": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "localDate": {
+            "type": "string",
+            "example": "2026-11-17"
+          },
+          "version": {
+            "type": "integer",
+            "description": "Grows by one each time the plan changes."
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "budgetMinutes": {
+            "type": "integer"
+          },
+          "freeMinutes": {
+            "type": "integer"
+          },
+          "sessionMinutes": {
+            "type": "integer",
+            "description": "Length of one learning item at this grade."
+          },
+          "dailyMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Parent setting; null = default."
+          },
+          "plannedMinutes": {
+            "type": "integer",
+            "description": "Open items that fit in the budget."
+          },
+          "doneMinutes": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TodayItem"
+            }
+          }
+        },
+        "required": [
+          "studentId",
+          "localDate",
+          "version",
+          "generatedAt",
+          "budgetMinutes",
+          "freeMinutes",
+          "sessionMinutes",
+          "dailyMinutes",
+          "plannedMinutes",
+          "doneMinutes",
+          "items"
+        ]
+      },
+      "TodayItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TodayItemKind"
+          },
+          "title": {
+            "type": "string",
+            "description": "Task or skill title; empty for DUE_REVIEW."
+          },
+          "subject": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Library subject, e.g. `math`."
+          },
+          "minutes": {
+            "type": "integer"
+          },
+          "priority": {
+            "type": "number"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TodayReason"
+            },
+            "minItems": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/TodayItemStatus"
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "inBudget": {
+            "type": "boolean",
+            "description": "Fits in the minutes left today."
+          },
+          "rewardXp": {
+            "type": "integer",
+            "description": "Reward hint: XP this item can give at most."
+          },
+          "link": {
+            "$ref": "#/components/schemas/TodayLink"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "subject",
+          "minutes",
+          "priority",
+          "reasons",
+          "status",
+          "pinned",
+          "required",
+          "inBudget",
+          "rewardXp",
+          "link",
+          "detail"
+        ]
+      },
+      "TodayItemKind": {
+        "type": "string",
+        "enum": [
+          "PARENT_TASK",
+          "HOMEWORK",
+          "EXAM_PREP",
+          "WEAK_PREREQUISITE",
+          "DUE_REVIEW",
+          "READING_GOAL",
+          "ACTIVITY_GOAL",
+          "NEXT_SKILL"
+        ]
+      },
+      "TodayReason": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "DUE_TODAY",
+              "EXAM_SOON",
+              "EXAM_RELEVANT",
+              "PREREQUISITE_GAP",
+              "REVIEW_DUE",
+              "NEXT_IN_CURRICULUM",
+              "PARENT_PRIORITY",
+              "WORKLOAD_TODAY"
+            ]
+          },
+          "points": {
+            "type": "number",
+            "description": "Points this term of the §11 formula adds to the priority (negative: takes)."
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "code",
+          "points"
+        ]
+      },
+      "TodayItemStatus": {
+        "type": "string",
+        "enum": [
+          "PLANNED",
+          "STARTED",
+          "PENDING_APPROVAL",
+          "DONE",
+          "SKIPPED",
+          "REMOVED"
+        ]
+      },
+      "TodayLink": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "TASK"
+                ]
+              },
+              "taskId": {
+                "type": "string",
+                "format": "uuid",
+                "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+              },
+              "occurrenceId": {
+                "type": "string",
+                "format": "uuid",
+                "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+              },
+              "verificationMode": {
+                "type": "string",
+                "enum": [
+                  "SELF_CHECK",
+                  "PHOTO_PROOF",
+                  "PARENT_APPROVAL",
+                  "SYSTEM_VERIFIED"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "taskId",
+              "occurrenceId",
+              "verificationMode"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "SESSION"
+                ]
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "PRACTICE",
+                  "REVIEW"
+                ]
+              },
+              "skillIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+                }
+              },
+              "subject": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "mode",
+              "skillIds",
+              "subject"
+            ]
+          }
+        ],
+        "description": "Where the item leads: a task to complete, or the body of POST /v1/learning/sessions."
+      },
+      "TodaySettings": {
+        "type": "object",
+        "properties": {
+          "dailyMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 10,
+            "maximum": 480
+          }
+        },
+        "required": [
+          "dailyMinutes"
+        ]
+      },
+      "TodayItemResponse": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/TodayItem"
+          },
+          "today": {
+            "$ref": "#/components/schemas/TodayResponse"
+          }
+        },
+        "required": [
+          "item",
+          "today"
+        ]
+      },
+      "TodayItemComplete": {
+        "type": "object",
+        "properties": {
+          "clientUuid": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "proofPath": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "clientUuid"
+        ],
+        "description": "Same body as POST /v1/tasks/{id}/complete (without `date`: always today)."
+      },
+      "TodayItemPin": {
+        "type": "object",
+        "properties": {
+          "pinned": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TodayItemRemove": {
+        "type": "object",
+        "properties": {
+          "removed": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SchoolAssessmentListResponse": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "assessments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SchoolAssessment"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "studentId",
+          "assessments",
+          "nextCursor"
+        ]
+      },
+      "SchoolAssessment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "subjectCode": {
+            "type": "string"
+          },
+          "assessedOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "type": {
+            "$ref": "#/components/schemas/AssessmentType"
+          },
+          "score": {
+            "type": "number"
+          },
+          "maxScore": {
+            "type": "number"
+          },
+          "percent": {
+            "type": "number",
+            "description": "score ÷ maxScore, 0-100 with one decimal."
+          },
+          "schoolYear": {
+            "type": "string"
+          },
+          "semester": {
+            "$ref": "#/components/schemas/Semester"
+          },
+          "topicTags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "teacherComment": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "description": "Curriculum skills the assessment covered."
+          },
+          "attachmentUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Signed link to the attached photo or PDF (15 minutes), or null."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "studentId",
+          "subjectCode",
+          "assessedOn",
+          "type",
+          "score",
+          "maxScore",
+          "percent",
+          "schoolYear",
+          "semester",
+          "topicTags",
+          "note",
+          "teacherComment",
+          "skillIds",
+          "attachmentUrl",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AssessmentType": {
+        "type": "string",
+        "enum": [
+          "ORAL",
+          "SHORT_QUIZ",
+          "HOMEWORK",
+          "PERIODIC_TEST",
+          "MIDTERM",
+          "FINAL",
+          "MOCK",
+          "CUSTOM"
+        ]
+      },
+      "Semester": {
+        "type": "string",
+        "enum": [
+          "HK1",
+          "HK2",
+          "SUMMER"
+        ]
+      },
+      "SchoolAssessmentResponse": {
+        "type": "object",
+        "properties": {
+          "assessment": {
+            "$ref": "#/components/schemas/SchoolAssessment"
+          }
+        },
+        "required": [
+          "assessment"
+        ]
+      },
+      "SchoolAssessmentCreate": {
+        "type": "object",
+        "properties": {
+          "subjectCode": {
+            "type": "string",
+            "example": "TOAN",
+            "description": "GDPT 2018 subject code (GET /v1/subjects)."
+          },
+          "assessedOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "type": {
+            "$ref": "#/components/schemas/AssessmentType"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "maxScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Default 10."
+          },
+          "schoolYear": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{4}$",
+            "example": "2026-2027",
+            "description": "Default: from assessedOn."
+          },
+          "semester": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Semester"
+              },
+              {
+                "description": "Default: from assessedOn."
+              }
+            ]
+          },
+          "topicTags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "maxItems": 10
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "teacherComment": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "maxItems": 20
+          },
+          "attachmentPath": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300,
+            "description": "`path` from POST /v1/students/{id}/school-assessments/upload-sign."
+          }
+        },
+        "required": [
+          "subjectCode",
+          "assessedOn",
+          "type",
+          "score"
+        ]
+      },
+      "SchoolAssessmentUpdate": {
+        "type": "object",
+        "properties": {
+          "subjectCode": {
+            "type": "string",
+            "example": "TOAN",
+            "description": "GDPT 2018 subject code (GET /v1/subjects)."
+          },
+          "assessedOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "type": {
+            "$ref": "#/components/schemas/AssessmentType"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "maxScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Default 10."
+          },
+          "schoolYear": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{4}$",
+            "example": "2026-2027",
+            "description": "Default: from assessedOn."
+          },
+          "semester": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Semester"
+              },
+              {
+                "description": "Default: from assessedOn."
+              }
+            ]
+          },
+          "topicTags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "maxItems": 10
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "teacherComment": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "skillIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+            },
+            "maxItems": 20
+          },
+          "attachmentPath": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300,
+            "description": "`path` from POST /v1/students/{id}/school-assessments/upload-sign."
+          }
+        }
+      },
+      "AssessmentUploadSignResponse": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Pass as `attachmentPath` when saving the grade."
+          },
+          "uploadUrl": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "maxBytes": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "uploadUrl",
+          "expiresAt",
+          "maxBytes"
+        ]
+      },
+      "AssessmentUploadSign": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+              "application/pdf"
+            ]
+          }
+        },
+        "required": [
+          "contentType"
+        ]
+      },
+      "DashboardResponse": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "integer"
+          },
+          "range": {
+            "type": "string",
+            "enum": [
+              "7d",
+              "30d",
+              "90d"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "today": {
+            "$ref": "#/components/schemas/DashboardToday"
+          },
+          "streak": {
+            "$ref": "#/components/schemas/DashboardStreak"
+          },
+          "rewards": {
+            "$ref": "#/components/schemas/DashboardRewards"
+          },
+          "tasks": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer"
+              },
+              "done": {
+                "type": "integer"
+              },
+              "requiredTotal": {
+                "type": "integer"
+              },
+              "requiredDone": {
+                "type": "integer"
+              },
+              "completion": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "sufficiency": {
+                "$ref": "#/components/schemas/DataSufficiency"
+              }
+            },
+            "required": [
+              "total",
+              "done",
+              "requiredTotal",
+              "requiredDone",
+              "completion",
+              "sufficiency"
+            ]
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardDay"
+            },
+            "description": "One entry per day of the range."
+          },
+          "learning": {
+            "type": "object",
+            "properties": {
+              "sessions": {
+                "type": "integer"
+              },
+              "minutes": {
+                "type": "integer"
+              },
+              "answers": {
+                "type": "integer"
+              },
+              "accuracy": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "sufficiency": {
+                "$ref": "#/components/schemas/DataSufficiency"
+              },
+              "improving": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SkillInsight"
+                }
+              },
+              "atRisk": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SkillInsight"
+                }
+              },
+              "subjects": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DashboardSubjectMastery"
+                }
+              }
+            },
+            "required": [
+              "sessions",
+              "minutes",
+              "answers",
+              "accuracy",
+              "sufficiency",
+              "improving",
+              "atRisk",
+              "subjects"
+            ]
+          },
+          "school": {
+            "type": "object",
+            "properties": {
+              "schoolYear": {
+                "type": "string"
+              },
+              "subjects": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DashboardSchoolSubject"
+                }
+              }
+            },
+            "required": [
+              "schoolYear",
+              "subjects"
+            ]
+          },
+          "sideBySide": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "subjectCode": {
+                  "type": "string"
+                },
+                "librarySubject": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "school": {
+                  "type": "object",
+                  "properties": {
+                    "averagePercent": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "sufficiency": {
+                      "$ref": "#/components/schemas/DataSufficiency"
+                    }
+                  },
+                  "required": [
+                    "averagePercent",
+                    "count",
+                    "sufficiency"
+                  ]
+                },
+                "mastery": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "meanScore": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "practised": {
+                      "type": "integer"
+                    },
+                    "skills": {
+                      "type": "integer"
+                    },
+                    "sufficiency": {
+                      "$ref": "#/components/schemas/DataSufficiency"
+                    }
+                  },
+                  "required": [
+                    "meanScore",
+                    "practised",
+                    "skills",
+                    "sufficiency"
+                  ]
+                }
+              },
+              "required": [
+                "subjectCode",
+                "librarySubject",
+                "school",
+                "mastery"
+              ]
+            },
+            "description": "School grades and app mastery of the same subject, side by side. They are different measures and are never combined into one number."
+          },
+          "upcomingExams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpcomingExam"
+            }
+          }
+        },
+        "required": [
+          "studentId",
+          "displayName",
+          "grade",
+          "range",
+          "from",
+          "to",
+          "today",
+          "streak",
+          "rewards",
+          "tasks",
+          "days",
+          "learning",
+          "school",
+          "sideBySide",
+          "upcomingExams"
+        ]
+      },
+      "DashboardToday": {
+        "type": "object",
+        "properties": {
+          "itemsTotal": {
+            "type": "integer"
+          },
+          "itemsDone": {
+            "type": "integer"
+          },
+          "plannedMinutes": {
+            "type": "integer"
+          },
+          "doneMinutes": {
+            "type": "integer"
+          },
+          "budgetMinutes": {
+            "type": "integer"
+          },
+          "completion": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "itemsDone ÷ itemsTotal, 0-1."
+          }
+        },
+        "required": [
+          "itemsTotal",
+          "itemsDone",
+          "plannedMinutes",
+          "doneMinutes",
+          "budgetMinutes",
+          "completion"
+        ]
+      },
+      "DashboardStreak": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "integer",
+            "description": "Consecutive days with a finished task or practice session, ending today."
+          },
+          "activeDays": {
+            "type": "integer",
+            "description": "Active days in the last 30 days."
+          },
+          "sufficiency": {
+            "$ref": "#/components/schemas/DataSufficiency"
+          }
+        },
+        "required": [
+          "days",
+          "activeDays",
+          "sufficiency"
+        ]
+      },
+      "DataSufficiency": {
+        "type": "string",
+        "enum": [
+          "INSUFFICIENT",
+          "LOW",
+          "OK"
+        ],
+        "description": "How much data an interpretive figure stands on (Master Spec §7): INSUFFICIENT = do not read anything into it, LOW = a first indication, OK = enough."
+      },
+      "DashboardRewards": {
+        "type": "object",
+        "properties": {
+          "coinBalance": {
+            "type": "integer"
+          },
+          "coinsToday": {
+            "type": "integer",
+            "description": "Coin today converts to at day end (projected)."
+          },
+          "capCoinsToday": {
+            "type": "integer"
+          },
+          "coinsWeek": {
+            "type": "integer",
+            "description": "Coin granted for the last 7 settled days."
+          },
+          "coinsInRange": {
+            "type": "integer"
+          },
+          "xpInRange": {
+            "type": "integer"
+          },
+          "lifetimeXp": {
+            "type": "integer"
+          },
+          "level": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "coinBalance",
+          "coinsToday",
+          "capCoinsToday",
+          "coinsWeek",
+          "coinsInRange",
+          "xpInRange",
+          "lifetimeXp",
+          "level"
+        ]
+      },
+      "DashboardDay": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "example": "2026-11-17",
+            "description": "Household-local day (YYYY-MM-DD)."
+          },
+          "tasksTotal": {
+            "type": "integer"
+          },
+          "tasksDone": {
+            "type": "integer"
+          },
+          "sessions": {
+            "type": "integer"
+          },
+          "learningMinutes": {
+            "type": "integer"
+          },
+          "xpEarned": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "tasksTotal",
+          "tasksDone",
+          "sessions",
+          "learningMinutes",
+          "xpEarned"
+        ]
+      },
+      "SkillInsight": {
+        "type": "object",
+        "properties": {
+          "skillId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "NOT_LEARNED",
+              "INTRODUCED",
+              "LEARNING",
+              "PROFICIENT",
+              "MASTERED",
+              "RETAINED"
+            ]
+          },
+          "masteryScore": {
+            "type": "number"
+          },
+          "signal": {
+            "type": "string",
+            "enum": [
+              "IMPROVING",
+              "AT_RISK"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "RECENT_ABOVE_AVERAGE",
+              "RECENT_BELOW_AVERAGE",
+              "FORGETTING"
+            ]
+          },
+          "sufficiency": {
+            "$ref": "#/components/schemas/DataSufficiency"
+          }
+        },
+        "required": [
+          "skillId",
+          "subject",
+          "title",
+          "state",
+          "masteryScore",
+          "signal",
+          "reason",
+          "sufficiency"
+        ]
+      },
+      "DashboardSubjectMastery": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "description": "Library subject, e.g. `math`."
+          },
+          "title": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "integer"
+          },
+          "practised": {
+            "type": "integer"
+          },
+          "proficient": {
+            "type": "integer"
+          },
+          "meanScore": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "attempts": {
+            "type": "integer"
+          },
+          "sufficiency": {
+            "$ref": "#/components/schemas/DataSufficiency"
+          }
+        },
+        "required": [
+          "subject",
+          "title",
+          "skills",
+          "practised",
+          "proficient",
+          "meanScore",
+          "attempts",
+          "sufficiency"
+        ]
+      },
+      "DashboardSchoolSubject": {
+        "type": "object",
+        "properties": {
+          "subjectCode": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "averagePercent": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "direction": {
+            "$ref": "#/components/schemas/TrendDirection"
+          },
+          "deltaPercent": {
+            "type": "number"
+          },
+          "sufficiency": {
+            "$ref": "#/components/schemas/DataSufficiency"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "day": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                  "example": "2026-11-17",
+                  "description": "Household-local day (YYYY-MM-DD)."
+                },
+                "percent": {
+                  "type": "number"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/AssessmentType"
+                }
+              },
+              "required": [
+                "day",
+                "percent",
+                "type"
+              ]
+            }
+          }
+        },
+        "required": [
+          "subjectCode",
+          "count",
+          "averagePercent",
+          "direction",
+          "deltaPercent",
+          "sufficiency",
+          "points"
+        ]
+      },
+      "TrendDirection": {
+        "type": "string",
+        "enum": [
+          "UP",
+          "DOWN",
+          "FLAT"
+        ]
+      },
+      "UpcomingExam": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subjectCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "daysUntil": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "eventId",
+          "title",
+          "subjectCode",
+          "startsAt",
+          "daysUntil"
+        ]
+      },
+      "HouseholdOverviewResponse": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChildOverview"
+            }
+          }
+        },
+        "required": [
+          "children"
+        ]
+      },
+      "ChildOverview": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "integer"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "today": {
+            "$ref": "#/components/schemas/DashboardToday"
+          },
+          "streak": {
+            "$ref": "#/components/schemas/DashboardStreak"
+          },
+          "coinBalance": {
+            "type": "integer"
+          },
+          "coinsToday": {
+            "type": "integer"
+          },
+          "coinsWeek": {
+            "type": "integer"
+          },
+          "skillsImproving": {
+            "type": "integer"
+          },
+          "skillsAtRisk": {
+            "type": "integer"
+          },
+          "skillsSufficiency": {
+            "$ref": "#/components/schemas/DataSufficiency"
+          },
+          "upcomingExams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpcomingExam"
+            }
+          }
+        },
+        "required": [
+          "studentId",
+          "displayName",
+          "grade",
+          "avatar",
+          "today",
+          "streak",
+          "coinBalance",
+          "coinsToday",
+          "coinsWeek",
+          "skillsImproving",
+          "skillsAtRisk",
+          "skillsSufficiency",
+          "upcomingExams"
         ]
       }
     },
@@ -11224,6 +13732,2071 @@
           },
           "409": {
             "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/sessions": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Start a practice, review or diagnostic session",
+        "description": "Child actor. Covers the practicable skills of `nodeId` (or `skillIds`) of the child’s grade. Without `mode` the first session on a topic is a DIAGNOSTIC (8-12 adaptive items), later ones PRACTICE (70% current skills, 30% due reviews). REVIEW serves the skills whose review is due (409 when none). Idempotent by `clientUuid`. Without EDUCATION_ANALYTICS consent the session works and only aggregates are stored (`analytics: false`).",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningSessionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Started (or replayed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningSessionCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/sessions/{id}/next": {
+      "get": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "The item to answer now",
+        "description": "Child actor. Returns the same item until it is answered. Selection: target difficulty ±1, unseen items first, a new seed for TEMPLATE items, the rest of a passage group after its first item. The answer is never included. `done` when the target, the time limit or the item pool is reached.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Learning session id."
+            },
+            "required": true,
+            "description": "Learning session id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Next item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/sessions/{id}/answers": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Answer the current item",
+        "description": "Child actor. Judged against the stored item, or the variant of the stored seed for a TEMPLATE item. Updates the skill’s mastery (hints and rushed answers count less) and its review schedule. A wrong option returns its pre-written feedback. Idempotent by `clientUuid`; 409 when `itemId` is not the current item.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Learning session id."
+            },
+            "required": true,
+            "description": "Learning session id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnswerCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Judged (or replayed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnswerResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/sessions/{id}/hint": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Next hint of the current item (tutor tier T0)",
+        "description": "Child actor. Returns the next of the 4 pre-generated hints; the last level also returns the worked solution. Each hint lowers the weight of the answer. No AI call.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Learning session id."
+            },
+            "required": true,
+            "description": "Learning session id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HintResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/sessions/{id}/finish": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Finish the session",
+        "description": "Child actor. Places the skills of a diagnostic, returns the summary with the worked solutions of wrong answers and emits `learning.session_finished` (LearningSessionFinished); the worker grants XP once per session (rule LEARNING_CORRECT_ANSWER). Calling it again returns the stored summary.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Learning session id."
+            },
+            "required": true,
+            "description": "Learning session id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Finished (or replayed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningSessionFinishResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/knowledge-map": {
+      "get": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Knowledge map: curriculum of the child’s grade with mastery states",
+        "description": "Parent: any child of the household; child: only their own id (others 404). Nodes come parents first; a skill carries its state (Master Spec §10.2), a higher node the mean of its skills.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]+$",
+              "description": "One subject (e.g. math)."
+            },
+            "required": false,
+            "description": "One subject (e.g. math).",
+            "name": "subject",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Knowledge map",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeMapResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/learning-path": {
+      "get": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "What to practise next",
+        "description": "Due reviews first, then skills in progress (weakest first), then new skills whose prerequisites are at least Proficient. Parent or the child themself; others 404.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]+$",
+              "description": "One subject (e.g. math)."
+            },
+            "required": false,
+            "description": "One subject (e.g. math).",
+            "name": "subject",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Learning path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningPathResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/items/{id}/report": {
+      "post": {
+        "tags": [
+          "learning"
+        ],
+        "summary": "Report a problem with a question",
+        "description": "Parent or child. Stores the reason and, for a TEMPLATE item, the seed. Never stores who reported.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Library item id."
+            },
+            "required": true,
+            "description": "Library item id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemReportCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reported",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemReportResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/today": {
+      "get": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Today plan of a child",
+        "description": "Parent: any child of the household (sees removed items too); child: only their own id (others 404). Items are ordered: pinned first, then by priority (§11: urgency + prerequisite gap + forgetting risk + curriculum importance + exam relevance + parent priority − recent workload), each with `reasons[]`. The plan is written at day start and regenerated when a task, an exam, the timetable, a finished session or a skill state changed since, so a finished session shows without a manual recalculation.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Today",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/today/recalculate": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Regenerate the Today plan now",
+        "description": "Parent or the child themself. Pins, removals and skips of the day are kept. `version` grows only when the plan changed.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Today",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/today/settings": {
+      "put": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Minutes a day for Today",
+        "description": "Parent only. `dailyMinutes: null` returns to the default of the grade (3 sessions). The budget is never above the free time left by school and calendar events. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TodaySettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Today with the new budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/today-items/{id}/start": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Start a Today item",
+        "description": "Child actor, own items of today. Marks the item STARTED. A learning item is then opened with POST /v1/learning/sessions using `link` (`mode`, `skillIds`, `subject`); it becomes DONE when a session covering it finishes (SYSTEM_VERIFIED).",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Today item id."
+            },
+            "required": true,
+            "description": "Today item id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item and the plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/today-items/{id}/skip": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Skip a Today item for today",
+        "description": "Child actor, own open items of today. Required tasks cannot be skipped (409 REQUIRED_ITEM). The item stays in the plan as SKIPPED and can still be started.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Today item id."
+            },
+            "required": true,
+            "description": "Today item id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item and the plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/today-items/{id}/complete": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Complete a task item of Today",
+        "description": "Child actor. For task items this is POST /v1/tasks/{id}/complete for today (same rules, same idempotency by `clientUuid`, same errors). Learning items are completed by the system when a session finishes: 409 SYSTEM_VERIFIED_ONLY.",
+        "security": [
+          {
+            "childSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Today item id."
+            },
+            "required": true,
+            "description": "Today item id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TodayItemComplete"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item and the plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/today-items/{id}/pin": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Pin (or unpin) a Today item",
+        "description": "Parent only. A pinned item is listed first and always fits the budget. `pinned: false` unpins. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Today item id."
+            },
+            "required": true,
+            "description": "Today item id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TodayItemPin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item and the plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/today-items/{id}/remove": {
+      "post": {
+        "tags": [
+          "planner"
+        ],
+        "summary": "Remove an item from Today (or put it back)",
+        "description": "Parent only. The item is hidden from the child for the rest of the day; the task or skill itself is untouched. `removed: false` puts it back. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Today item id."
+            },
+            "required": true,
+            "description": "Today item id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TodayItemRemove"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item and the plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (CONFLICT)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/school-assessments": {
+      "get": {
+        "tags": [
+          "gradebook"
+        ],
+        "summary": "School grades of a child",
+        "description": "Parent only. Newest first; filter by subject, school year or semester. `attachmentUrl` is a signed link valid for 15 minutes.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "example": "TOAN",
+              "description": "GDPT 2018 subject code (GET /v1/subjects)."
+            },
+            "required": false,
+            "description": "GDPT 2018 subject code (GET /v1/subjects).",
+            "name": "subjectCode",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{4}$",
+              "example": "2026-2027"
+            },
+            "required": false,
+            "name": "schoolYear",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/Semester"
+            },
+            "required": false,
+            "name": "semester",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 60,
+              "description": "`nextCursor` of the previous page."
+            },
+            "required": false,
+            "description": "`nextCursor` of the previous page.",
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Grades",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolAssessmentListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "gradebook"
+        ],
+        "summary": "Enter a school grade",
+        "description": "Parent only. `maxScore` defaults to 10; school year and semester default from `assessedOn` (year from September, HK1 to mid January, HK2 to May). `skillIds` map the assessment to curriculum skills. Audited. The grade is shown beside app mastery and never changes it.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchoolAssessmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolAssessmentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/school-assessments/{id}": {
+      "patch": {
+        "tags": [
+          "gradebook"
+        ],
+        "summary": "Correct a school grade",
+        "description": "Parent only. Audited with the names of the changed fields.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "School assessment id."
+            },
+            "required": true,
+            "description": "School assessment id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchoolAssessmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolAssessmentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "gradebook"
+        ],
+        "summary": "Delete a school grade",
+        "description": "Parent only. Removes the grade, its skill mappings and its attachment. Audited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "School assessment id."
+            },
+            "required": true,
+            "description": "School assessment id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/school-assessments/upload-sign": {
+      "post": {
+        "tags": [
+          "gradebook"
+        ],
+        "summary": "Signed upload for a photo or PDF of a school test",
+        "description": "Parent only. PUT the file to `uploadUrl` (valid 2 hours, max 10 MB, JPEG/PNG/WebP/PDF) into a private bucket, then send `path` as `attachmentPath`. No OCR: the file is only stored.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentUploadSign"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upload target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentUploadSignResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable (SERVICE_UNAVAILABLE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{id}/dashboard": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Dashboard of one child",
+        "description": "Parent only. Today, streak, Coin and XP, tasks and practice of the range (`7d`, `30d`, `90d`), skills improving or at risk, mastery per subject, school grades of the current school year with their trend, and upcoming exams. Every interpretive figure carries a `sufficiency` label. School grades and app mastery are listed side by side and never merged.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3f9a5b2c-1d4e-4f6a-8b7c-9d0e1f2a3b4c",
+              "description": "Student id."
+            },
+            "required": true,
+            "description": "Student id.",
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "7d",
+                "30d",
+                "90d"
+              ],
+              "default": "7d",
+              "description": "Days up to today."
+            },
+            "required": false,
+            "description": "Days up to today.",
+            "name": "range",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (VALIDATION_FAILED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not in your household (NOT_FOUND)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/household/overview": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "One card per child for the parent home",
+        "description": "Parent only. Per child: Today completion, streak, Coin today and this week, number of skills improving and at risk (last 7 days), upcoming exams.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Overview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HouseholdOverviewResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials (UNAUTHENTICATED, INVALID_CREDENTIALS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (FORBIDDEN, ACCOUNT_DISABLED, CONSENT_REQUIRED)",
             "content": {
               "application/json": {
                 "schema": {

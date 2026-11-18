@@ -14,12 +14,14 @@ import { View } from 'react-native';
 import { parentApi } from '../../src/api.ts';
 import { t, type MessageKey } from '../../src/i18n/index.ts';
 import { describeError, unwrap } from '../../src/lib/api-error.ts';
+import { examSkillIds, examSubjects } from '../../src/lib/today.ts';
 import { useTheme } from '../../src/theme.ts';
 import { Button } from '../../src/ui/Button.tsx';
 import { Chip, ChipRow } from '../../src/ui/Chip.tsx';
 import { Notice } from '../../src/ui/Notice.tsx';
 import { Screen } from '../../src/ui/Screen.tsx';
 import { TextField } from '../../src/ui/TextField.tsx';
+import { useLoad } from '../../src/ui/useLoad.ts';
 
 /** Household-local day + HH:MM → ISO instant. */
 function instant(day: string, time: string, timeZone: string): string {
@@ -42,6 +44,24 @@ export default function EventForm() {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  // M07: what an exam covers (optional). The form works without the knowledge map.
+  const [examSubject, setExamSubject] = useState<string | null>(null);
+  const [topicIds, setTopicIds] = useState<string[]>([]);
+  const { state: mapState } = useLoad(
+    async () =>
+      examSubjects(
+        await unwrap(
+          parentApi.GET('/api/v1/students/{id}/knowledge-map', {
+            params: { path: { id: studentId } },
+          }),
+        ),
+      ),
+    [studentId],
+  );
+  const subjects = mapState.kind === 'ready' ? mapState.data : [];
+  const chosen = type === 'EXAM' ? subjects.find((s) => s.subject === examSubject) : undefined;
+  const toggleTopic = (id: string) =>
+    setTopicIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
 
   const valid =
     title.trim() !== '' &&
@@ -63,6 +83,12 @@ export default function EventForm() {
             note: note.trim() || null,
             startsAt: instant(date, start, tz),
             endsAt: instant(date, end, tz),
+            ...(chosen
+              ? {
+                  ...(chosen.subjectCode ? { subjectCode: chosen.subjectCode } : {}),
+                  skillIds: examSkillIds(chosen, topicIds),
+                }
+              : {}),
           },
         }),
       );
@@ -122,6 +148,40 @@ export default function EventForm() {
         </View>
       </View>
       {!valid && title.trim() !== '' && <Notice message={t('eventForm.timeInvalid')} />}
+      {type === 'EXAM' && subjects.length > 0 && (
+        <>
+          <ChipRow label={t('eventForm.subject')}>
+            {subjects.map((s) => (
+              <Chip
+                key={s.subject}
+                testID={`exam-subject-${s.subject}`}
+                label={s.title}
+                selected={examSubject === s.subject}
+                onPress={() => {
+                  setExamSubject(examSubject === s.subject ? null : s.subject);
+                  setTopicIds([]);
+                }}
+              />
+            ))}
+          </ChipRow>
+          {chosen && (
+            <>
+              <ChipRow label={t('eventForm.examTopics')}>
+                {chosen.topics.map((topic) => (
+                  <Chip
+                    key={topic.id}
+                    testID={`exam-topic-${topic.id}`}
+                    label={topic.title}
+                    selected={topicIds.includes(topic.id)}
+                    onPress={() => toggleTopic(topic.id)}
+                  />
+                ))}
+              </ChipRow>
+              <Notice tone="info" message={t('eventForm.examTopicsHint')} />
+            </>
+          )}
+        </>
+      )}
       <TextField
         testID="event-note"
         label={t('eventForm.note')}

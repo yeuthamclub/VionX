@@ -135,6 +135,28 @@ export default function StudentDetail() {
               onPress={() => resetPin(s)}
             />
             <Button
+              testID="open-dashboard"
+              label={t('student.dashboard')}
+              color={c.parent}
+              onPress={() =>
+                router.push({
+                  pathname: '/dashboard/[id]',
+                  params: { id: s.id, name: s.displayName },
+                })
+              }
+            />
+            <Button
+              testID="open-today"
+              label={t('student.today')}
+              color={c.parent}
+              onPress={() =>
+                router.push({
+                  pathname: '/today/[id]',
+                  params: { id: s.id, name: s.displayName },
+                })
+              }
+            />
+            <Button
               testID="open-calendar"
               label={t('student.calendar')}
               color={c.parent}
@@ -152,6 +174,16 @@ export default function StudentDetail() {
               onPress={() =>
                 router.push({
                   pathname: '/rewards/[id]',
+                  params: { id: s.id, name: s.displayName },
+                })
+              }
+            />
+            <Button
+              testID="open-mastery"
+              label={t('student.mastery')}
+              onPress={() =>
+                router.push({
+                  pathname: '/mastery/[id]',
                   params: { id: s.id, name: s.displayName },
                 })
               }

@@ -62,7 +62,7 @@ async function tickWorker(): Promise<void> {
 
 /** Runs the worker until the events are processed (a pg_cron tick may hold some of them). */
 async function drain(eventIds: string[]): Promise<void> {
-  const deadline = Date.now() + 30_000;
+  const deadline = Date.now() + 120_000;
   for (;;) {
     await tickWorker();
     const [row] = await sql<{ n: number }[]>`

@@ -6,8 +6,11 @@
 // curriculum/, practice/, mastery/, planner/ ...). M00 ships the shared helpers below.
 export * from './calendar/index.ts';
 export * from './consent/index.ts';
+export * from './dashboard/index.ts';
 export * from './identity/index.ts';
 export * from './library/index.ts';
+export * from './mastery/index.ts';
+export * from './planner/index.ts';
 export * from './rewards/index.ts';
 export * from './shared/result.ts';
 export * from './time/local-day.ts';

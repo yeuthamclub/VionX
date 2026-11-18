@@ -209,11 +209,13 @@ export interface EventRow {
   starts_at: Date;
   ends_at: Date;
   all_day: boolean;
+  /** M07: skills an exam covers (library ids). */
+  skill_ids: string[];
 }
 
 const eventColumns = (db: Db) => db`
   id, household_id, student_id, type, title, note, location, subject_code, starts_at, ends_at,
-  all_day`;
+  all_day, skill_ids`;
 
 export async function eventsBetween(
   db: Db,
@@ -244,6 +246,7 @@ export interface EventValues {
   starts_at: Date;
   ends_at: Date;
   all_day: boolean;
+  skill_ids: string[];
 }
 
 export async function insertEvent(
@@ -255,9 +258,10 @@ export async function insertEvent(
 ): Promise<EventRow> {
   const [row] = await db<EventRow[]>`
     insert into app.calendar_events (household_id, student_id, created_by, type, title, note,
-      location, subject_code, starts_at, ends_at, all_day)
+      location, subject_code, starts_at, ends_at, all_day, skill_ids)
     values (${householdId}, ${studentId}, ${createdBy}, ${v.type}, ${v.title}, ${v.note},
-            ${v.location}, ${v.subject_code}, ${v.starts_at}, ${v.ends_at}, ${v.all_day})
+            ${v.location}, ${v.subject_code}, ${v.starts_at}, ${v.ends_at}, ${v.all_day},
+            ${v.skill_ids}::uuid[])
     returning ${eventColumns(db)}`;
   return row!;
 }
@@ -272,7 +276,7 @@ export async function updateEvent(
     update app.calendar_events set
       type = ${v.type}, title = ${v.title}, note = ${v.note}, location = ${v.location},
       subject_code = ${v.subject_code}, starts_at = ${v.starts_at}, ends_at = ${v.ends_at},
-      all_day = ${v.all_day}
+      all_day = ${v.all_day}, skill_ids = ${v.skill_ids}::uuid[]
     where id = ${id} and ${scope.where()}
     returning ${eventColumns(db)}`;
   return rows[0] ?? null;

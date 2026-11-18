@@ -1,0 +1,57 @@
+# M08, Master Spec §43, PARENT device again, after m08-child.yaml: the parent's dashboard shows
+# what the child just did (task, practice, XP, the cap bar's Coin for today).
+#   maestro --device <parent> test apps/mobile/.maestro/m08-parent-after.yaml
+# Coin is granted at day end; here the dashboard shows today's projected Coin. The conversion
+# under the cap is checked by `pnpm acceptance m08`.
+appId: vn.vionx.app
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: 'screen-parent-home'
+    timeout: 60000
+# The first child's card: at least the task and the practice card are done, the streak started
+- scrollUntilVisible:
+    element: 'Chuỗi ngày liên tiếp: 1'
+    timeout: 30000
+- assertVisible: 'Hôm nay: xong [2-9]/.* việc'
+- takeScreenshot: m08-parent-home-after
+- tapOn: 'Chuỗi ngày liên tiếp: 1'
+- extendedWaitUntil:
+    visible:
+      id: 'dash-panel-overview'
+    timeout: 20000
+- assertVisible:
+    id: 'dash-streak'
+    text: '1 ngày'
+
+# Learning: one session, with its sufficiency label
+- tapOn:
+    id: 'dash-tab-learning'
+- assertVisible: 'phiên luyện'
+- assertVisible:
+    id: 'dash-accuracy'
+- assertVisible:
+    id: 'dash-subject-math'
+- takeScreenshot: m08-parent-learning-tab
+
+# Tasks & rewards: the task is counted, XP arrived
+- tapOn:
+    id: 'dash-tab-tasks'
+- assertVisible:
+    id: 'dash-tasks'
+    text: '1/1'
+- assertVisible:
+    id: 'dash-coins'
+- scrollUntilVisible:
+    element: '.*: 1/1 việc · 1 phiên luyện · \+.* XP'
+- takeScreenshot: m08-parent-tasks-tab
+
+# The grade is still beside mastery, which now has a practised skill
+- tapOn:
+    id: 'dash-tab-overview'
+- scrollUntilVisible:
+    element:
+      id: 'side-TOAN'
+- assertVisible: 'mức nắm trong ứng dụng \([1-9].*/.* kỹ năng đã luyện\)'
+- takeScreenshot: m08-parent-side-by-side-after

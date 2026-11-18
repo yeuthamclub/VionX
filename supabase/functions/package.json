@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json && pnpm run deno:check",
-    "deno:check": "deno check --config deno.json api/index.ts worker/index.ts ai-batch/index.ts",
+    "deno:check": "deno check --config deno.json api/index.ts worker/index.ts ai-batch/index.ts serve.ts",
+    "serve": "deno run --allow-net --allow-env --allow-read --config deno.json serve.ts",
     "test": "vitest run",
     "test:api": "vitest run --config vitest.integration.config.ts"
   },

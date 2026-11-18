@@ -12,6 +12,7 @@ export interface ObjectStorage {
 
 export const PRIVACY_EXPORT_BUCKET = 'privacy-exports';
 export const TASK_PROOF_BUCKET = 'task-proofs';
+export const ASSESSMENT_FILE_BUCKET = 'assessment-files';
 
 const encodePath = (path: string) => path.split('/').map(encodeURIComponent).join('/');
 

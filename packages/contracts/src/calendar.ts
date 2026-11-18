@@ -143,6 +143,9 @@ export const CalendarEventSchema = z
     startsAt: DateTime,
     endsAt: DateTime,
     allDay: z.boolean(),
+    skillIds: z.array(Uuid).openapi({
+      description: 'Skills an EXAM covers (M07 exam prep); empty = the weakest of the subject.',
+    }),
   })
   .openapi('CalendarEvent');
 export type CalendarEvent = z.infer<typeof CalendarEventSchema>;
@@ -157,6 +160,7 @@ export const CalendarEventCreateSchema = z
     startsAt: DateTime,
     endsAt: DateTime,
     allDay: z.boolean().optional(),
+    skillIds: z.array(Uuid).max(50).optional(),
   })
   .openapi('CalendarEventCreate');
 

@@ -1,0 +1,151 @@
+# M08, Master Spec §43, PARENT device (emulator 1 of 2). Run the three files in this order:
+#   1. maestro --device <parent> test apps/mobile/.maestro/m08-parent.yaml
+#      (prints the first child's login id in the last screenshot name and keeps it on screen)
+#   2. maestro --device <child>  test -e LOGIN_ID=<vx-…> apps/mobile/.maestro/m08-child.yaml
+#   3. maestro --device <parent> test apps/mobile/.maestro/m08-parent-after.yaml
+# This file: the parent signs up, creates 3 children (each gets a Child ID and PIN), gives the
+# first child a task, enters a school grade with the fast form and sees it beside app mastery.
+# Numbers (XP, Coin under the cap, sufficiency labels, audit, 404 for other households) are
+# covered by `pnpm acceptance m08` and the API tests.
+# Prereqs: as m01-identity.yaml (development build, functions with the Toán 6 library,
+# `pnpm dev:mobile`). Uses the test OTP number 0900000008 / 123456.
+appId: vn.vionx.app
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: subflows/m08-parent-sign-in.yaml
+    env:
+      PHONE: '0900000008'
+      HOUSEHOLD: 'Gia đình Tổng quan'
+
+# Three children; the first one is used on the child device
+- runFlow:
+    file: subflows/m01-add-child.yaml
+    env:
+      NAME: 'An Tổng Quan'
+      YEAR: '2014'
+      GRADE: '6'
+      PIN: '2580'
+- evalScript: ${output.loginId = maestro.copiedText}
+- runFlow:
+    file: subflows/m01-add-child.yaml
+    env:
+      NAME: 'Bình Tổng Quan'
+      YEAR: '2014'
+      GRADE: '6'
+      PIN: ''
+- runFlow:
+    file: subflows/m01-add-child.yaml
+    env:
+      NAME: 'Chi Tổng Quan'
+      YEAR: '2018'
+      GRADE: '2'
+      PIN: ''
+
+# One card per child on the parent home
+- scrollUntilVisible:
+    element: 'Hôm nay: xong 0/.* việc'
+- assertVisible: 'Chuỗi ngày liên tiếp: 0'
+- assertVisible: 'Kỹ năng: chưa đủ dữ liệu để nhận xét'
+- takeScreenshot: m08-parent-home-cards
+
+# A task for the first child
+- scrollUntilVisible:
+    element: 'An Tổng Quan'
+    direction: UP
+- tapOn: 'An Tổng Quan'
+- scrollUntilVisible:
+    element:
+      id: 'open-calendar'
+- tapOn:
+    id: 'open-calendar'
+- tapOn:
+    id: 'add-task'
+- tapOn:
+    id: 'task-title'
+- inputText: 'Bai tap Toan'
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'verification-SELF_CHECK'
+- tapOn:
+    id: 'verification-SELF_CHECK'
+- scrollUntilVisible:
+    element:
+      id: 'task-save'
+- tapOn:
+    id: 'task-save'
+- extendedWaitUntil:
+    visible:
+      id: 'screen-calendar'
+    timeout: 15000
+- back
+
+# Dashboard → School tab → fast grade entry
+- scrollUntilVisible:
+    element:
+      id: 'open-dashboard'
+    direction: UP
+- tapOn:
+    id: 'open-dashboard'
+- extendedWaitUntil:
+    visible:
+      id: 'dash-panel-overview'
+    timeout: 20000
+- assertVisible:
+    id: 'dash-streak-sufficiency'
+    text: 'Chưa đủ dữ liệu'
+- tapOn:
+    id: 'dash-tab-school'
+- assertVisible:
+    id: 'grades-empty'
+- tapOn:
+    id: 'add-grade'
+- extendedWaitUntil:
+    visible:
+      id: 'screen-grade-form'
+    timeout: 15000
+- tapOn:
+    id: 'grade-subject-TOAN'
+- tapOn:
+    id: 'grade-score'
+- inputText: '7,5'
+- hideKeyboard
+- tapOn:
+    id: 'grade-save-another'
+- extendedWaitUntil:
+    visible:
+      id: 'grade-message'
+    timeout: 15000
+- tapOn:
+    id: 'grade-score'
+- inputText: '9'
+- hideKeyboard
+- tapOn:
+    id: 'grade-save'
+- extendedWaitUntil:
+    visible:
+      id: 'grades-TOAN'
+    timeout: 20000
+- assertVisible: '2 bài · trung bình 82.5% · tăng 15 điểm phần trăm'
+- assertVisible:
+    id: 'trend-chart-TOAN'
+- takeScreenshot: m08-parent-school-tab
+
+# The grade beside app mastery (two figures, not one)
+- tapOn:
+    id: 'dash-tab-overview'
+- scrollUntilVisible:
+    element:
+      id: 'side-TOAN'
+- assertVisible: 'điểm trung bình ở trường \(2 bài\)'
+- assertVisible: 'mức nắm trong ứng dụng \(0/.* kỹ năng đã luyện\)'
+- takeScreenshot: m08-parent-side-by-side
+
+# Leave the first child's login id on screen for the child device
+- back
+- scrollUntilVisible:
+    element: ${output.loginId}
+    direction: UP
+- takeScreenshot: m08-parent-login-id

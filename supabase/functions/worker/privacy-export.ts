@@ -68,7 +68,7 @@ export const EXPORT_SECTIONS: ExportSection[] = [
     file: 'calendar_events.json',
     query: (db, h) => db`
       select id, student_id, type, title, note, location, subject_code, starts_at, ends_at, all_day,
-             created_at, updated_at
+             skill_ids, created_at, updated_at
       from app.calendar_events where household_id = ${h} order by starts_at`,
   },
   {
@@ -140,6 +140,80 @@ export const EXPORT_SECTIONS: ExportSection[] = [
       select id, student_id, item_id, title, cost_coins, status, requested_at, decided_at,
              decided_by, decision_note
       from app.reward_redemptions where household_id = ${h} order by requested_at`,
+  },
+  {
+    file: 'learning_sessions.json',
+    query: (db, h) => db`
+      select id, student_id, mode, skill_ids, topic_node_id, grade, subject, status, analytics,
+             target_items, answered_count, correct_count, hints_count, summary, started_at, finished_at
+      from app.learning_sessions where household_id = ${h} order by started_at`,
+  },
+  {
+    file: 'answer_attempts.json',
+    query: (db, h) => db`
+      select id, student_id, session_id, item_id, skill_id, variant_seed, response, is_correct,
+             hints_used, response_ms, difficulty, mastery_delta, answered_at
+      from app.answer_attempts where household_id = ${h} order by answered_at`,
+  },
+  {
+    file: 'skill_states.json',
+    query: (db, h) => db`
+      select s.student_id, s.skill_id, s.mastery_score, s.confidence_score, s.attempt_count,
+             s.correct_count, s.recent_accuracy, s.avg_response_ms, s.current_difficulty,
+             s.last_attempt_at, s.last_mastered_at, s.retained_at, s.next_review_at,
+             r.repetitions, r.interval_days, r.ease
+      from app.student_skill_states s
+      left join app.review_schedule r on r.student_id = s.student_id and r.skill_id = s.skill_id
+      where s.household_id = ${h} order by s.student_id, s.skill_id`,
+  },
+  {
+    file: 'mistake_patterns.json',
+    query: (db, h) => db`
+      select student_id, skill_id, misconception, occurrences, last_item_id, last_seen_at
+      from app.mistake_patterns where household_id = ${h} order by student_id, skill_id`,
+  },
+  {
+    file: 'item_history.json',
+    query: (db, h) => db`
+      select student_id, item_id, seen_count, seeds, last_correct, last_seen_at
+      from app.student_item_history where household_id = ${h} order by student_id, last_seen_at`,
+  },
+  {
+    file: 'school_assessments.json',
+    query: (db, h) => db`
+      select a.id, a.student_id, a.subject_code, a.assessed_on, a.type, a.score, a.max_score,
+             a.school_year, a.semester, a.topic_tags, a.note, a.teacher_comment,
+             a.attachment_path, a.created_at, a.updated_at,
+             coalesce((select array_agg(m.skill_id) from app.school_assessment_skill_mappings m
+                       where m.assessment_id = a.id), '{}') as skill_ids
+      from app.school_assessments a where a.household_id = ${h}
+      order by a.student_id, a.assessed_on`,
+  },
+  {
+    file: 'day_summaries.json',
+    query: (db, h) => db`
+      select student_id, local_day, tasks_total, tasks_done, required_total, required_done,
+             sessions, learning_minutes, answers, correct, xp_earned
+      from app.student_day_summaries where household_id = ${h}
+      order by student_id, local_day`,
+  },
+  {
+    file: 'today_plans.json',
+    query: (db, h) => db`
+      select p.student_id, p.local_date, p.version, p.budget_minutes, p.free_minutes,
+             p.generated_at,
+             (select coalesce(jsonb_agg(jsonb_build_object(
+                 'kind', i.kind, 'title', i.title, 'subject', i.subject, 'minutes', i.minutes,
+                 'priority', i.priority, 'reasons', i.reasons, 'status', i.status,
+                 'pinned', i.pinned, 'required', i.required) order by i.position), '[]'::jsonb)
+              from app.today_plan_items i where i.plan_id = p.id) as items
+      from app.today_plans p where p.household_id = ${h} order by p.student_id, p.local_date`,
+  },
+  {
+    file: 'planner_settings.json',
+    query: (db, h) => db`
+      select student_id, daily_minutes, updated_at
+      from app.planner_settings where household_id = ${h} order by student_id`,
   },
   {
     file: 'policy_acceptances.json',
