@@ -6,7 +6,7 @@
 # whatever control is on screen gets one tap. Right or wrong does not matter here; correctness,
 # mastery, template seeds, reviews and XP are covered by `pnpm acceptance m06` and the API tests.
 # Prereqs: as m01-identity.yaml (development build on an emulator, local Supabase + functions with
-# the Toán 2 library imported, `pnpm dev:mobile`). Uses the LOCAL test OTP number 0900000006 /
+# the Toán 2 library imported, `pnpm dev:mobile`). Uses the LOCAL test OTP number 0900000002 /
 # 123456 (supabase/config.toml). Read-aloud needs a device with a Vietnamese TTS voice; Maestro
 # cannot hear it, so check it by ear on the device.
 # Run: maestro test apps/mobile/.maestro/m06-practice.yaml
@@ -21,7 +21,7 @@ appId: vn.vionx.app
     id: 'role-parent'
 - tapOn:
     id: 'phone-input'
-- inputText: '0900000006'
+- inputText: '0900000002'
 - tapOn:
     id: 'send-code'
 - extendedWaitUntil:

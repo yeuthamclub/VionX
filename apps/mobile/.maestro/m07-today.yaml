@@ -6,7 +6,7 @@
 # Ranking, budget, skips, removals and cross-household denial are covered by
 # `pnpm acceptance m07` and the API tests.
 # Prereqs: as m01-identity.yaml (development build on an emulator, functions with the Toán 6
-# library imported, `pnpm dev:mobile`). Uses the test OTP number 0900000006 / 123456.
+# library imported, `pnpm dev:mobile`). Uses the test OTP number 0900000002 / 123456.
 # Run: maestro test apps/mobile/.maestro/m07-today.yaml
 appId: vn.vionx.app
 ---
@@ -19,7 +19,7 @@ appId: vn.vionx.app
     id: 'role-parent'
 - tapOn:
     id: 'phone-input'
-- inputText: '0900000006'
+- inputText: '0900000002'
 - tapOn:
     id: 'send-code'
 - extendedWaitUntil:

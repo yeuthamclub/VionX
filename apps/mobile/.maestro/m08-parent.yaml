@@ -8,7 +8,7 @@
 # Numbers (XP, Coin under the cap, sufficiency labels, audit, 404 for other households) are
 # covered by `pnpm acceptance m08` and the API tests.
 # Prereqs: as m01-identity.yaml (development build, functions with the Toán 6 library,
-# `pnpm dev:mobile`). Uses the test OTP number 0900000008 / 123456.
+# `pnpm dev:mobile`). Uses the test OTP number 0900000003 / 123456.
 appId: vn.vionx.app
 ---
 - launchApp:
@@ -16,7 +16,7 @@ appId: vn.vionx.app
 - runFlow:
     file: subflows/m08-parent-sign-in.yaml
     env:
-      PHONE: '0900000008'
+      PHONE: '0900000003'
       HOUSEHOLD: 'Gia đình Tổng quan'
 
 # Three children; the first one is used on the child device
