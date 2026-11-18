@@ -68,6 +68,23 @@ Kênh thử nghiệm nội bộ (internal testing) cần tài khoản nhà phát
 
 Lưu ý: tài khoản cá nhân tạo sau 11/2023 phải cho ít nhất 12 người thử kín liên tục 14 ngày, rồi mới được phát hành công khai. Kênh internal testing thì không bị giới hạn này.
 
+## 5b. Firebase và Expo (cho thông báo đẩy và bản phát hành, M09)
+
+1. **Firebase (thông báo đẩy):**
+   - vào https://console.firebase.google.com, bấm **Add project** và chọn đúng project Google Cloud `VionX` đã tạo ở bước 4;
+   - bấm **Add app → Android**, package `vn.vionx.app`, rồi tải file `google-services.json`;
+   - đặt file vào `/Volumes/ViTu/VionX/VionX-repo/apps/mobile/google-services.json`. File này không phải bí mật.
+2. **Expo:** tạo tài khoản miễn phí ở https://expo.dev/signup, rồi chạy lệnh dưới đây và đăng nhập:
+   ```bash
+   cd /Volumes/ViTu/VionX/VionX-repo/apps/mobile && npx eas-cli login
+   ```
+
+**Xong khi:** file `google-services.json` đã nằm đúng chỗ và terminal báo đã đăng nhập Expo.
+
+## 5c. Điện thoại thử (Redmi K40)
+
+Claude cài và thử app qua cáp USB, nhưng không mở được khoá màn hình. Khi Claude báo cần thử, Leo mở khoá máy và để máy cắm cáp. Claude đã bật chế độ "luôn sáng khi cắm sạc" nên máy không tự khoá lại. Muốn Claude tự chạy cả lúc Leo vắng thì tạm đặt khoá màn hình thành **Vuốt** hoặc **Không** trong Cài đặt → Bảo mật.
+
 ## 6. Người duyệt cần mời
 
 - **Pháp lý:** nhờ luật sư đọc các văn bản đã soạn ở M02: điều khoản, chính sách quyền riêng tư, đồng ý của phụ huynh (`docs/legal/`).
