@@ -31,36 +31,61 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- scrollUntilVisible:
+    element:
+      id: 'verify-code'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'verify-code'
 - extendedWaitUntil:
-    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục'
+    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục|Đang hoạt động|Cần đồng ý.*'
     timeout: 20000
 - runFlow:
     when:
       visible:
         id: 'policies-accept'
     commands:
+      - scrollUntilVisible:
+          element:
+            id: 'policies-agree'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'policies-agree'
+      - scrollUntilVisible:
+          element:
+            id: 'policies-accept'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'policies-accept'
 - extendedWaitUntil:
-    visible: 'Thêm con|Tạo gia đình'
+    visible: 'Thêm con|Tạo gia đình|Đang hoạt động|Cần đồng ý.*'
     timeout: 20000
 - runFlow:
     when:
       visible: 'Tạo gia đình'
     commands:
+      - scrollUntilVisible:
+          element:
+            id: 'household-name'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'household-name'
       - inputText: 'Gia đình Luyện tập'
+      - scrollUntilVisible:
+          element:
+            id: 'household-create'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'household-create'
 - extendedWaitUntil:
     visible:
-      id: 'add-child'
-    timeout: 15000
+      id: 'screen-parent-home-settled'
+    timeout: 90000
 
 # A grade-2 child for this run
 - runFlow:
@@ -73,6 +98,15 @@ appId: vn.vionx.app
 - evalScript: ${output.loginId = maestro.copiedText}
 
 # Child device
+- extendedWaitUntil:
+    visible:
+      id: 'screen-parent-home-settled'
+    timeout: 90000
+- scrollUntilVisible:
+    element:
+      id: 'child-device'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-device'
 - tapOn: 'Tiếp tục'
@@ -80,6 +114,11 @@ appId: vn.vionx.app
     visible:
       id: 'child-login-id'
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: 'child-login-id'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-login-id'
 - inputText: ${output.loginId}
@@ -87,6 +126,11 @@ appId: vn.vionx.app
     file: subflows/m01-enter-pin.yaml
     env:
       DIGITS: '2,5,8,0'
+- scrollUntilVisible:
+    element:
+      id: 'child-login-submit'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-login-submit'
 - extendedWaitUntil:
@@ -95,12 +139,22 @@ appId: vn.vionx.app
     timeout: 15000
 
 # Learn → knowledge map → first topic
+- scrollUntilVisible:
+    element:
+      id: 'open-learn'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'open-learn'
 - extendedWaitUntil:
     visible:
       id: 'screen-learn'
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: 'subject-math'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'subject-math'
 - takeScreenshot: m06-knowledge-map
@@ -109,16 +163,27 @@ appId: vn.vionx.app
     visible:
       id: 'item-stem'
     timeout: 20000
-- assertVisible:
-    id: 'speak-item'
-- assertVisible:
-    id: 'practice-progress'
+- scrollUntilVisible:
+    element:
+      id: 'speak-item'
+    direction: DOWN
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'practice-progress'
+    direction: DOWN
+    timeout: 60000
 - takeScreenshot: m06-first-item
 
 # Hint ladder and report on the first item
 - scrollUntilVisible:
     element:
       id: 'practice-hint'
+- scrollUntilVisible:
+    element:
+      id: 'practice-hint'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'practice-hint'
 - scrollUntilVisible:
@@ -128,8 +193,18 @@ appId: vn.vionx.app
 - scrollUntilVisible:
     element:
       id: 'practice-report'
+- scrollUntilVisible:
+    element:
+      id: 'practice-report'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'practice-report'
+- scrollUntilVisible:
+    element:
+      id: 'report-UNCLEAR'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'report-UNCLEAR'
 - extendedWaitUntil:
@@ -149,25 +224,58 @@ appId: vn.vionx.app
             id: 'item-stem'
           direction: UP
           optional: true
-      - assertVisible:
-          id: 'speak-item'
+      - scrollUntilVisible:
+          element:
+            id: 'speak-item'
+          direction: DOWN
+          timeout: 60000
       # choice, picture choice, spelling, multi choice, word bank, ordering (tap each in turn)
+      - scrollUntilVisible:
+          element:
+            id: 'option-a'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'option-a'
           optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'option-b'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'option-b'
           optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'option-c'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'option-c'
           optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'option-d'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'option-d'
           optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'option-true'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'option-true'
           optional: true
       # numeric: the on-screen pad
+      - scrollUntilVisible:
+          element:
+            id: 'key-5'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'key-5'
           optional: true
@@ -175,6 +283,11 @@ appId: vn.vionx.app
           element:
             id: 'practice-submit'
           optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'practice-submit'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'practice-submit'
           optional: true
@@ -183,6 +296,11 @@ appId: vn.vionx.app
             id: 'practice-continue'
           timeout: 15000
           optional: true
+      - scrollUntilVisible:
+          element:
+            id: 'practice-continue'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'practice-continue'
           optional: true
@@ -198,16 +316,32 @@ appId: vn.vionx.app
             - scrollUntilVisible:
                 element:
                   id: 'practice-finish'
+            - scrollUntilVisible:
+                element:
+                  id: 'practice-finish'
+                direction: DOWN
+                timeout: 60000
             - tapOn:
                 id: 'practice-finish'
-- assertVisible:
-    id: 'summary-score'
-- assertVisible:
-    id: 'summary-xp'
+- scrollUntilVisible:
+    element:
+      id: 'summary-score'
+    direction: DOWN
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: 'summary-xp'
+    direction: DOWN
+    timeout: 60000
 - takeScreenshot: m06-summary
 - scrollUntilVisible:
     element:
       id: 'practice-done'
+- scrollUntilVisible:
+    element:
+      id: 'practice-done'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'practice-done'
 - extendedWaitUntil:

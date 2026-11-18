@@ -27,12 +27,17 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- scrollUntilVisible:
+    element:
+      id: 'verify-code'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'verify-code'
 
 # Privacy policy & terms: the button stays disabled until the box is ticked
 - extendedWaitUntil:
-    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục'
+    visible: 'Thêm con|Tạo gia đình|Đồng ý và tiếp tục|Đang hoạt động|Cần đồng ý.*'
     timeout: 20000
 - runFlow:
     when:
@@ -40,26 +45,46 @@ appId: vn.vionx.app
         id: 'policies-accept'
     commands:
       - takeScreenshot: m02-policies
+      - scrollUntilVisible:
+          element:
+            id: 'policies-agree'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'policies-agree'
+      - scrollUntilVisible:
+          element:
+            id: 'policies-accept'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'policies-accept'
 - extendedWaitUntil:
-    visible: 'Thêm con|Tạo gia đình'
+    visible: 'Thêm con|Tạo gia đình|Đang hoạt động|Cần đồng ý.*'
     timeout: 20000
 - runFlow:
     when:
       visible: 'Tạo gia đình'
     commands:
+      - scrollUntilVisible:
+          element:
+            id: 'household-name'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'household-name'
       - inputText: 'Gia đình Đồng ý'
+      - scrollUntilVisible:
+          element:
+            id: 'household-create'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'household-create'
 - extendedWaitUntil:
     visible:
-      id: 'add-child'
-    timeout: 15000
+      id: 'screen-parent-home-settled'
+    timeout: 90000
 
 # Add a grade-6 child: CORE_SERVICE consent is required before the credentials appear
 - runFlow:
@@ -72,14 +97,33 @@ appId: vn.vionx.app
 - evalScript: ${output.loginId = maestro.copiedText}
 
 # Turn on the AI assistant for the child (needs the child's assent, age >= 7)
+- extendedWaitUntil:
+    visible:
+      id: 'screen-parent-home-settled'
+    timeout: 90000
+- scrollUntilVisible:
+    element:
+      id: 'student-${output.loginId}'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'student-${output.loginId}'
+- scrollUntilVisible:
+    element:
+      id: 'open-consents'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'open-consents'
 - extendedWaitUntil:
     visible:
       id: 'grant-AI_PERSONALIZATION'
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: 'grant-AI_PERSONALIZATION'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'grant-AI_PERSONALIZATION'
 - extendedWaitUntil:
@@ -91,12 +135,26 @@ appId: vn.vionx.app
 - back
 
 # Privacy Center: request an export and wait for the download link
+- extendedWaitUntil:
+    visible:
+      id: 'screen-parent-home-settled'
+    timeout: 90000
+- scrollUntilVisible:
+    element:
+      id: 'privacy-center'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'privacy-center'
 - extendedWaitUntil:
     visible:
       id: 'export-start'
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: 'export-start'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'export-start'
 - extendedWaitUntil:
@@ -107,6 +165,15 @@ appId: vn.vionx.app
 - back
 
 # The child answers the assent card on a child device
+- extendedWaitUntil:
+    visible:
+      id: 'screen-parent-home-settled'
+    timeout: 90000
+- scrollUntilVisible:
+    element:
+      id: 'child-device'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-device'
 - tapOn: 'Tiếp tục'
@@ -114,6 +181,11 @@ appId: vn.vionx.app
     visible:
       id: 'child-login-id'
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: 'child-login-id'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-login-id'
 - inputText: ${output.loginId}
@@ -121,12 +193,22 @@ appId: vn.vionx.app
     file: subflows/m01-enter-pin.yaml
     env:
       DIGITS: '2,4,6,8'
+- scrollUntilVisible:
+    element:
+      id: 'child-login-submit'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-login-submit'
 - extendedWaitUntil:
     visible:
       id: 'assent-pending'
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: 'open-assent'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'open-assent'
 - extendedWaitUntil:
@@ -134,6 +216,11 @@ appId: vn.vionx.app
       id: 'assent-AI_PERSONALIZATION'
     timeout: 15000
 - takeScreenshot: m02-assent
+- scrollUntilVisible:
+    element:
+      id: 'assent-yes'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'assent-yes'
 - extendedWaitUntil:

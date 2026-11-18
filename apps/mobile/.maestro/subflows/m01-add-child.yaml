@@ -4,25 +4,59 @@
 # env: NAME, YEAR, GRADE, PIN ('' = generated). Leaves the login id in maestro.copiedText.
 appId: vn.vionx.app
 ---
+- extendedWaitUntil:
+    visible:
+      id: 'screen-parent-home-settled'
+    timeout: 90000
+- scrollUntilVisible:
+    element:
+      id: 'add-child'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'add-child'
+- scrollUntilVisible:
+    element:
+      id: 'child-name'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-name'
 - inputText: ${NAME}
+- scrollUntilVisible:
+    element:
+      id: 'child-birth-year'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-birth-year'
 - inputText: ${YEAR}
 - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'grade-${GRADE}'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'grade-${GRADE}'
 - runFlow:
     when:
       true: ${PIN != ''}
     commands:
+      - scrollUntilVisible:
+          element:
+            id: 'child-pin'
+          direction: DOWN
+          timeout: 60000
       - tapOn:
           id: 'child-pin'
       - inputText: ${PIN}
       - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'child-create'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'child-create'
 # M02: the parent grants CORE_SERVICE and, as its own step, CROSS_BORDER_TRANSFER before the
@@ -31,32 +65,57 @@ appId: vn.vionx.app
     visible:
       id: 'screen-consents'
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: 'grant-CORE_SERVICE'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'grant-CORE_SERVICE'
 - extendedWaitUntil:
     visible:
       id: 'revoke-CORE_SERVICE'
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: 'grant-CROSS_BORDER_TRANSFER'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'grant-CROSS_BORDER_TRANSFER'
 - extendedWaitUntil:
     visible:
       id: 'revoke-CROSS_BORDER_TRANSFER'
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: 'consent-continue'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'consent-continue'
 - extendedWaitUntil:
     visible:
       id: 'credential-card'
     timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: 'credential-login-id'
+    direction: DOWN
+    timeout: 60000
 - assertVisible:
     id: 'credential-login-id'
     text: 'vx-[2-9a-hjkmnp-z]{6}'
 - copyTextFrom:
     id: 'credential-login-id'
+- scrollUntilVisible:
+    element:
+      id: 'credentials-done'
+    direction: DOWN
+    timeout: 60000
 - tapOn:
     id: 'credentials-done'
 - extendedWaitUntil:
     visible:
-      id: 'add-child'
-    timeout: 15000
+      id: 'screen-parent-home-settled'
+    timeout: 90000

@@ -26,7 +26,11 @@ export default function ParentHome() {
   const [redemptions, setRedemptions] = useState(0);
   // M08: one card per child (Today, streak, Coin, skills, exams); the list works without it.
   const [overview, setOverview] = useState<ChildOverview[]>([]);
+  // The buttons sit below the list and move when the list and its cards arrive. They are hidden
+  // while the list loads; the test id `screen-parent-home-settled` tells the Maestro flows the cards are in too.
+  const [overviewSettled, setOverviewSettled] = useState(false);
   const { state, reload } = useLoad(async (): Promise<HouseholdResponse | null> => {
+    setOverviewSettled(false);
     try {
       const household = await unwrap(parentApi.GET('/api/v1/household'));
       // Approvals badge; never blocks the home screen.
@@ -40,10 +44,12 @@ export default function ParentHome() {
         (r) => setRedemptions(r.pendingCount),
         () => setRedemptions(0),
       );
-      void unwrap(parentApi.GET('/api/v1/household/overview')).then(
-        (o) => setOverview(o.children),
-        () => setOverview([]),
-      );
+      void unwrap(parentApi.GET('/api/v1/household/overview'))
+        .then(
+          (o) => setOverview(o.children),
+          () => setOverview([]),
+        )
+        .finally(() => setOverviewSettled(true));
       return household;
     } catch (e) {
       if (e instanceof AppError && e.status === 404) return null;
@@ -136,7 +142,11 @@ export default function ParentHome() {
   return (
     <Screen
       title={state.kind === 'ready' && state.data ? state.data.household.name : t('children.title')}
-      testID="screen-parent-home"
+      testID={
+        state.kind !== 'loading' && overviewSettled
+          ? 'screen-parent-home-settled'
+          : 'screen-parent-home'
+      }
     >
       <StateView
         state={state}
@@ -168,50 +178,54 @@ export default function ParentHome() {
           </View>
         )}
       </StateView>
-      <Button
-        testID="open-approvals"
-        label={
-          badgeText(pending)
-            ? `${t('approvals.open')} (${badgeText(pending)})`
-            : t('approvals.open')
-        }
-        color={pending > 0 ? c.warning : c.parent}
-        onPress={() => router.push('/approvals')}
-      />
-      <Button
-        testID="open-redemptions"
-        label={
-          badgeText(redemptions)
-            ? `${t('redemptions.open')} (${badgeText(redemptions)})`
-            : t('redemptions.open')
-        }
-        color={redemptions > 0 ? c.warning : c.parent}
-        onPress={() => router.push('/redemptions')}
-      />
-      <Button
-        testID="add-child"
-        label={t('children.add')}
-        color={c.parent}
-        onPress={() => router.push('/child-new')}
-      />
-      <Button
-        testID="privacy-center"
-        label={t('children.privacy')}
-        variant="secondary"
-        onPress={() => router.push('/privacy')}
-      />
-      <Button
-        testID="child-device"
-        label={t('children.childDevice')}
-        variant="secondary"
-        onPress={useAsChildDevice}
-      />
-      <Button
-        testID="parent-sign-out"
-        label={t('children.signOut')}
-        variant="secondary"
-        onPress={() => void signOut()}
-      />
+      {state.kind !== 'loading' && (
+        <>
+          <Button
+            testID="open-approvals"
+            label={
+              badgeText(pending)
+                ? `${t('approvals.open')} (${badgeText(pending)})`
+                : t('approvals.open')
+            }
+            color={pending > 0 ? c.warning : c.parent}
+            onPress={() => router.push('/approvals')}
+          />
+          <Button
+            testID="open-redemptions"
+            label={
+              badgeText(redemptions)
+                ? `${t('redemptions.open')} (${badgeText(redemptions)})`
+                : t('redemptions.open')
+            }
+            color={redemptions > 0 ? c.warning : c.parent}
+            onPress={() => router.push('/redemptions')}
+          />
+          <Button
+            testID="add-child"
+            label={t('children.add')}
+            color={c.parent}
+            onPress={() => router.push('/child-new')}
+          />
+          <Button
+            testID="privacy-center"
+            label={t('children.privacy')}
+            variant="secondary"
+            onPress={() => router.push('/privacy')}
+          />
+          <Button
+            testID="child-device"
+            label={t('children.childDevice')}
+            variant="secondary"
+            onPress={useAsChildDevice}
+          />
+          <Button
+            testID="parent-sign-out"
+            label={t('children.signOut')}
+            variant="secondary"
+            onPress={() => void signOut()}
+          />
+        </>
+      )}
     </Screen>
   );
 }
