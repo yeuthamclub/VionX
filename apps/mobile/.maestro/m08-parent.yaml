@@ -310,6 +310,6 @@ appId: vn.vionx.app
     notVisible: 'Đang tải…'
     timeout: 60000
 - scrollUntilVisible:
-    element: ${output.loginId}
+    element: ".*${output.loginId}.*"
     direction: UP
 - takeScreenshot: m08-parent-login-id
