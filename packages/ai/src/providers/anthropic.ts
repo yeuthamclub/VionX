@@ -114,10 +114,16 @@ function toParams(request: ProviderRequest): Anthropic.MessageCreateParamsNonStr
   return params;
 }
 
-/** Attachments go before the text input (documents first, then the question). */
+/**
+ * Cached context first, then attachments, then the text input (documents first, then the
+ * question). The context breakpoint caches system + context, shared by requests of one skill.
+ */
 function userContent(request: ProviderRequest): string | Anthropic.ContentBlockParam[] {
-  if (!request.attachments?.length) return request.input;
-  const blocks: Anthropic.ContentBlockParam[] = request.attachments.map((a) =>
+  if (!request.attachments?.length && !request.context) return request.input;
+  const context: Anthropic.ContentBlockParam[] = request.context
+    ? [{ type: 'text', text: request.context, cache_control: { type: 'ephemeral' } }]
+    : [];
+  const blocks: Anthropic.ContentBlockParam[] = (request.attachments ?? []).map((a) =>
     a.mediaType === 'application/pdf'
       ? {
           type: 'document' as const,
@@ -128,7 +134,7 @@ function userContent(request: ProviderRequest): string | Anthropic.ContentBlockP
           source: { type: 'base64' as const, media_type: a.mediaType, data: a.data },
         },
   );
-  return [...blocks, { type: 'text', text: request.input }];
+  return [...context, ...blocks, { type: 'text', text: request.input }];
 }
 
 interface MessageLike {

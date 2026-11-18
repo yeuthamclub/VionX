@@ -103,7 +103,7 @@ Learning content is a **global library** separate from family data. It is genera
 | TOC/structure, skill backbone, lesson → skill mapping | `claude-sonnet-5-5` | Batch |
 | Item generation (questions, templates, hints, distractor feedback) | `claude-sonnet-5-5` | Batch |
 | Item verification | `claude-haiku-4-5` + deterministic checks | Batch |
-| Disputed items (verifier disagrees) | `claude-opus-5-5` | Batch, ≤5% of items |
+| Disputed items (verifier disagrees and code has not recomputed the key) | `claude-opus-5-5` | Batch, ≤5% of items |
 | Tutor T2 (free-form question not in library) | `claude-haiku-4-5` | Realtime, streaming |
 | Tutor T3 (escalation, low confidence or third follow-up) | `claude-sonnet-5-5` | Realtime |
 | Writing feedback (Tiếng Việt, Ngữ văn, English) | Haiku 4.5 (G1-9), Sonnet 5.5 (G10-12) | Realtime or nightly batch |

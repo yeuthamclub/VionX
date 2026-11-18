@@ -63,6 +63,8 @@ export interface AiAttachment {
 export interface ProviderRequest {
   model: string;
   system: string;
+  /** Shared reference text opening the user turn, cached (e.g. one skill's textbook pages). */
+  context?: string;
   input: string;
   /** Documents or images placed before `input` in the user turn. */
   attachments?: AiAttachment[];

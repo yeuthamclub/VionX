@@ -5,6 +5,7 @@ import { parseNumberText } from '../src/lib/math.ts';
 import {
   classifyPage,
   NgramIndex,
+  normaliseText,
   readingLevel,
   vietnameseScore,
   wordJaccard,
@@ -90,6 +91,12 @@ describe('n-grams and reading level', () => {
     index.add('Muốn cộng hai phân số cùng mẫu, ta cộng các tử và giữ nguyên mẫu.');
     expect(index.overlap('Ta CỘNG các tử, và giữ nguyên mẫu số').longestRun).toBe(8);
     expect(index.overlap('Cộng các tử số lại với nhau').shared).toBe(0);
+  });
+
+  it('keeps the sign of negative numbers', () => {
+    expect(normaliseText('$-3$')).not.toBe(normaliseText('$3$'));
+    expect(normaliseText('$\\frac{-7}{12}$')).not.toBe(normaliseText('$\\frac{7}{12}$'));
+    expect(normaliseText('−9 nghìn đồng')).toBe(normaliseText('$-9$ nghìn đồng'));
   });
 
   it('counts words and the longest sentence', () => {

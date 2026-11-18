@@ -23,7 +23,7 @@ const cleanEnv = Object.fromEntries(
 );
 
 function pnpm(args: string[], workDir = dir) {
-  const r = spawnSync('pnpm', ['-s', ...args, ...(workDir ? ['--work-dir', workDir] : [])], {
+  const r = spawnSync('pnpm', ['--silent', ...args, ...(workDir ? ['--work-dir', workDir] : [])], {
     cwd: root,
     encoding: 'utf8',
     env: cleanEnv,

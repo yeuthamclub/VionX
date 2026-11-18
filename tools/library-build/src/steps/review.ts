@@ -148,4 +148,7 @@ export async function reviewImport(ctx: BuildContext): Promise<void> {
     ctx.log(
       `  ${regen} rejected slot(s) can be generated once more: generate → check → verify → review-export`,
     );
+  const spent = store.list((r) => r.item.status === 'REJECTED').length - regen;
+  if (spent > 0)
+    ctx.log(`  ${spent} rejected slot(s) used up their attempts: generate --retry-rejected`);
 }

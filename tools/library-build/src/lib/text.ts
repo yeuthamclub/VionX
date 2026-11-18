@@ -1,12 +1,16 @@
 // Text measures used by textlayer (page quality, extraction validation) and check (n-gram overlap,
 // duplicates, reading level). Pure functions.
 
-/** NFC, lower case, punctuation → space, collapsed whitespace. Digits and diacritics are kept. */
+/**
+ * NFC, lower case, punctuation → space, collapsed whitespace. Digits and diacritics are kept, and so
+ * is a minus sign before a digit (as the word "âm"), so "−3" and "3" stay different options.
+ */
 export function normaliseText(text: string): string {
   return text
     .normalize('NFC')
     .toLowerCase()
     .replace(/\$[^$]*\$/g, (m) => ` ${m.replace(/[\\{}$]/g, ' ')} `)
+    .replace(/[-−–](?=\s*\d)/g, ' âm ')
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
 }

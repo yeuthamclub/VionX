@@ -19,6 +19,8 @@ export interface RunParams {
   promptVersion: string;
   /** Stable prefix (system prompt, schema notes, style guide). Cached by the provider. */
   system?: string;
+  /** Reference text shared by many requests, after `system`. Cached by the provider. */
+  context?: string;
   /** Item-specific input, sent last. Objects are serialised as JSON. */
   input: string | Record<string, unknown>;
   /** PDF pages or images sent before `input`. */
@@ -43,6 +45,7 @@ export interface BatchItem {
   /** Caller id, `^[a-zA-Z0-9_-]{1,64}$`. Results come back keyed by it, in any order. */
   customId: string;
   system?: string;
+  context?: string;
   input: string | Record<string, unknown>;
   attachments?: AiAttachment[];
   outputSchema?: Record<string, unknown>;
@@ -248,7 +251,7 @@ export class AiGateway {
 
 function buildRequest(
   config: AiTaskConfig,
-  params: Pick<RunParams, 'system' | 'input' | 'attachments' | 'outputSchema'>,
+  params: Pick<RunParams, 'system' | 'context' | 'input' | 'attachments' | 'outputSchema'>,
   mode: 'realtime' | 'batch',
 ): ProviderRequest {
   const request: ProviderRequest = {
@@ -262,6 +265,7 @@ function buildRequest(
   };
   if (params.outputSchema) request.outputSchema = params.outputSchema;
   if (params.attachments?.length) request.attachments = params.attachments;
+  if (params.context) request.context = params.context;
   return request;
 }
 
