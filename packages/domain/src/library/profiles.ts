@@ -110,6 +110,17 @@ export const SUBJECT_PROFILES: readonly SubjectProfile[] = [
     matching: 0.1,
     ordering: 0.1,
   }),
+  // ADR-001: Toán 5 added after the 8 launch libraries.
+  p(5, 'math', 'Toán 5', 0.45, 0, 0, false, 'vi', 'MEDIUM', {
+    single_choice: 0.3,
+    numeric: 0.35,
+    fill_blank: 0.1,
+    multi_choice: 0.05,
+    true_false: 0.05,
+    ordering: 0.05,
+    matching: 0.05,
+    picture_choice: 0.05,
+  }),
 ];
 
 export const subjectProfile = (grade: number, subject: string): SubjectProfile | undefined =>
