@@ -11,6 +11,9 @@ appId: vn.vionx.app
       id: 'screen-parent-home-settled'
     timeout: 90000
 # The first child's card: at least the task and the practice card are done, the streak started
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element: 'Chuỗi ngày liên tiếp: 1'
     timeout: 30000
@@ -21,6 +24,9 @@ appId: vn.vionx.app
     visible:
       id: 'dash-panel-overview'
     timeout: 20000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'dash-streak'
@@ -31,6 +37,9 @@ appId: vn.vionx.app
     text: '1 ngày'
 
 # Learning: one session, with its sufficiency label
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'dash-tab-learning'
@@ -39,10 +48,16 @@ appId: vn.vionx.app
 - tapOn:
     id: 'dash-tab-learning'
 - assertVisible: 'phiên luyện'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'dash-accuracy'
     direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
     timeout: 60000
 - scrollUntilVisible:
     element:
@@ -52,6 +67,9 @@ appId: vn.vionx.app
 - takeScreenshot: m08-parent-learning-tab
 
 # Tasks & rewards: the task is counted, XP arrived
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'dash-tab-tasks'
@@ -59,6 +77,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'dash-tab-tasks'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'dash-tasks'
@@ -67,16 +88,25 @@ appId: vn.vionx.app
 - assertVisible:
     id: 'dash-tasks'
     text: '1/1'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'dash-coins'
     direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
     timeout: 60000
 - scrollUntilVisible:
     element: '.*: 1/1 việc · 1 phiên luyện · \+.* XP'
 - takeScreenshot: m08-parent-tasks-tab
 
 # The grade is still beside mastery, which now has a practised skill
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'dash-tab-overview'
@@ -84,6 +114,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'dash-tab-overview'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'side-TOAN'

@@ -19,6 +19,9 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verify-code'
@@ -34,6 +37,9 @@ appId: vn.vionx.app
       visible:
         id: 'policies-accept'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'policies-agree'
@@ -41,6 +47,9 @@ appId: vn.vionx.app
           timeout: 60000
       - tapOn:
           id: 'policies-agree'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'policies-accept'
@@ -55,6 +64,9 @@ appId: vn.vionx.app
     when:
       visible: 'Tạo gia đình'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'household-name'
@@ -63,6 +75,9 @@ appId: vn.vionx.app
       - tapOn:
           id: 'household-name'
       - inputText: ${HOUSEHOLD}
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'household-create'

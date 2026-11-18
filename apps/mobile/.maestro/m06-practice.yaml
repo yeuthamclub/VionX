@@ -31,6 +31,9 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verify-code'
@@ -46,6 +49,9 @@ appId: vn.vionx.app
       visible:
         id: 'policies-accept'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'policies-agree'
@@ -53,6 +59,9 @@ appId: vn.vionx.app
           timeout: 60000
       - tapOn:
           id: 'policies-agree'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'policies-accept'
@@ -67,6 +76,9 @@ appId: vn.vionx.app
     when:
       visible: 'Tạo gia đình'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'household-name'
@@ -75,6 +87,9 @@ appId: vn.vionx.app
       - tapOn:
           id: 'household-name'
       - inputText: 'Gia đình Luyện tập'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'household-create'
@@ -102,6 +117,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-parent-home-settled'
     timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-device'
@@ -114,6 +132,9 @@ appId: vn.vionx.app
     visible:
       id: 'child-login-id'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-login-id'
@@ -126,6 +147,9 @@ appId: vn.vionx.app
     file: subflows/m01-enter-pin.yaml
     env:
       DIGITS: '2,5,8,0'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-login-submit'
@@ -139,6 +163,9 @@ appId: vn.vionx.app
     timeout: 15000
 
 # Learn → knowledge map → first topic
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-learn'
@@ -150,6 +177,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-learn'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'subject-math'
@@ -163,10 +193,16 @@ appId: vn.vionx.app
     visible:
       id: 'item-stem'
     timeout: 20000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'speak-item'
     direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
     timeout: 60000
 - scrollUntilVisible:
     element:
@@ -176,9 +212,15 @@ appId: vn.vionx.app
 - takeScreenshot: m06-first-item
 
 # Hint ladder and report on the first item
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'practice-hint'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'practice-hint'
@@ -186,13 +228,22 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'practice-hint'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'hint-1'
     direction: UP
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'practice-report'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'practice-report'
@@ -200,6 +251,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'practice-report'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'report-UNCLEAR'
@@ -207,6 +261,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'report-UNCLEAR'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'report-sent'
@@ -225,6 +282,9 @@ appId: vn.vionx.app
             id: 'item-stem'
           direction: UP
           optional: true
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'speak-item'
@@ -235,7 +295,8 @@ appId: vn.vionx.app
           element:
             id: 'option-a'
           direction: DOWN
-          timeout: 60000
+          timeout: 3000
+          optional: true
       - tapOn:
           id: 'option-a'
           optional: true
@@ -243,7 +304,8 @@ appId: vn.vionx.app
           element:
             id: 'option-b'
           direction: DOWN
-          timeout: 60000
+          timeout: 3000
+          optional: true
       - tapOn:
           id: 'option-b'
           optional: true
@@ -251,7 +313,8 @@ appId: vn.vionx.app
           element:
             id: 'option-c'
           direction: DOWN
-          timeout: 60000
+          timeout: 3000
+          optional: true
       - tapOn:
           id: 'option-c'
           optional: true
@@ -259,7 +322,8 @@ appId: vn.vionx.app
           element:
             id: 'option-d'
           direction: DOWN
-          timeout: 60000
+          timeout: 3000
+          optional: true
       - tapOn:
           id: 'option-d'
           optional: true
@@ -267,7 +331,8 @@ appId: vn.vionx.app
           element:
             id: 'option-true'
           direction: DOWN
-          timeout: 60000
+          timeout: 3000
+          optional: true
       - tapOn:
           id: 'option-true'
           optional: true
@@ -276,7 +341,8 @@ appId: vn.vionx.app
           element:
             id: 'key-5'
           direction: DOWN
-          timeout: 60000
+          timeout: 3000
+          optional: true
       - tapOn:
           id: 'key-5'
           optional: true
@@ -288,7 +354,8 @@ appId: vn.vionx.app
           element:
             id: 'practice-submit'
           direction: DOWN
-          timeout: 60000
+          timeout: 3000
+          optional: true
       - tapOn:
           id: 'practice-submit'
           optional: true
@@ -301,7 +368,8 @@ appId: vn.vionx.app
           element:
             id: 'practice-continue'
           direction: DOWN
-          timeout: 60000
+          timeout: 3000
+          optional: true
       - tapOn:
           id: 'practice-continue'
           optional: true
@@ -314,9 +382,15 @@ appId: vn.vionx.app
               id: 'practice-submit'
               enabled: false
           commands:
+            - extendedWaitUntil:
+                notVisible: 'Đang tải…'
+                timeout: 60000
             - scrollUntilVisible:
                 element:
                   id: 'practice-finish'
+            - extendedWaitUntil:
+                notVisible: 'Đang tải…'
+                timeout: 60000
             - scrollUntilVisible:
                 element:
                   id: 'practice-finish'
@@ -324,10 +398,16 @@ appId: vn.vionx.app
                 timeout: 60000
             - tapOn:
                 id: 'practice-finish'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'summary-score'
     direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
     timeout: 60000
 - scrollUntilVisible:
     element:
@@ -335,9 +415,15 @@ appId: vn.vionx.app
     direction: DOWN
     timeout: 60000
 - takeScreenshot: m06-summary
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'practice-done'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'practice-done'

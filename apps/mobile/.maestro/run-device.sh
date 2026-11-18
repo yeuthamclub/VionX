@@ -10,6 +10,8 @@
 # number is deleted before the first flow that uses it (and again before m08, which shares 03).
 cd "$(dirname "$0")/.." || exit 1
 export JAVA_HOME=${JAVA_HOME:-/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home}
+# With more than one device attached, name the one to use: DEVICE=<adb serial> zsh run-device.sh …
+export ANDROID_SERIAL=${DEVICE:-$(adb devices | awk 'NR>1 && $2=="device" {print $1; exit}')}
 adb reverse tcp:54331 tcp:54331 >/dev/null || exit 1
 out=../../.maestro-results
 mkdir -p $out
@@ -20,6 +22,6 @@ for f in $flows; do
   if [[ -n ${phone[$f]} ]]; then
     (cd ../.. && pnpm cloud npx tsx scripts/maestro-households.ts --delete ${phone[$f]} 2>/dev/null | grep deleted)
   fi
-  maestro test .maestro/$f.yaml --debug-output $out/$f > $out/$f.log 2>&1
+  maestro --device $ANDROID_SERIAL test .maestro/$f.yaml --debug-output $out/$f > $out/$f.log 2>&1
   echo "$f exit=$?" | tee -a $out/summary.txt
 done

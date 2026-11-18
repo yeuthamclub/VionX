@@ -8,6 +8,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-parent-home-settled'
     timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'add-child'
@@ -15,6 +18,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'add-child'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-name'
@@ -23,6 +29,9 @@ appId: vn.vionx.app
 - tapOn:
     id: 'child-name'
 - inputText: ${NAME}
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-birth-year'
@@ -32,6 +41,9 @@ appId: vn.vionx.app
     id: 'child-birth-year'
 - inputText: ${YEAR}
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'grade-${GRADE}'
@@ -43,6 +55,9 @@ appId: vn.vionx.app
     when:
       true: ${PIN != ''}
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'child-pin'
@@ -52,6 +67,9 @@ appId: vn.vionx.app
           id: 'child-pin'
       - inputText: ${PIN}
       - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-create'
@@ -65,6 +83,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-consents'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'grant-CORE_SERVICE'
@@ -72,10 +93,16 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'grant-CORE_SERVICE'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'revoke-CORE_SERVICE'
     direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
     timeout: 60000
 - scrollUntilVisible:
     element:
@@ -84,10 +111,16 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'grant-CROSS_BORDER_TRANSFER'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'revoke-CROSS_BORDER_TRANSFER'
     direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
     timeout: 60000
 - scrollUntilVisible:
     element:
@@ -100,6 +133,9 @@ appId: vn.vionx.app
     visible:
       id: 'credential-card'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'credential-login-id'
@@ -110,6 +146,9 @@ appId: vn.vionx.app
     text: 'vx-[2-9a-hjkmnp-z]{6}'
 - copyTextFrom:
     id: 'credential-login-id'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'credentials-done'

@@ -24,6 +24,9 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verify-code'
@@ -39,6 +42,9 @@ appId: vn.vionx.app
       visible:
         id: 'policies-accept'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'policies-agree'
@@ -46,6 +52,9 @@ appId: vn.vionx.app
           timeout: 60000
       - tapOn:
           id: 'policies-agree'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'policies-accept'
@@ -60,6 +69,9 @@ appId: vn.vionx.app
     when:
       visible: 'Tạo gia đình'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'household-name'
@@ -68,6 +80,9 @@ appId: vn.vionx.app
       - tapOn:
           id: 'household-name'
       - inputText: 'Gia đình Nhiệm vụ'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'household-create'
@@ -95,6 +110,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-parent-home-settled'
     timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'student-${output.loginId}'
@@ -102,6 +120,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'student-${output.loginId}'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-calendar'
@@ -113,6 +134,9 @@ appId: vn.vionx.app
     visible:
       id: 'add-task'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'add-task'
@@ -124,6 +148,9 @@ appId: vn.vionx.app
     visible:
       id: 'task-title'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'task-title'
@@ -133,6 +160,9 @@ appId: vn.vionx.app
     id: 'task-title'
 - inputText: 'Đọc sách 15 phút'
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'repeat-DAILY'
@@ -140,9 +170,15 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'repeat-DAILY'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verification-PARENT_APPROVAL'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verification-PARENT_APPROVAL'
@@ -150,9 +186,15 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'verification-PARENT_APPROVAL'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'task-save'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'task-save'
@@ -172,6 +214,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-parent-home-settled'
     timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-device'
@@ -184,6 +229,9 @@ appId: vn.vionx.app
     visible:
       id: 'child-login-id'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-login-id'
@@ -196,6 +244,9 @@ appId: vn.vionx.app
     file: subflows/m01-enter-pin.yaml
     env:
       DIGITS: '1,4,7,0'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-login-submit'
@@ -203,10 +254,16 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'child-login-submit'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-child-tasks'
     direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
     timeout: 60000
 - scrollUntilVisible:
     element:
@@ -218,6 +275,9 @@ appId: vn.vionx.app
 - extendedWaitUntil:
     visible: 'Đọc sách 15 phút'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'complete-.*'
@@ -225,6 +285,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'complete-.*'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-tasks-message'
@@ -232,6 +295,9 @@ appId: vn.vionx.app
     timeout: 60000
 - takeScreenshot: m03-child-sent
 - back
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-sign-out'
@@ -245,6 +311,9 @@ appId: vn.vionx.app
     visible:
       id: 'child-login-parent'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-login-parent'
@@ -264,6 +333,9 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verify-code'
@@ -279,6 +351,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-parent-home-settled'
     timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-approvals'
@@ -290,6 +365,9 @@ appId: vn.vionx.app
     visible: 'Đọc sách 15 phút'
     timeout: 15000
 - takeScreenshot: m03-approvals
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'approve-.*'
@@ -297,6 +375,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'approve-.*'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'approvals-message'

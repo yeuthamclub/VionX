@@ -28,6 +28,9 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verify-code'
@@ -45,6 +48,9 @@ appId: vn.vionx.app
       visible:
         id: 'policies-accept'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'policies-agree'
@@ -52,6 +58,9 @@ appId: vn.vionx.app
           timeout: 60000
       - tapOn:
           id: 'policies-agree'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'policies-accept'
@@ -68,6 +77,9 @@ appId: vn.vionx.app
     when:
       visible: 'Tạo gia đình'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'household-name'
@@ -76,6 +88,9 @@ appId: vn.vionx.app
       - tapOn:
           id: 'household-name'
       - inputText: 'Gia đình Maestro'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'household-create'
@@ -119,6 +134,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-parent-home-settled'
     timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-device'
@@ -133,6 +151,9 @@ appId: vn.vionx.app
     timeout: 15000
 
 # Child signs in with ID + PIN
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-login-id'
@@ -145,6 +166,9 @@ appId: vn.vionx.app
     file: subflows/m01-enter-pin.yaml
     env:
       DIGITS: '2,5,8,0'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-login-submit'
@@ -156,6 +180,9 @@ appId: vn.vionx.app
     visible: 'Xin chào, Chín!'
     timeout: 15000
 - takeScreenshot: m01-child-home
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-sign-out'
@@ -176,6 +203,9 @@ appId: vn.vionx.app
           file: subflows/m01-enter-pin.yaml
           env:
             DIGITS: '0,0,0,0'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'child-login-submit'
@@ -191,6 +221,9 @@ appId: vn.vionx.app
 - takeScreenshot: m01-locked
 
 # Parent resets the PIN
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-login-parent'
@@ -210,6 +243,9 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verify-code'
@@ -221,6 +257,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-parent-home-settled'
     timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'student-${output.loginId}'
@@ -230,6 +269,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-parent-home-settled'
     timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'student-${output.loginId}'
@@ -238,6 +280,9 @@ appId: vn.vionx.app
 - tapOn:
     id: 'student-${output.loginId}'
 - assertVisible: 'Đang bị khoá.*'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'new-pin'
@@ -247,6 +292,9 @@ appId: vn.vionx.app
     id: 'new-pin'
 - inputText: '1357'
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'reset-pin'
@@ -259,6 +307,9 @@ appId: vn.vionx.app
     visible:
       id: 'credential-card'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'credential-pin'
@@ -267,6 +318,9 @@ appId: vn.vionx.app
 - assertVisible:
     id: 'credential-pin'
     text: '1357'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'credentials-done'
@@ -280,6 +334,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-parent-home-settled'
     timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-device'
@@ -296,6 +353,9 @@ appId: vn.vionx.app
     file: subflows/m01-enter-pin.yaml
     env:
       DIGITS: '1,3,5,7'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-login-submit'

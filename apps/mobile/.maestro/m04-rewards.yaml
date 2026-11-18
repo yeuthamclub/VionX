@@ -27,6 +27,9 @@ appId: vn.vionx.app
 - tapOn:
     id: 'otp-input'
 - inputText: '123456'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verify-code'
@@ -42,6 +45,9 @@ appId: vn.vionx.app
       visible:
         id: 'policies-accept'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'policies-agree'
@@ -49,6 +55,9 @@ appId: vn.vionx.app
           timeout: 60000
       - tapOn:
           id: 'policies-agree'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'policies-accept'
@@ -63,6 +72,9 @@ appId: vn.vionx.app
     when:
       visible: 'Tạo gia đình'
     commands:
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'household-name'
@@ -71,6 +83,9 @@ appId: vn.vionx.app
       - tapOn:
           id: 'household-name'
       - inputText: 'Gia đình Thưởng'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'household-create'
@@ -98,6 +113,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-parent-home-settled'
     timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'student-${output.loginId}'
@@ -105,9 +123,15 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'student-${output.loginId}'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-rewards'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-rewards'
@@ -115,10 +139,16 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'open-rewards'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'wallet-card'
     direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
     timeout: 60000
 - scrollUntilVisible:
     element:
@@ -130,6 +160,9 @@ appId: vn.vionx.app
 - extendedWaitUntil:
     visible: '.*Tối đa hệ thống: 20.*'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'rules-weekdayCapCoins'
@@ -140,9 +173,15 @@ appId: vn.vionx.app
 - eraseText
 - inputText: '25'
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'rules-save'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'rules-save'
@@ -150,13 +189,22 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'rules-save'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element: 'Không được cao hơn 20'
     direction: UP
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'rules-weekdayCapCoins'
     direction: UP
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'rules-weekdayCapCoins'
@@ -167,9 +215,15 @@ appId: vn.vionx.app
 - eraseText
 - inputText: '15'
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'rules-save'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'rules-save'
@@ -177,6 +231,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'rules-save'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'rules-message'
@@ -186,6 +243,9 @@ appId: vn.vionx.app
 - back
 
 # Catalog: add a reward
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-reward-catalog'
@@ -193,10 +253,16 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'open-reward-catalog'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'catalog-add'
     direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
     timeout: 60000
 - scrollUntilVisible:
     element:
@@ -205,6 +271,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'catalog-add'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'catalog-title'
@@ -213,6 +282,9 @@ appId: vn.vionx.app
 - tapOn:
     id: 'catalog-title'
 - inputText: '30 phút xem hoạt hình'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'catalog-cost'
@@ -222,6 +294,9 @@ appId: vn.vionx.app
     id: 'catalog-cost'
 - inputText: '5'
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'catalog-icon-screen'
@@ -229,6 +304,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'catalog-icon-screen'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'catalog-save'
@@ -244,6 +322,9 @@ appId: vn.vionx.app
 - back
 
 # A SELF_CHECK task worth 50 XP for today
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-calendar'
@@ -255,6 +336,9 @@ appId: vn.vionx.app
     visible:
       id: 'add-task'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'add-task'
@@ -266,6 +350,9 @@ appId: vn.vionx.app
     visible:
       id: 'task-title'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'task-title'
@@ -275,9 +362,15 @@ appId: vn.vionx.app
     id: 'task-title'
 - inputText: 'Luyện tiếng Anh'
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verification-SELF_CHECK'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'verification-SELF_CHECK'
@@ -285,9 +378,15 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'verification-SELF_CHECK'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'task-xp'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'task-xp'
@@ -298,9 +397,15 @@ appId: vn.vionx.app
 - eraseText
 - inputText: '50'
 - hideKeyboard
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'task-save'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'task-save'
@@ -319,6 +424,9 @@ appId: vn.vionx.app
     visible:
       id: 'screen-parent-home-settled'
     timeout: 90000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-device'
@@ -331,6 +439,9 @@ appId: vn.vionx.app
     visible:
       id: 'child-login-id'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-login-id'
@@ -343,6 +454,9 @@ appId: vn.vionx.app
     file: subflows/m01-enter-pin.yaml
     env:
       DIGITS: '2,5,8,0'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-login-submit'
@@ -350,10 +464,16 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'child-login-submit'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-child-tasks'
     direction: DOWN
+    timeout: 60000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
     timeout: 60000
 - scrollUntilVisible:
     element:
@@ -365,6 +485,9 @@ appId: vn.vionx.app
 - extendedWaitUntil:
     visible: 'Luyện tiếng Anh'
     timeout: 15000
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'complete-.*'
@@ -372,6 +495,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'complete-.*'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'child-tasks-message'
@@ -379,6 +505,9 @@ appId: vn.vionx.app
     timeout: 60000
 - back
 # The worker grants XP within a minute (pg_cron tick).
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-child-wallet'
@@ -386,6 +515,9 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'open-child-wallet'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'wallet-card'
@@ -397,6 +529,9 @@ appId: vn.vionx.app
     times: 12
     commands:
       - back
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'open-child-wallet'
@@ -404,6 +539,9 @@ appId: vn.vionx.app
           timeout: 60000
       - tapOn:
           id: 'open-child-wallet'
+      - extendedWaitUntil:
+          notVisible: 'Đang tải…'
+          timeout: 60000
       - scrollUntilVisible:
           element:
             id: 'wallet-card'
@@ -412,6 +550,9 @@ appId: vn.vionx.app
       - waitForAnimationToEnd:
           timeout: 5000
 - assertVisible: 'Tổng 50 XP'
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'wallet-cap-bar'
@@ -419,6 +560,9 @@ appId: vn.vionx.app
     timeout: 60000
 - assertVisible: '.*50/1500 XP.*'
 - takeScreenshot: m04-wallet
+- extendedWaitUntil:
+    notVisible: 'Đang tải…'
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-child-rewards'
