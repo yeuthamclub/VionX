@@ -209,7 +209,7 @@ If `--acceptance` fails:
 - **A. Code before AI in verify.** Of the 55 wave-1 disputes, 40 would be skipped (39 KEY_CORRECT
   plus DIV.IRRED.Q03, whose key was right too). The other 15 are STATIC items without a usable
   expression; they still go to Opus.
-- **F1. `item_generation` effort high → medium**, by migration 0010 and `DEFAULT_TASK_CONFIG`.
+- **F1. `item_generation` effort high → medium**, by migration 0015 (first numbered 0010) and `DEFAULT_TASK_CONFIG`.
   Try one topic first and compare the check rejection rate with wave 1.
 - **F2. Cached context.** `AiGateway` requests take an optional `context` block, sent first in
   the user turn with `cache_control`, so system + skill pages + notes are cached across the
@@ -222,7 +222,7 @@ If `--acceptance` fails:
   the context block and the input.
 
 ## Decisions
-- **No new ai_task_config keys.** (Migration 0010 later changes one default effort, item F1.) The structure steps share `structure_mapping`
+- **No new ai_task_config keys.** (Migration 0015 later changes one default effort, item F1.) The structure steps share `structure_mapping`
   with three prompt files, and dispute uses the existing `item_dispute` task. The model per task
   comes from `ops.ai_task_config` when `VIONX_DB_URL` is set, otherwise from `DEFAULT_TASK_CONFIG`.
   Code holds no model names.
