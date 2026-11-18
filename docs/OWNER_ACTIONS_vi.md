@@ -27,7 +27,7 @@ File `.wave.sh` (đã xoá ngày 18/11) chứa một API key ở dạng chữ th
 - **Project dev:**
   - service secret và mật khẩu `admin@vionx.local` đã được đổi ngày 17/11 (M06); giá trị mới chỉ nằm trong `.env.cloud`;
   - giá trị công khai trên GitHub (`local-dev-service-secret`) bị worker trên dev từ chối (401).
-- **Project test:** vẫn dùng giá trị công khai. Claude tự đổi bằng SQL và `.env.test`.
+- **Project test:** vẫn dùng giá trị công khai, nhưng project này không có Edge Function nào (kiểm 18/11: 404), nên giá trị đó không mở được gì. Các test tích hợp cần đúng giá trị này, nên giữ nguyên.
 - **Mật khẩu database:** chưa từng lộ. Không cần đổi.
 
 ## 3. Cho Claude quyền triển khai Edge Functions
@@ -85,5 +85,4 @@ Tìm 2–5 gia đình dùng điện thoại Android, có ít nhất một bé l�
 
 - Build app Android, cài lên Redmi K40, chạy các luồng kiểm thử M01–M08 trên máy thật.
 - Làm M09: chạy offline, thông báo đẩy, vận hành, bản phát hành nội bộ.
-- Đổi service secret của project test.
 - Sửa Tiếng Anh 6 (tỉ lệ đọc to) và Tiếng Anh 2 (50 kỹ năng mới có 1 câu) cho đạt acceptance.
