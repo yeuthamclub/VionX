@@ -1,7 +1,14 @@
 # X01 Report: Toán 6 library build scripts
 
-## Status: scripts done, live run pending
-**The 500-item Toán 6 library is NOT built yet.**
+> **Update 2026-11-18: DONE.** The live run produced `.library-build/MATH.6/package/6-math.zip`:
+> 500 approved items, 200 TEMPLATE. `pnpm library:validate 6-math.zip --acceptance` passes every rule
+> (≥480 approved, every active skill ≥2 items, TEMPLATE 40%, group/read-aloud/written 0%). It is
+> imported into the Supabase Cloud development project. The fixes from the live run were merged in
+> PR #10 (`--retry-rejected`, cost plan A, minus-sign normalisation). The text below is the original
+> report from before the live run. All libraries are listed in `LIBRARIES_REPORT.md`.
+
+## Status (original): scripts done, live run pending
+**At the time of this report the 500-item Toán 6 library was not built yet.**
 
 This session built and tested the build scripts: all 12 steps, run as `pnpm library:build MATH.6 …`.
 They have only been run on recorded fixtures (`--fake`), which give one topic and 9 items. Nothing
