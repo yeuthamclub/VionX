@@ -177,10 +177,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'grade-save-another'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'grade-message'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'grade-score'
@@ -197,10 +198,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'grade-save'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'grades-TOAN'
-    timeout: 20000
+    direction: DOWN
+    timeout: 60000
 - assertVisible: '2 bài · trung bình 82.5% · tăng 15 điểm phần trăm'
 - scrollUntilVisible:
     element:

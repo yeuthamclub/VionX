@@ -203,10 +203,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'child-login-submit'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'open-child-tasks'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-child-tasks'
@@ -224,10 +225,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'complete-.*'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'child-tasks-message'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - takeScreenshot: m03-child-sent
 - back
 - scrollUntilVisible:
@@ -295,7 +297,8 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'approve-.*'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'approvals-message'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000

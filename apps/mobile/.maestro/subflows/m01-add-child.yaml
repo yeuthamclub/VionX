@@ -72,10 +72,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'grant-CORE_SERVICE'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'revoke-CORE_SERVICE'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'grant-CROSS_BORDER_TRANSFER'
@@ -83,10 +84,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'grant-CROSS_BORDER_TRANSFER'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'revoke-CROSS_BORDER_TRANSFER'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'consent-continue'

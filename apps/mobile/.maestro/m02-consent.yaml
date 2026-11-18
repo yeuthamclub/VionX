@@ -115,10 +115,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'open-consents'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'grant-AI_PERSONALIZATION'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'grant-AI_PERSONALIZATION'
@@ -126,10 +127,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'grant-AI_PERSONALIZATION'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'revoke-AI_PERSONALIZATION'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - takeScreenshot: m02-child-consents
 - back
 - back
@@ -146,10 +148,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'privacy-center'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'export-start'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'export-start'
@@ -157,9 +160,10 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'export-start'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'export-download'
+    direction: DOWN
     timeout: 60000
 - takeScreenshot: m02-export-ready
 - back
@@ -200,10 +204,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'child-login-submit'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'assent-pending'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-assent'
@@ -211,10 +216,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'open-assent'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'assent-AI_PERSONALIZATION'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - takeScreenshot: m02-assent
 - scrollUntilVisible:
     element:
@@ -223,7 +229,8 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'assent-yes'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'assent-done'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000

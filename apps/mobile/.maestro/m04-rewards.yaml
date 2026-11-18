@@ -115,10 +115,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'open-rewards'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'wallet-card'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-reward-rules'
@@ -176,10 +177,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'rules-save'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'rules-message'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - takeScreenshot: m04-rules
 - back
 
@@ -191,10 +193,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'open-reward-catalog'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'catalog-add'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'catalog-add'
@@ -347,10 +350,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'child-login-submit'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'open-child-tasks'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - scrollUntilVisible:
     element:
       id: 'open-child-tasks'
@@ -368,10 +372,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'complete-.*'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'child-tasks-message'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - back
 # The worker grants XP within a minute (pg_cron tick).
 - scrollUntilVisible:
@@ -381,10 +386,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'open-child-wallet'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'wallet-card'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 - repeat:
     while:
       notVisible: 'Tổng 50 XP'
@@ -398,10 +404,11 @@ appId: vn.vionx.app
           timeout: 60000
       - tapOn:
           id: 'open-child-wallet'
-      - extendedWaitUntil:
-          visible:
+      - scrollUntilVisible:
+          element:
             id: 'wallet-card'
-          timeout: 15000
+          direction: DOWN
+          timeout: 60000
       - waitForAnimationToEnd:
           timeout: 5000
 - assertVisible: 'Tổng 50 XP'

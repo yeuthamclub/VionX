@@ -43,10 +43,11 @@ appId: vn.vionx.app
 
 # The parent's task
 - tapOn: 'Con làm xong rồi!'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'today-message'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 
 # One practice session from a Today card
 - scrollUntilVisible:

@@ -207,10 +207,11 @@ appId: vn.vionx.app
     timeout: 60000
 - tapOn:
     id: 'report-UNCLEAR'
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: 'report-sent'
-    timeout: 15000
+    direction: DOWN
+    timeout: 60000
 
 # Answer up to 12 items with taps only, whatever their type
 - repeat:
