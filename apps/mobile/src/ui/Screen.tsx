@@ -3,6 +3,9 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../theme.ts';
 
+/** Widest a screen's content gets, in dp. A phone is narrower, so nothing changes there. */
+export const CONTENT_MAX_WIDTH = 720;
+
 export function Screen(props: {
   title?: string;
   subtitle?: string;
@@ -17,7 +20,14 @@ export function Screen(props: {
     >
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ padding: theme.spacing.xl, gap: theme.spacing.lg }}
+        // Tablets (the child's device) and landscape: one centred column, not full-width rows.
+        contentContainerStyle={{
+          padding: theme.spacing.xl,
+          gap: theme.spacing.lg,
+          width: '100%',
+          maxWidth: CONTENT_MAX_WIDTH,
+          alignSelf: 'center',
+        }}
       >
         {(props.title || props.subtitle) && (
           <View style={{ gap: theme.spacing.xs }}>

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { HealthCard } from '../../src/HealthCard.tsx';
 import { t } from '../../src/i18n/index.ts';
 import { useTheme } from '../../src/theme.ts';
+import { CONTENT_MAX_WIDTH } from '../../src/ui/Screen.tsx';
 
 /** First-launch screen: "Phụ huynh / Con" plus the API health status. */
 export default function Welcome() {
@@ -37,7 +38,15 @@ export default function Welcome() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }}>
-      <ScrollView contentContainerStyle={{ padding: theme.spacing.xl, gap: theme.spacing.lg }}>
+      <ScrollView
+        contentContainerStyle={{
+          padding: theme.spacing.xl,
+          gap: theme.spacing.lg,
+          width: '100%',
+          maxWidth: CONTENT_MAX_WIDTH,
+          alignSelf: 'center',
+        }}
+      >
         <View style={{ gap: theme.spacing.xs }}>
           <Text style={[theme.typography.display, { color: c.text }]}>{t('welcome.title')}</Text>
           <Text style={[theme.typography.body, { color: c.textMuted }]}>
