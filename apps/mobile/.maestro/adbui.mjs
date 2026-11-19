@@ -7,6 +7,7 @@
 //   type:<text>       type into the focused field (ASCII)
 //   shot:<file.png>   save a screenshot
 //   has:<id|"text">   exit 1 if it is not on screen
+//   practice          answer the open practice session until its summary shows
 import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 
@@ -57,6 +58,53 @@ async function scrollTo(target) {
   throw new Error(`not found by scrolling: ${target}`);
 }
 
+/** Tap it if it shows up within `ms` (scrolling once if needed); false when it does not. */
+async function tryTap(target, ms = 0) {
+  const [w, h] = screen;
+  for (const end = Date.now() + ms; ; await sleep(700)) {
+    let n = find(target);
+    if (!n && Date.now() >= end) {
+      adb('shell', 'input', 'swipe', `${w / 2}`, `${h * 0.7}`, `${w / 2}`, `${h * 0.35}`, '400');
+      await sleep(600);
+      n = find(target);
+    }
+    if (n) {
+      adb('shell', 'input', 'tap', `${(n.b[0] + n.b[2]) / 2}`, `${(n.b[1] + n.b[3]) / 2}`);
+      await sleep(500);
+      return true;
+    }
+    if (Date.now() >= end) return false;
+  }
+}
+/** Tap it only if it is on screen right now. */
+async function tapIfPresent(target) {
+  const n = find(target);
+  if (!n) return false;
+  adb('shell', 'input', 'tap', `${(n.b[0] + n.b[2]) / 2}`, `${(n.b[1] + n.b[3]) / 2}`);
+  await sleep(400);
+  return true;
+}
+/**
+ * Answer a practice session to its summary. Every option on screen is tapped in turn: that picks
+ * one for a choice item and fills every slot of an ordering item. Answers need not be right.
+ */
+async function practice() {
+  for (let i = 0; i < 20; i++) {
+    if (find('practice-summary') || find('summary-xp')) return;
+    for (const answer of ['option-a', 'option-b', 'option-c', 'option-d', 'option-true', 'key-5'])
+      await tapIfPresent(answer);
+    if (await tapIfPresent('blank-0')) {
+      adb('shell', 'input', 'text', 'x');
+      adb('shell', 'input', 'keyevent', '111'); // ESCAPE closes the keyboard, never navigates back
+      await sleep(500);
+    }
+    const submitted = await tryTap('practice-submit');
+    const continued = await tryTap('practice-continue', 15000);
+    if (!submitted && !continued) await tryTap('practice-finish');
+  }
+  throw new Error('practice session did not reach its summary in 20 rounds');
+}
+
 let screen = size();
 for (const c of commands) {
   const [cmd, ...rest] = c.split(':');
@@ -73,6 +121,7 @@ for (const c of commands) {
     await sleep(500);
   } else if (cmd === 'type') adb('shell', 'input', 'text', arg);
   else if (cmd === 'shot') writeFileSync(arg, adb('exec-out', 'screencap', '-p'));
+  else if (cmd === 'practice') await practice();
   else if (cmd === 'has') {
     if (!find(arg)) throw new Error(`not on screen: ${arg}`);
   } else throw new Error(`unknown command: ${c}`);
