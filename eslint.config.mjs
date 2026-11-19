@@ -33,11 +33,17 @@ export default tseslint.config(
     },
   },
   {
-    files: ['scripts/**', '**/scripts/**', '**/*.config.{ts,mjs,js}', '**/tests/**'],
+    files: [
+      'scripts/**',
+      '**/scripts/**',
+      '**/*.config.{ts,mjs,js}',
+      '**/tests/**',
+      '**/.maestro/*.mjs',
+    ],
     languageOptions: { globals: { ...globals.node } },
   },
   {
-    files: ['**/metro.config.js', '**/babel.config.js'],
+    files: ['**/metro.config.js', '**/babel.config.js', 'apps/mobile/plugins/*.js'],
     languageOptions: { sourceType: 'commonjs', globals: { ...globals.node } },
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },

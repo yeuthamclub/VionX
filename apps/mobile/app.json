@@ -21,7 +21,8 @@
           "microphonePermission": false
         }
       ],
-      "@sentry/react-native/expo"
+      "@sentry/react-native/expo",
+      "./plugins/with-loopback-cleartext.js"
     ],
     "experiments": {
       "typedRoutes": false

@@ -221,11 +221,13 @@ export async function buildDashboard(
     learning.loadConfig(sql),
     learning.curriculumTree(sql, student.grade),
     learning.states(sql, scope, s),
+    // Ordered by created_at within a day: two tests entered on one day keep their order, so the
+    // trend ("up/down N points") does not flip with the random ids.
     sql<AssessmentPoint[]>`
       select subject_code, assessed_on::text as assessed_on, type, score, max_score
       from app.school_assessments
       where student_id = ${s} and household_id = ${h} and school_year = ${term.schoolYear}
-      order by assessed_on, id`,
+      order by assessed_on, created_at, id`,
     calendar.eventsBetween(
       sql,
       scope,
